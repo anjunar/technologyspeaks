@@ -1,0 +1,56 @@
+.input-container {
+
+  position: relative;
+
+  .dirty {
+    color: var(--color-warning);
+  }
+
+  .focus {
+    color: var(--color-selected);
+  }
+
+  .error {
+    color: var(--color-error);
+  }
+
+  .placeholder {
+    font-size: xx-small;
+    height: 10px;
+  }
+
+  .input {
+    width: 100%;
+  }
+
+  hr {
+    border: none;
+    height: 1px;
+    margin : 1px;
+    background-color: var(--color-background-secondary);
+
+    &.dirty {
+      background-color: var(--color-warning);
+    }
+
+    &.focus {
+      background-color: var(--color-selected);
+    }
+
+    &.error {
+      background-color: var(--color-error);
+    }
+
+  }
+
+  .errors {
+    font-size: xx-small;
+    height: 10px;
+    color: var(--color-error);
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 5px;
+  }
+
+}

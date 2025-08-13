@@ -1,0 +1,13 @@
+.tab {
+    border-bottom: solid 2px var(--color-background-secondary);
+    cursor : pointer;
+    padding-left: 6px;
+    padding-right: 6px;
+    height: 32px;
+    line-height: 32px;
+    vertical-align: center;
+
+    &.selected {
+        border-bottom: solid 2px var(--color-selected);
+    }
+}

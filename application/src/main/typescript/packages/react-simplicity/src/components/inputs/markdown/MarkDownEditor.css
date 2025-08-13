@@ -1,0 +1,12 @@
+.markdown-editor {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .content {
+        outline: 0;
+        flex: 1;
+        height: 100%;
+        line-height: 28px;
+    }
+}

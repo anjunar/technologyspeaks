@@ -1,0 +1,154 @@
+@import "./reset.css";
+
+html[data-theme="light"] {
+    /* 🎨 Helle Neutraltöne – Basis */
+    --color-neutral-100: #ffffff;    /* Haupt-Hintergrund */
+    --color-neutral-200: #f5f5f5;    /* Sekundärer Hintergrund */
+    --color-neutral-300: #e0e0e0;    /* Inputs, Ränder */
+    --color-neutral-400: #cccccc;    /* Borders, deaktivierte Flächen */
+    --color-neutral-500: #999999;    /* Labels, deaktivierte Texte */
+    --color-neutral-700: #4d4d4d;    /* Fließtext */
+    --color-neutral-800: #2b2b2b;    /* Überschriften */
+    --color-neutral-900: #121212;    /* Tiefer Textkontrast */
+
+    /* 🟢 Olivgrün – Hauptakzent */
+    --color-olive-500: #87c440;      /* Hauptakzent, z. B. Buttons, Links */
+    --color-olive-400: #a4ff4f;      /* Hover oder leuchtende Effekte */
+    --color-olive-200: #d6fcb0;      /* zarter Hintergrund oder Sektionen */
+
+    /* 🔶 Semantische Farben */
+    --color-warning: #f57c00;        /* Warnungen – kräftiges Orange */
+    --color-error: #d32f2f;          /* Fehler – klares Rot */
+    --color-info: #0288d1;           /* Info – reines Blau */
+    --color-accent-purple: #9c27b0;  /* Leichter KI-/Inspirationston */
+    --color-highlight: #fff9c4;      /* Markierungen im Text */
+
+    /* 🖋 Verwendung */
+    --color-text: var(--color-neutral-800);
+    --color-background-primary: var(--color-neutral-100);
+    --color-background-secondary: var(--color-neutral-300);
+    --color-background-tertiary: var(--color-neutral-400);
+    --color-surface-muted: var(--color-neutral-400);
+
+    --color-selected: var(--color-olive-500);
+    --color-reflective: var(--color-olive-200);
+}
+
+html[data-theme="dark"] {
+    /* 🎨 Grundfarben – neutrale Basis */
+    --color-neutral-900: #0e0e0e;   /* tiefstes Schwarz – für Haupt-Hintergrund */
+    --color-neutral-800: #1b1e20;   /* primärer Hintergrund */
+    --color-neutral-700: #2a2e35;   /* sekundärer Hintergrund */
+    --color-neutral-600: #3a3f45;   /* Border, Schattenflächen */
+    --color-neutral-500: #5c6268;   /* deaktivierte Texte, Icons */
+    --color-neutral-300: #a0a0a0;   /* Labels */
+    --color-neutral-200: #e0e0e0;   /* Fließtext */
+    --color-neutral-100: #f5f5f5;   /* Kontrastflächen */
+
+    /* 🟢 Olivgrün – dein markanter Akzent */
+    --color-olive-500: #a4ff4f;     /* Hauptakzent für Titles, Highlights */
+    --color-olive-600: #89cc40;     /* Hover oder aktive Tabs */
+    --color-olive-300: #c0ff80;     /* Sekundärer Akzent */
+
+    /* 🔶 Semantische Farben */
+    --color-warning: #ffb74d;       /* Warnungen – Orange */
+    --color-error: #ef5350;         /* Fehler – Rot */
+    --color-info: #7ec9f5;          /* Info – sanftes Blau */
+    --color-accent-purple: #c792ea; /* Zarter KI- oder Inspirationsakzent */
+    --color-highlight: #fff3b0;     /* Markierungen im Text oder Quotes */
+
+    /* 🖋 Semantische Verwendungen */
+    --color-text: var(--color-neutral-200);
+    --color-background-primary: var(--color-neutral-800);
+    --color-background-secondary: var(--color-neutral-600);
+    --color-background-tertiary: var(--color-neutral-700);
+    --color-surface-muted: var(--color-neutral-600);
+
+    --color-selected: var(--color-olive-500);
+    --color-reflective: var(--color-olive-600);
+}
+
+html {
+    font-family: Helvetica, serif;
+    font-size: 16px;
+    background-color: var(--color-background-primary);
+    color: var(--color-text);
+}
+
+iframe {
+    border: none;
+}
+
+input {
+    font-size: 16px;
+}
+
+select {
+    font-size: 16px;
+}
+
+textarea {
+    background-color: inherit;
+    color: var(--color-text);
+}
+
+button {
+    background-color: inherit;
+
+    color: var(--color-text);
+
+    &[disabled] {
+        color: var(--color-background-secondary);
+    }
+
+    &.container {
+        display : flex;
+        align-items : center;
+        justify-content : flex-start;
+        gap : 5px
+    }
+
+    &.hover {
+        &:not([disabled]):hover {
+            background-color: var(--color-selected);
+            color: var(--color-background-primary);
+        }
+    }
+}
+
+.system {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .router {
+        flex : 1
+    }
+}
+
+.center {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.center-horizontal {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.panel {
+    width: 100%;
+    min-width: 360px;
+    max-width: 800px;
+}
+
+.responsive-column {
+    min-width: 360px;
+    max-width: 800px;
+    width: 100%;
+    margin: auto;
+}

@@ -1,0 +1,78 @@
+.caption {
+    position : absolute;
+    border: 1px solid var(--color-background-secondary);
+    box-sizing: border-box;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 70%);
+}
+
+.caption .nw {
+    position: absolute;
+    cursor: nw-resize;
+    left : -10px;
+    top : -10px;
+    width : 20px;
+    height : 20px;
+}
+
+.caption .ne {
+    position : absolute;
+    right: -10px;
+    top : -10px;
+    width: 20px;
+    height: 20px;
+    cursor : ne-resize;
+}
+
+.caption .se {
+    position : absolute;
+    right: -10px;
+    bottom: -10px;
+    width: 20px;
+    height: 20px;
+    cursor : se-resize;
+}
+
+.caption .sw {
+    position: absolute;
+    left : -10px;
+    bottom : -10px;
+    width : 20px;
+    height : 20px;
+    cursor: sw-resize;
+}
+
+.caption .n {
+    position : absolute;
+    left : 10px;
+    top: -10px;
+    width : calc(100% - 20px);
+    height : 20px;
+    cursor : n-resize;
+}
+
+.caption .s {
+    position : absolute;
+    left : 10px;
+    bottom: -10px;
+    width : calc(100% - 20px);
+    height : 20px;
+    cursor : s-resize;
+}
+
+.caption .w {
+    position: absolute;
+    left: -10px;
+    top : 10px;
+    width: 20px;
+    height: calc(100% - 20px);
+    cursor: w-resize;
+}
+
+.caption .e {
+    position: absolute;
+    right: -10px;
+    top : 10px;
+    width: 20px;
+    height: calc(100% - 20px);
+    cursor: e-resize;
+}

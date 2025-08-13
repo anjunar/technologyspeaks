@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "CommonJS",
+    "target": "ES2015",
+    "moduleResolution": "node",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "outDir": "build",
+    "esModuleInterop" : true,
+    "jsx": "react-jsx",
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"]
+}

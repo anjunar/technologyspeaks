@@ -1,0 +1,15 @@
+.file-manager {
+
+    .overlay {
+        background-color: var(--color-background-primary);
+        position: fixed;
+        padding: 16px;
+        left: 0;
+        top: 0;
+        width: 150px;
+        height: 200px;
+        z-index: 9999;
+        border: 1px solid var(--color-background-secondary);
+    }
+
+}

@@ -1,0 +1,14 @@
+.cursor {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background: var(--color-text);
+    animation: blink 1s step-start infinite;
+    pointer-events: none;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
