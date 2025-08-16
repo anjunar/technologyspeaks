@@ -6,6 +6,8 @@ import com.anjunar.vertx.fsm.services.TableFSMService
 
 case class TableSearchStateDef(name : String,
                                url : String,
+                               method : String = "GET",
+                               contentType : String = "application/json",
                                view : SchemaView = Full,
                                entity : Class[?],
                                service : Class[? <: TableFSMService[?, ?]])

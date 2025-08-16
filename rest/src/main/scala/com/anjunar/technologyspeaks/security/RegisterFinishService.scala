@@ -22,16 +22,15 @@ class RegisterFinishService extends JsonFSMService[JsonObject] with WebAuthnServ
 
   override def run(ctx : RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
+    val publicKeyCredential = body.getJsonObject("publicKeyCredential")
+    val credentialId = publicKeyCredential.getString("id")
     val username = body.getString("username")
-    val registrationResponseJSON = body.getString("response")
-    val responseData = new JsonObject(registrationResponseJSON)
-    val credentialId = responseData.getString("id")
-    
-    Future.fromCompletionStage(webAuthnManager.parseRegistrationResponseJSON(registrationResponseJSON)
+
+    Future.fromCompletionStage(webAuthnManager.parseRegistrationResponseJSON(publicKeyCredential.encode())
       .thenCompose { registrationData =>
         Option(challengeStore.get(username)) match {
           case Some(challenge) =>
-            val serverProperty = new ServerProperty(new Origin(ORIGIN), RP_ID, challenge, null)
+            val serverProperty = new ServerProperty(new Origin(ORIGIN), RP_ID, challenge)
             val pubKeyCredParams = util.Arrays.asList(
               new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.ES256),
               new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.RS256)

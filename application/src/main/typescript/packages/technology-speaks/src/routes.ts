@@ -298,47 +298,11 @@ export const routes: Router.Route[] = [
                     },
                     {
                         path: "/login",
-                        component: LoginPage,
-                        loader: {
-                            async login(info, pathParams, queryParams) {
-                                let response = await fetch(`${info.protocol}://${info.host}/service/security/login`, {
-                                    headers : getHeaders(info)
-                                })
-
-                                process(response, getRedirect(info))
-
-                                if (response.ok) {
-                                    return mapForm(await response.json(), true)
-                                }
-
-                                throw new Error(response.status.toString())
-                            }
-                        }
+                        component: LoginPage
                     },
                     {
                         path: "/register",
-                        component: RegisterPage,
-                        loader: {
-                            async register(info, pathParams, queryParams) {
-                                let response = await fetch(`${info.protocol}://${info.host}/service/security/register`, {
-                                    headers : getHeaders(info)
-                                })
-
-                                process(response, getRedirect(info))
-
-                                if (response.ok) {
-                                    let activeObject: Login = mapForm(await response.json(), true);
-
-                                    const {browser, cpu, os, device} = UAParser(navigator.userAgent);
-                                    activeObject.displayName = `${browser.name} on ${os.name} ${os.version} ${device.type ? device.type.substring(0, 1).toUpperCase() + device.type.substring(1) : "Desktop"}`
-
-
-                                    return activeObject
-                                }
-
-                                throw new Error(response.status.toString())
-                            }
-                        }
+                        component: RegisterPage
                     },
                     {
                         path: "/confirm",

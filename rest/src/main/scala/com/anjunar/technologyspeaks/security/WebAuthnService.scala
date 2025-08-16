@@ -10,9 +10,9 @@ trait WebAuthnService {
 
   val webAuthnManager = WebAuthnManagerProvider.webAuthnManager
 
-  val credentialStore = new ConcurrentHashMap[String, util.List[CredentialRecord]]()
-  val challengeStore = new ConcurrentHashMap[String, Challenge]()
-  val ORIGIN = "https://localhost:8080"
+  val credentialStore = WebAuthnManagerProvider.credentialStore
+  val challengeStore = WebAuthnManagerProvider.challengeStore
+  val ORIGIN = "http://localhost:8080"
   val RP_ID = "localhost"
   val RP_NAME = "Technology Speaks"
 

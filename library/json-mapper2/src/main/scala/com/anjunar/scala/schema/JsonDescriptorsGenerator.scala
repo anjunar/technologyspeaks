@@ -18,8 +18,6 @@ import scala.jdk.CollectionConverters.*
 
 object JsonDescriptorsGenerator {
   
-  def i18nResolver : I18nResolver = CDI.current().select(classOf[I18nResolver]).get()
-
   private val analyzers: Array[AbstractAnalyzer] = Array(
     new PrimitiveAnalyser,
     new CollectionAnalyzer,
@@ -46,7 +44,7 @@ object JsonDescriptorsGenerator {
 
       schemaBuilder.primitiveMapping.foreach((clazz, builder) => {
         val nodeDescriptor = NodeDescriptor(
-          i18nResolver.find(builder.title),
+          builder.title,
           builder.description,
           builder.widget,
           builder.id,
@@ -147,7 +145,7 @@ object JsonDescriptorsGenerator {
 
   private def generatePrimitive(property: AbstractProperty, propertyType: Class[?], schemaDefinition: PropertyBuilder[?]) = {
     val nodeDescriptor = NodeDescriptor(
-      i18nResolver.find(schemaDefinition.title),
+      schemaDefinition.title,
       schemaDefinition.description,
       schemaDefinition.widget,
       schemaDefinition.id,
@@ -175,7 +173,7 @@ object JsonDescriptorsGenerator {
       }
     })
     val enumDescriptor = EnumDescriptor(
-      i18nResolver.find(schemaDefinition.title),
+      schemaDefinition.title,
       schemaDefinition.description,
       schemaDefinition.widget,
       schemaDefinition.id,
@@ -192,7 +190,7 @@ object JsonDescriptorsGenerator {
 
   private def generateObject(property: AbstractProperty, propertyType: ResolvedClass, schemaDefinition: PropertyBuilder[?], context: JsonDescriptorsContext): ObjectDescriptor = {
     val objectDescriptor = generateObject(propertyType, schemaDefinition.schemaBuilder, new JsonDescriptorsContext(context))
-    objectDescriptor.title = i18nResolver.find(schemaDefinition.title)
+    objectDescriptor.title = schemaDefinition.title
     objectDescriptor.description = schemaDefinition.description
     objectDescriptor.widget = schemaDefinition.widget
     objectDescriptor.id = schemaDefinition.id
@@ -212,7 +210,7 @@ object JsonDescriptorsGenerator {
 
     descriptor.items = generateObject(collectionType, schemaDefinition.schemaBuilder, new JsonDescriptorsContext(context))
     descriptor.`type` = property.propertyType.raw.getSimpleName
-    descriptor.title = i18nResolver.find(schemaDefinition.title)
+    descriptor.title = schemaDefinition.title
     descriptor.description = schemaDefinition.description
     descriptor.widget = schemaDefinition.widget
     descriptor.id = schemaDefinition.id

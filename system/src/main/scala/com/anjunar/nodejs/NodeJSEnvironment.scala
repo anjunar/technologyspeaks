@@ -37,6 +37,7 @@ class NodeJSEnvironment {
       }
     }).start()
 
+/*
     webpackProcess = new ProcessBuilder("npm.cmd", "run", "watch")
       .directory(new File("./src/main/typescript/packages/technology-speaks"))
       .redirectError(ProcessBuilder.Redirect.INHERIT)
@@ -56,6 +57,7 @@ class NodeJSEnvironment {
         reader.close()
       }
     }).start()
+*/
 
   }
 
@@ -90,7 +92,7 @@ class NodeJSEnvironment {
       case e: Exception => logger.error("Failed to destroy NodeJS SSR process", e)
     }
     try {
-      if (webpackProcess.isAlive) {
+      if (webpackProcess != null && webpackProcess.isAlive) {
         logger.info("Destroying NodeJS Webpack process tree...")
         killProcessTree(webpackProcess)
       }

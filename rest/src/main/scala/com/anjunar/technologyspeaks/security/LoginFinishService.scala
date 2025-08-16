@@ -20,16 +20,14 @@ class LoginFinishService extends JsonFSMService[JsonObject] with WebAuthnService
 
   override def run(ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
+    val publicKeyCredential = body.getJsonObject("publicKeyCredential")
     val username = body.getString("username")
-    val authenticationResponseJSON = body.getString("response")
-
-    val responseData = new JsonObject(authenticationResponseJSON)
-    val credentialId = responseData.getString("id")
+    val credentialId = publicKeyCredential.getString("id")
     if (credentialId == null || credentialId.isEmpty) {
       throw new IllegalArgumentException("Credential ID is missing in response")
     }
 
-    Future.fromCompletionStage(webAuthnManager.parseAuthenticationResponseJSON(authenticationResponseJSON)
+    Future.fromCompletionStage(webAuthnManager.parseAuthenticationResponseJSON(publicKeyCredential.encode())
       .thenCompose { authenticationData =>
         Option(credentialStore.get(username))
           .flatMap(_.asScala.find(_.asInstanceOf[CredentialRecordImpl].getCredentialId == credentialId))

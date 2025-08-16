@@ -1,9 +1,9 @@
 import React from "react"
 import * as webauthnJson from "@github/webauthn-json";
 import {
-    Button,
+    Button, Form, Input,
     JsFlag,
-    JSONSerializer,
+    JSONSerializer, mapForm,
     Router,
     SchemaForm,
     SchemaInput,
@@ -14,15 +14,13 @@ import Login from "../../domain/security/Login";
 
 function LoginPage(properties: LoginPage.Attributes) {
 
-    const {login} = properties
-
-    const domain = useForm(login)
+    const domain = useForm(mapForm<Login>({$type : "Login"}, true))
 
     async function loginAction() {
 
         let value = JSONSerializer(domain)
 
-        const credentialGetOptions = await fetch('/service/security/options', {
+        const credentialGetOptions = await fetch('/service/security/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -32,12 +30,15 @@ function LoginPage(properties: LoginPage.Attributes) {
 
         const publicKeyCredential = await webauthnJson.get(credentialGetOptions);
 
-        const responseFinish = await fetch('/service/security/finish', {
+        const responseFinish = await fetch('/service/security/login/finish', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(publicKeyCredential),
+            body: JSON.stringify({
+                username : domain.username,
+                publicKeyCredential
+            }),
         });
 
         if (responseFinish.ok) {
@@ -61,10 +62,10 @@ function LoginPage(properties: LoginPage.Attributes) {
         <div className={"login-page"} style={{display : "flex", justifyContent : "center", alignItems : "center", height : "100%"}}>
             <div>
                 <h1>Login</h1>
-                <SchemaForm value={domain} onSubmit={loginAction} style={{width : "300px"}} redirect={"/"}>
-                    <SchemaInput name={"username"}/>
+                <Form value={domain} onSubmit={loginAction} style={{width : "300px"}}>
+                    <Input name={"username"}/>
                     <JsFlag showWhenJs={false}>
-                        <SchemaInput name={"password"}/>
+                        <Input name={"password"}/>
                     </JsFlag>
                     <div style={{display : "flex", justifyContent : "flex-end"}}>
                         <JsFlag showWhenJs={true}>
@@ -74,16 +75,14 @@ function LoginPage(properties: LoginPage.Attributes) {
                             <Button name={"fallback"}>Login</Button>
                         </JsFlag>
                     </div>
-                </SchemaForm>
+                </Form>
             </div>
         </div>
     )
 }
 
 namespace LoginPage {
-    export interface Attributes {
-        login : Login
-    }
+    export interface Attributes {}
 }
 
 export default LoginPage

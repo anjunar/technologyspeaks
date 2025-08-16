@@ -5,7 +5,7 @@ import com.anjunar.vertx.fsm.FSMEngine
 import com.typesafe.scalalogging.Logger
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.{AbstractVerticle, Future, Handler, Promise, VerticleBase}
-import io.vertx.ext.web.handler.SessionHandler
+import io.vertx.ext.web.handler.{BodyHandler, SessionHandler}
 import io.vertx.ext.web.sstore.LocalSessionStore
 import io.vertx.ext.web.{Router, RoutingContext}
 import jakarta.enterprise.context.ApplicationScoped
@@ -23,6 +23,8 @@ class CDIVerticle(beanManager: BeanManager, instance: Instance[AnyRef], engine: 
 
   override def start(): Future[?] = {
     val router = Router.router(vertx)
+
+    router.route().handler(BodyHandler.create())
 
     router.errorHandler(500, ctx => {
       val failure = ctx.failure()

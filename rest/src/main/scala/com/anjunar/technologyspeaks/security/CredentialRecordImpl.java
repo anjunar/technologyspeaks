@@ -30,9 +30,9 @@ public class CredentialRecordImpl implements CredentialRecord {
         this.clientData = clientData;
         this.transports = transports;
         this.counter = counter;
-        this.uvInitialized = false; // Default: false, as userVerification is "discouraged"
-        this.backupEligible = true; // Default: true, as most authenticators are backup-eligible
-        this.backedUp = false;      // Default: false, as backup state is not tracked
+        this.uvInitialized = false; 
+        this.backupEligible = false;
+        this.backedUp = false;      
     }
 
     public AttestationObject getAttestationObject() {

@@ -23,15 +23,15 @@ class HATEOASEngine extends FSMEngine {
 
       val loginOptions = fsm.transition(
         JsonStateDef(
-          name = "Login",
-          url = "/webAuthn/login/options",
+          name = "login",
+          url = "/security/login",
           entity = classOf[JsonObject],
           service = classOf[LoginOptionsService]
         ), loginOptions => Seq(
           fsm.transition(
             JsonStateDef(
-              name = "Login",
-              url = "/webAuthn/login/finish",
+              name = "login",
+              url = "/security/login/finish",
               entity = classOf[JsonObject],
               service = classOf[LoginFinishService]
             ), loginFinish => Seq(application)
@@ -40,15 +40,15 @@ class HATEOASEngine extends FSMEngine {
 
       val registerOptions = fsm.transition(
         JsonStateDef(
-          name = "Register",
-          url = "/webAuthn/register/options",
+          name = "register",
+          url = "/security/register",
           entity = classOf[JsonObject],
           service = classOf[RegisterOptionsService]
         ), registerOptions => Seq(
           fsm.transition(
             JsonStateDef(
-              name = "Register",
-              url = "/webAuthn/register/finish",
+              name = "register",
+              url = "/security/register/finish",
               entity = classOf[JsonObject],
               service = classOf[RegisterFinishService]
             ), registerFinish => Seq(loginOptions)
@@ -57,14 +57,14 @@ class HATEOASEngine extends FSMEngine {
 
       val documentSearch = fsm.transition(
         TableSearchStateDef(
-          name = "DocumentSearch",
+          name = "documents",
           url = "/documents/search",
           entity = classOf[DocumentSearch],
           service = classOf[DocumentsService]
         ), documentSearch => Seq(
           fsm.transition(
             TableListStateDef(
-              name = "Documents",
+              name = "documents",
               url = "/documents",
               entity = classOf[Document],
               service = classOf[DocumentsService]
