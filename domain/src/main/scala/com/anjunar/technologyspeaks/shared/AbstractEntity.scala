@@ -13,7 +13,7 @@ import scala.compiletime.uninitialized
 import java.lang
 
 @MappedSuperclass
-abstract class AbstractEntity extends EntityContext[AbstractEntity] {
+abstract class AbstractEntity  {
 
   @Id
   @Column(name = "id", unique = true, nullable = false)

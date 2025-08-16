@@ -10,7 +10,7 @@ import scala.beans.BeanProperty
 class Table[E](@BeanProperty
                @(PropertyDescriptor @field)(title = "Rows", widget = "table")
                var rows: util.List[E],
-                            @(PropertyDescriptor @field)(title = "Size")
+               @(PropertyDescriptor @field)(title = "Size")
                var size: Long) {
 
   def this() = {

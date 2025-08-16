@@ -1,17 +1,18 @@
 package com.anjunar.technologyspeaks.control
 
-import com.anjunar.jpa.RepositoryContext
+import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
+import com.anjunar.scala.schema.engine.EntitySchemaDef
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import jakarta.persistence.{Basic, CascadeType, Embedded, Entity, OneToOne}
 import jakarta.validation.constraints.{NotBlank, Pattern, Size}
 import jakarta.ws.rs.FormParam
 
-import scala.beans.BeanProperty
+import java.util.UUID
 import scala.compiletime.uninitialized
 
 @Entity
-class Address extends AbstractEntity {
+class Address extends AbstractEntity with EntityContext[Address] {
 
   @OneToOne(mappedBy = "address", targetEntity = classOf[User])
   var user : User = uninitialized
@@ -40,12 +41,18 @@ class Address extends AbstractEntity {
   @FormParam("country")
   var country : String = uninitialized
   
-  @Embedded
-  @PropertyDescriptor(title = "Lat and Lan")
-  var point : GeoPoint = uninitialized
-
-
   override def toString = s"Address($street, $number, $zipCode, $country)"
 }
 
-object Address extends RepositoryContext[Address](classOf[Address])
+object Address extends RepositoryContext[Address](classOf[Address]) {
+
+  val schema = new EntitySchemaDef[Address]("Address") {
+    val id = column[UUID]("id")
+    val street = column[String]("street")
+    val number = column[String]("number")
+    val zipCode = column[String]("zipCode")
+    val country = column[String]("country")
+  }
+
+
+}

@@ -4,7 +4,7 @@ import com.anjunar.scala.introspector.DescriptionIntrospector
 import com.anjunar.scala.mapper.file.{File, FileContext}
 import com.anjunar.scala.mapper.helper.JPAHelper
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
-import com.anjunar.scala.universe.introspector.{BeanIntrospector, ScalaIntrospector}
+import com.anjunar.scala.universe.introspector.BeanIntrospector
 import jakarta.persistence.{ManyToOne, OneToMany}
 import jakarta.ws.rs.FormParam
 

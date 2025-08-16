@@ -4,6 +4,7 @@ import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.jpa.{PostgresIndex, PostgresIndices}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
+import io.smallrye.mutiny.Uni
 import jakarta.persistence.{Basic, Column, Entity, Lob}
 import org.hibernate.`type`.SqlTypes
 import org.hibernate.annotations.JdbcTypeCode
@@ -12,6 +13,7 @@ import scala.compiletime.uninitialized
 import org.hibernate.annotations
 
 import java.util
+import java.util.concurrent.CompletionStage
 
 @Entity
 @PostgresIndices(Array(
@@ -59,17 +61,21 @@ object MemoryEntry extends RepositoryContext[MemoryEntry](classOf[MemoryEntry]) 
     entry
   }
 
-  def findLatest10() : util.List[MemoryEntry] = {
-    entityManager.createQuery("SELECT e FROM MemoryEntry e ORDER BY e.created DESC ", classOf[MemoryEntry])
-      .setMaxResults(10)
-      .getResultList
+  def findLatest10() : CompletionStage[util.List[MemoryEntry]] = {
+    sessionFactory.withTransaction(session => {
+      session.createQuery("SELECT e FROM MemoryEntry e ORDER BY e.created DESC ", classOf[MemoryEntry])
+        .setMaxResults(10)
+        .getResultList
+    })
   }
 
-  def findSimilar(vector : Array[Float]): util.List[MemoryEntry] = {
-    entityManager.createQuery("SELECT e FROM MemoryEntry e WHERE function('cosine_distance', e.embedding, :vector) < 0.3 ORDER BY function('cosine_distance', e.embedding, :vector) ASC", classOf[MemoryEntry])
-      .setParameter("vector", vector)
-      .setMaxResults(10)
-      .getResultList
+  def findSimilar(vector : Array[Float]): CompletionStage[util.List[MemoryEntry]] = {
+    sessionFactory.withTransaction(session => {
+      session.createQuery("SELECT e FROM MemoryEntry e WHERE function('cosine_distance', e.embedding, :vector) < 0.3 ORDER BY function('cosine_distance', e.embedding, :vector) ASC", classOf[MemoryEntry])
+        .setParameter("vector", vector)
+        .setMaxResults(10)
+        .getResultList
+    })
   }
 
 }

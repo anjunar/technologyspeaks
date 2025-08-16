@@ -4,6 +4,7 @@ import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.scala.mapper.file.{File, FileContext}
+import com.anjunar.scala.schema.engine.EntitySchemaDef
 import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.control.User
 import com.anjunar.technologyspeaks.shared.AbstractEntity
@@ -18,7 +19,7 @@ import org.hibernate.annotations.CollectionType
 import org.hibernate.envers.{AuditReaderFactory, Audited, NotAudited}
 
 import java.util
-import java.util.Locale
+import java.util.{Locale, UUID}
 import scala.beans.BeanProperty
 import scala.collection.mutable
 import scala.compiletime.uninitialized
@@ -71,71 +72,10 @@ class Document extends AbstractEntity with OwnerProvider {
 }
 
 object Document extends RepositoryContext[Document](classOf[Document]) {
+
+  val schema = new EntitySchemaDef[Document]("Document") {
+    val id = column[UUID]("id")
+    val title = column[String]("title")
+  }
   
-  def findTop5(vector : Array[Float]) : util.List[Document] = {
-    val builder = entityManager.getCriteriaBuilder
-    val query = builder.createQuery(classOf[Document])
-    val root = query.from(classOf[Document])
-
-    val subquery = query.subquery(classOf[lang.Double])
-    val chunkRoot = subquery.correlate(root).join("chunks")
-
-    val distanceExpr = builder.avg(builder.function(
-      "cosine_distance",
-      classOf[lang.Double],
-      chunkRoot.get("embedding"),
-      builder.parameter(classOf[Array[lang.Float]], "embedding")
-    ))
-
-    subquery.select(distanceExpr)
-      .where(Array(builder.equal(chunkRoot.get("document"), root)) *)
-
-    val maxDistance = 0.35d
-    val predicate = builder.lessThanOrEqualTo(subquery, maxDistance)
-
-    query.select(root)
-      .where(Array(predicate)*)
-    
-    entityManager.createQuery(query)
-      .setParameter("embedding", vector)
-      .setMaxResults(5)
-      .getResultList
-  }
-
-  def revisions(document: Document, index: Int, limit: Int): (Int, util.List[Revision]) = {
-    val auditReader = AuditReaderFactory.get(entityManager)
-    val revisions = auditReader.getRevisions(classOf[Document], document.id)
-
-    def paginateRevisions(revs: util.List[Number], page: Int, size: Int): util.List[Number] = {
-      val from = page * size
-      if (from >= revs.size) new util.ArrayList()
-      else revs.asScala.slice(from, Math.min(from + size, revs.size())).asJava
-    }
-
-    val pageRevisions = paginateRevisions(revisions, index, limit)
-    (revisions.size(), pageRevisions.stream.map(rev => {
-      val revDocument = auditReader.find(classOf[Document], document.id, rev)
-      val revision = new Revision
-      revision.id = revDocument.id
-      revision.revision = rev.intValue()
-      revision.title = revDocument.title
-
-      val oldContext = ASTDiffUtil.buildTreeContext(revDocument.editor.json)
-      val newContext = ASTDiffUtil.buildTreeContext(document.editor.json)
-
-      val matcher = Matchers.getInstance().getMatcher.`match`(oldContext.getRoot, newContext.getRoot)
-
-      val editScript = new ChawatheScriptGenerator().computeActions(matcher)
-
-      val actions = editScript.asList()
-
-      val changes = Change.extractChanges(actions)
-      
-      revision.editor = document.editor
-      revision.editor.changes.addAll(changes)
-      
-      revision
-    }).toList)
-  }
-
 }

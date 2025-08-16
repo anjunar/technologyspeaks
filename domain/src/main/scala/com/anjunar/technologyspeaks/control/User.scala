@@ -5,13 +5,17 @@ import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.security.SecurityUser
 import com.anjunar.jpa.{PostgresIndex, PostgresIndices}
+import com.anjunar.scala.schema.engine.{EntitySchemaDef, Link, RequestContext, SchemaView, VisibilityRule}
 import com.anjunar.technologyspeaks.shared.property.EntityView
+import io.smallrye.mutiny.Uni
 import jakarta.persistence.*
 import jakarta.validation.constraints.*
 import jakarta.ws.rs.FormParam
 
+import java.time.LocalDate
 import java.util
-import java.util.Objects
+import java.util.concurrent.{CompletableFuture, CompletionStage}
+import java.util.{Objects, UUID}
 import scala.compiletime.uninitialized
 
 
@@ -47,18 +51,46 @@ class User extends Identity with OwnerProvider with SecurityUser {
 
 object User extends RepositoryContext[User](classOf[User]) {
 
+  object NicknameRule extends VisibilityRule[User] {
+    override def isVisible(entity: User, property: String, ctx: RequestContext): Boolean = true
+    override def isWriteable(entity: User, property: String, ctx: RequestContext): Boolean = {
+      ctx.currentUser.id == entity.id || ctx.roles.contains("Administrator")
+    }
+  }
+
+  object ManagedRule extends VisibilityRule[User] {
+    override def isVisible(entity: User, property: String, ctx: RequestContext): Boolean = true
+
+    override def isWriteable(entity: User, property: String, ctx: RequestContext): Boolean = {
+      ctx.currentUser.id == entity.id || ctx.roles.contains("Administrator")
+    }
+  }
+
+  val schema = new EntitySchemaDef[User]("User") {
+    val id = column[UUID]("id", views = Set(SchemaView.Full, SchemaView.Compact))
+    val nickName = column[String]("nickName", views = Set(SchemaView.Full, SchemaView.Compact))
+      .visibleWhen(NicknameRule)
+    val emails = column[EMail]("emails")
+      .forType((email, ctx) => EMail.schema.build(email, ctx))
+    val info = column[UserInfo]("info")
+      .forType((userInfo, ctx) => UserInfo.schema.build(userInfo, ctx))
+      .visibleWhen(ManagedRule)
+    val address = column[Address]("address")
+      .forType((address, ctx) => Address.schema.build(address, ctx))
+      .visibleWhen(ManagedRule)
+  }
+
   def current(): User = {
     val token = Credential.current()
     token.email.user
   }
 
-  def findByEmail(email: String): User = {
-    try
-      User.query("select u from User u join u.emails e where e.value = :value")
+  def findByEmail(email: String): CompletionStage[User] = {
+    User.withTransaction { session =>
+      session.createQuery("select u from User u join u.emails e where e.value = :value", classOf[User])
         .setParameter("value", email)
         .getSingleResult
-    catch
-      case e: NoResultException => null
+    }
   }
 
   @Entity(name = "UserView")
@@ -68,22 +100,20 @@ object User extends RepositoryContext[User](classOf[User]) {
   }
 
   object View extends RepositoryContext[View](classOf[View]) {
-    def findByUser(user: User): View = {
-      if (user.isPersistent) {
-        try {
-          User.View.query("select v from UserView v where v.user = :user")
-            .setParameter("user", user)
-            .getSingleResult
-        } catch {
-          case e: NoResultException => {
-            val view = new View()
-            view.user = user
-            view.saveOrUpdate()
-            view
-          }
-        }
-      } else {
-        null
+    def findByUser(user: User): CompletionStage[View] = {
+      User.View.withTransaction { session =>
+        session.createQuery("select v from UserView v where v.user = :user", classOf[View])
+          .setParameter("user", user)
+          .getSingleResultOrNull
+          .thenCompose(view => {
+            if (view != null) {
+              CompletableFuture.completedFuture(view)
+            } else {
+              val newView = new View()
+              newView.user = user
+              session.persist(newView).thenApply(_ => newView)
+            }
+          })
       }
     }
   }

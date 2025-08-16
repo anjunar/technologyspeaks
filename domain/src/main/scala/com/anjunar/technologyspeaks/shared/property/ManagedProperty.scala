@@ -6,8 +6,10 @@ import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.control.{Group, User}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
+import io.smallrye.mutiny.Uni
 import jakarta.persistence.{Basic, Column, Entity, ManyToMany, ManyToOne}
 import jakarta.validation.constraints.Size
+import org.hibernate.reactive.mutiny.Mutiny
 
 import java.util
 import java.util.UUID
@@ -45,30 +47,38 @@ class ManagedProperty extends AbstractEntity with OwnerProvider {
 
 object ManagedProperty extends RepositoryContext[ManagedProperty](classOf[ManagedProperty]) {
 
-  def manage(currentUser: User, isOwnedOrAdmin: Boolean, view: EntityView, name: String): (Boolean, UUID) = {
+  def manageReactive(session: Mutiny.Session, currentUser: User, isOwnedOrAdmin: Boolean, view: EntityView, name: String): Uni[(Boolean, UUID)] = {
     if (view == null) {
-      return (true, null)
+      return Uni.createFrom().item((true, null.asInstanceOf[UUID]))
     }
-    val managedProperty = view.properties
-      .stream()
-      .filter(property => property.value == name)
+
+    val propertyOpt = view.properties.stream()
+      .filter(_.value == name)
       .findFirst()
-      .orElseGet(() => {
-        val property = new ManagedProperty()
-        property.value = name
-        property.view = view
-        property.saveOrUpdate()
+
+    val propertyUni: Uni[ManagedProperty] = if (propertyOpt.isPresent) {
+      Uni.createFrom().item(propertyOpt.get)
+    } else {
+      val property = new ManagedProperty()
+      property.value = name
+      property.view = view
+      session.persist(property).map(_ => {
         view.properties.add(property)
         property
       })
+    }
 
-    if (isOwnedOrAdmin) {
-      (true, managedProperty.id)
-    } else {
-      if (managedProperty.visibleForAll) {
-        (true, null)
+    propertyUni.map { managedProperty =>
+      if (isOwnedOrAdmin) {
+        (true, managedProperty.id)
       } else {
-        (managedProperty.users.contains(currentUser) || managedProperty.groups.stream().anyMatch(group => group.users.contains(currentUser)), null)
+        if (managedProperty.visibleForAll) {
+          (true, null)
+        } else {
+          val canSee = managedProperty.users.contains(currentUser) ||
+            managedProperty.groups.stream().anyMatch(_.users.contains(currentUser))
+          (canSee, null)
+        }
       }
     }
   }

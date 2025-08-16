@@ -30,8 +30,10 @@ class DocumentAIService {
   @Inject
   var oLlamaService: OLlamaService = uninitialized
 
+/*
   @Inject
   var factory: EntityManagerFactory = uninitialized
+*/
 
   def create(text: String, blockingQueue: BlockingQueue[String], cancelled : AtomicBoolean) : DocumentAIService.Response = {
 
@@ -101,11 +103,13 @@ class DocumentAIService {
     while (matcher.find()) {
       val hashTagString = matcher.group(1)
 
+/*
       val hashTag = factory.createEntityManager().createQuery("select h from HashTag h where h.value = :value", classOf[HashTag])
         .setParameter("value", hashTagString)
         .getSingleResult
+*/
 
-      renderedText = renderedText.replace(hashTag.value, hashTag.description)
+//      renderedText = renderedText.replace(hashTag.value, hashTag.description)
     }
 
     val message = s"""Rephrase the following sentence to make it more fluent without changing its meaning.
@@ -128,55 +132,8 @@ class DocumentAIService {
     vec.map(_ / norm)
   }
 
-  @Transactional
   def update(id: UUID, blockingQueue: BlockingQueue[String], cancelled : AtomicBoolean): Unit = {
 
-    val document = Document.find(id)
-    
-    val text = document.editor.toText()
-
-    val response = create(text, blockingQueue, cancelled)
-
-    if (! cancelled.get()) {
-      document.language = response.language
-
-      val chunks = response.chunks
-      chunks.foreach(chunk => {
-        chunk.embedding = createEmbeddings(chunk.title + "\n" + chunk.content)
-        chunk.document = document
-      })
-
-      val hashTags = response.hashtags
-        .map(hashTag => {
-          val vector = createEmbeddings(hashTag.description)
-
-          val hashTagsFromDB = factory.createEntityManager().createQuery("select h from HashTag h where function('similarity', h.value, :value) > 0.8 order by function('similarity', h.value, :value)", classOf[HashTag])
-            .setParameter("value", hashTag.value)
-            .getResultList
-
-          if (hashTagsFromDB.isEmpty) {
-            hashTag.embedding = vector
-            hashTag.saveOrUpdate()
-            hashTag
-          } else {
-            hashTagsFromDB.get(0)
-          }
-        })
-        .toList
-
-      blockingQueue.put("\n\nAll Hashtags created\n")
-
-      document.chunks.forEach(chunk => chunk.delete())
-      document.chunks.clear()
-      document.chunks.addAll(chunks.asJava)
-
-      document.hashTags.clear()
-      document.hashTags.addAll(hashTags.asJava)
-
-      document.description = response.summary
-
-      blockingQueue.put("!Done!")
-    }
 
   }
 

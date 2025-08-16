@@ -1,99 +1,96 @@
 package com.anjunar.technologyspeaks
 
-import com.anjunar.technologyspeaks.control.*
-import com.typesafe.scalalogging.Logger
-import jakarta.annotation.Resource
-import jakarta.enterprise.context.{ApplicationScoped, Initialized}
+import com.anjunar.technologyspeaks.control.{Address, Credential, CredentialPassword, EMail, Role, User, UserInfo}
+import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.event.Observes
-import jakarta.transaction.UserTransaction
+import org.hibernate.reactive.stage.Stage
+import org.jboss.weld.environment.se.events.ContainerInitialized
 
 import java.time.LocalDate
-import java.util.Objects
-import scala.compiletime.uninitialized
-
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionStage
 
 @ApplicationScoped
 class DataImport {
 
-  val log: Logger = Logger[DataImport]
+  def init(@Observes event: ContainerInitialized, sessionFactory: Stage.SessionFactory): Unit = {
+    sessionFactory.withTransaction((session, tx) =>
+      ensureRole(session, "Administrator", "Administrator")
+        .thenCompose(_ => ensureRole(session, "User", "User"))
+        .thenCompose(_ => ensureRole(session, "Guest", "Guest"))
+        .thenCompose(_ => ensureRole(session, "Confirmed", "Confirmed"))
+        .thenCompose(_ => ensureUser(session))
+    ).whenComplete((_, err) =>
+      if (err != null) err.printStackTrace()
+      else println("Startup initialization done")
+    )
+  }
 
-  @Resource
-  var transaction: UserTransaction = uninitialized
+  private def ensureRole(session: Stage.Session, name: String, description: String): CompletionStage[Role] = {
+    session.createQuery("from Role where name = :name", classOf[Role])
+      .setParameter("name", name)
+      .getSingleResultOrNull
+      .thenCompose(role => {
+        if (role != null) CompletableFuture.completedFuture(role)
+        else {
+          val newRole = new Role
+          newRole.name = name
+          newRole.description = description
+          session.persist(newRole).thenApply(_ => newRole)
+        }
+      })
+  }
 
-  def init(@Observes @Initialized(classOf[ApplicationScoped]) init: Unit): Unit = {
-    transaction.begin()
-    var administrator = Role.query(("name", "Administrator"))
-    if (Objects.isNull(administrator)) {
-      administrator = new Role
-      administrator.name = "Administrator"
-      administrator.description = "Administrator"
-      administrator.saveOrUpdate()
-    }
-    var user = Role.query(("name", "User"))
-    if (Objects.isNull(user)) {
-      user = new Role
-      user.name = "User"
-      user.description = "User"
-      user.saveOrUpdate()
-    }
-    var guest = Role.query(("name", "Guest"))
-    if (Objects.isNull(guest)) {
-      guest = new Role
-      guest.name = "Guest"
-      guest.description = "Guest"
-      guest.saveOrUpdate()
-    }
-    var confirmed = Role.query(("name", "Confirmed"))
-    if (Objects.isNull(confirmed)) {
-      confirmed = new Role
-      confirmed.name = "Confirmed"
-      confirmed.description = "Confirmed"
-      confirmed.saveOrUpdate()
-    }
+  private def ensureUser(session: Stage.Session): CompletionStage[User] = {
+    session.createQuery(
+        "from User u join fetch u.emails e where e.value = :email",
+        classOf[User]
+      ).setParameter("email", "anjunar@gmx.de")
+      .getSingleResultOrNull
+      .thenCompose(existing => {
+        if (existing != null) CompletableFuture.completedFuture(existing)
+        else {
+          val info = new UserInfo
+          info.firstName = "Patrick"
+          info.lastName = "Bittner"
+          info.birthDate = LocalDate.of(1980, 4, 1)
 
+          val address = new Address
+          address.street = "Beim alten Schützenhof"
+          address.number = "28"
+          address.zipCode = "22083"
+          address.country = "Deutschland"
 
-    var patrick = User.findByEmail("anjunar@gmx.de")
+          // Administrator Role laden
+          session.createQuery("from Role where name = :name", classOf[Role])
+            .setParameter("name", "Administrator")
+            .getSingleResult
+            .thenCompose(adminRole => {
+              val token = new Credential
+              token.roles.add(adminRole)
 
-    if (Objects.isNull(patrick)) {
-      val info = new UserInfo
-      info.firstName = "Patrick"
-      info.lastName = "Bittner"
-      info.birthDate = LocalDate.of(1980, 4, 1)
+              val email = new EMail
+              token.email = email
+              email.value = "anjunar@gmx.de"
+              email.credentials.add(token)
 
-      val address = new Address
-      address.street = "Beim alten Schützenhof"
-      address.number = "28"
-      address.zipCode = "22083"
-      address.country = "Deutschland"
+              val patrick = new User
+              email.user = patrick
+              patrick.nickName = "Anjunar"
+              patrick.enabled = true
+              patrick.deleted = false
+              patrick.info = info
+              patrick.address = address
+              patrick.emails.add(email)
 
-      val token = new Credential
-      token.roles.add(administrator)
+              val passwordCredential = new CredentialPassword
+              passwordCredential.password = "patrick"
+              passwordCredential.roles.add(adminRole)
+              email.credentials.add(passwordCredential)
 
-      val email = new EMail()
-      token.email = email
-
-      email.value = "anjunar@gmx.de"
-      email.credentials.add(token)
-
-      patrick = new User
-      email.user = patrick
-
-      patrick.nickName = "Anjunar"
-      patrick.enabled = true
-      patrick.deleted = false
-      patrick.info = info
-      patrick.address = address
-      patrick.emails.add(email)
-
-      val passwordCredential = new CredentialPassword
-      passwordCredential.password = "patrick"
-      passwordCredential.roles.add(administrator)
-      email.credentials.add(passwordCredential)
-
-      patrick.saveOrUpdate()
-    }
-
-    transaction.commit()
-
+              session.persist(patrick).thenApply(_ => patrick)
+            })
+        }
+      })
   }
 }

@@ -7,7 +7,7 @@ import com.anjunar.scala.schema.analyzer.*
 import com.anjunar.scala.schema.builder.{PropertyBuilder, SchemaBuilder}
 import com.anjunar.scala.schema.model.validators.{NotBlankValidator, NotNullValidator, SizeValidator}
 import com.anjunar.scala.schema.model.{CollectionDescriptor, EnumDescriptor, NodeDescriptor, ObjectDescriptor}
-import com.anjunar.scala.universe.introspector.{AbstractProperty, BeanIntrospector, ScalaIntrospector}
+import com.anjunar.scala.universe.introspector.{AbstractProperty, BeanIntrospector}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonValue}
 import jakarta.enterprise.inject.spi.CDI

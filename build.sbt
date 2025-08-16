@@ -4,24 +4,17 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.7.2"
 
-ThisBuild / javacOptions ++= Seq("--release", "17")
-ThisBuild / scalacOptions ++= Seq("-release", "17")
-
-javaOptions ++= Seq(
-  "--module-path", (dependencyClasspath in Compile).value.files.mkString(":"),
-  "--add-modules", "org.graalvm.polyglot"
-)
-
+ThisBuild / javacOptions ++= Seq("--release", "24")
+ThisBuild / scalacOptions ++= Seq("-release", "24")
 
 lazy val scalaUniverse2 = (project in file("library/scala-universe2"))
   .settings(
     libraryDependencies ++= Seq(
       "com.google.guava" % "guava" % "33.4.8-jre",
       "jakarta.enterprise" % "jakarta.enterprise.cdi-api" % "4.1.0",
-      "org.scala-lang" % "scala-reflect" % "2.13.16",
-      "org.slf4j" % "slf4j-api" % "2.0.16",
-      "ch.qos.logback" % "logback-classic" % "1.5.6",
-      "org.slf4j" % "jul-to-slf4j" % "2.0.16",
+      "ch.qos.logback" % "logback-classic" % "1.5.18",
+      "org.slf4j" % "slf4j-api" % "2.0.17",
+      "org.slf4j" % "jul-to-slf4j" % "2.0.17",
       "com.typesafe.scala-logging" % "scala-logging_3" % "3.9.5"
     )
   )
@@ -55,10 +48,13 @@ lazy val system = (project in file("system"))
       "com.fasterxml.jackson.jaxrs" % "jackson-jaxrs-json-provider" % "2.19.2",
       "com.google.guava" % "guava" % "33.4.8-jre",
       "commons-io" % "commons-io" % "2.20.0",
-      "io.vertx" % "vertx-web" % "5.0.2",
-      "io.vertx" % "vertx-pg-client" % "5.0.2",
       "org.hibernate.reactive" % "hibernate-reactive-core" % "4.1.0.Final",
+      "com.webauthn4j" % "webauthn4j-core-async" % "0.29.5.RELEASE",
+      "io.vertx" % "vertx-web" % "5.0.3",
+      "io.vertx" % "vertx-auth-webauthn4j" % "5.0.3",
+      "io.vertx" % "vertx-pg-client" % "5.0.3",
       "jakarta.json.bind" % "jakarta.json.bind-api" % "3.0.1",
+      "org.glassfish" % "jakarta.el" % "4.0.2",
       "javax.ws.rs" % "javax.ws.rs-api" % "2.1.1",
       "net.bytebuddy" % "byte-buddy" % "1.17.6",
       "org.apache.commons" % "commons-lang3" % "3.18.0",
@@ -85,7 +81,7 @@ lazy val rest = (project in file("rest"))
   .dependsOn(domain)
   .settings(
     libraryDependencies ++= Seq(
-      "io.vertx" % "vertx-web" % "5.0.2"
+      "io.vertx" % "vertx-web" % "5.0.3"
     )
   )
 
@@ -95,6 +91,6 @@ lazy val application = (project in file("application"))
   .dependsOn(rest)
   .settings(
     libraryDependencies ++= Seq(
-      "io.vertx" % "vertx-web-client" % "5.0.2"
+      "io.vertx" % "vertx-web-client" % "5.0.3"
       )
   )

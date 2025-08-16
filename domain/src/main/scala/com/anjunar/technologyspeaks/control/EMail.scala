@@ -2,11 +2,13 @@ package com.anjunar.technologyspeaks.control
 
 import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
+import com.anjunar.scala.schema.engine.{EntitySchemaDef, SchemaView}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import jakarta.persistence.*
 import jakarta.validation.constraints.{Email, NotBlank}
 
 import java.util
+import java.util.UUID
 import scala.compiletime.uninitialized
 
 @Entity
@@ -31,4 +33,11 @@ class EMail extends AbstractEntity {
   override def toString = s"EMail($value)"
 }
 
-object EMail extends RepositoryContext[EMail](classOf[EMail])
+object EMail extends RepositoryContext[EMail](classOf[EMail]) {
+  
+  val schema = new EntitySchemaDef[EMail]("EMail") {
+    val id = column[UUID]("id")
+    val value = column[String]("value")
+  }
+  
+}

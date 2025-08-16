@@ -1,7 +1,7 @@
 package com.anjunar.technologyspeaks.shared.hashtag
 
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.jpa.{PostgresIndex, PostgresIndices}
+import com.anjunar.jpa.{EntityContext, PostgresIndex, PostgresIndices}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import jakarta.persistence.{Basic, Column, Entity}
 import org.hibernate.`type`.SqlTypes
@@ -17,7 +17,7 @@ import org.hibernate.annotations
   new PostgresIndex(name = "hashtag_idx_value", columnList = "value", using = "GIN"),
   new PostgresIndex(name = "hashtag_idx_embedding", columnList = "embedding", using = "hnsw")
 ))
-class HashTag extends AbstractEntity {
+class HashTag extends AbstractEntity with EntityContext[HashTag] {
 
   @Basic
   @PropertyDescriptor(title = "HashTag", writeable = true, naming = true)

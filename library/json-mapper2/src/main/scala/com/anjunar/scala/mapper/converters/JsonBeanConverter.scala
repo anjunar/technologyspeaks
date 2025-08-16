@@ -7,7 +7,7 @@ import com.anjunar.scala.mapper.intermediate.model.{JsonNode, JsonObject, JsonSt
 import com.anjunar.scala.mapper.{JsonContext, JsonConverterRegistry}
 import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, LinkContext, PrimitiveSchemaBuilder, SchemaBuilder}
 import com.anjunar.scala.schema.model.{Link, NodeDescriptor}
-import com.anjunar.scala.universe.introspector.{BeanIntrospector, AbstractProperty, ScalaIntrospector}
+import com.anjunar.scala.universe.introspector.{BeanIntrospector, AbstractProperty}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.google.common.reflect.TypeToken
@@ -151,13 +151,10 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
     linkFactory(instance, (name: String, link: Link) => linksResult.put(name, link))
 
     for (link <- linksResult) {
-      if (!context.links.contains(link._2)) {
-        context.links.addOne(link._2)
-        val converter = registry.find(TypeResolver.resolve(classOf[Link]))
-        val node = converter.toJson(link._2, TypeResolver.resolve(classOf[Link]), JsonContext(context, link._1, context.noValidation, context.schema, context))
+      val converter = registry.find(TypeResolver.resolve(classOf[Link]))
+      val node = converter.toJson(link._2, TypeResolver.resolve(classOf[Link]), JsonContext(context, link._1, context.noValidation, context.schema, context))
 
-        links.put(link._1, node)
-      }
+      links.put(link._1, node)
     }
   }
 

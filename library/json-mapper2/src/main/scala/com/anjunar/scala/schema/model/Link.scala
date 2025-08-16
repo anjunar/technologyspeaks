@@ -8,6 +8,4 @@ import scala.annotation.meta.field
 case class Link(@(PropertyDescriptor @field)(title = "URL") url: String,
                 @(PropertyDescriptor @field)(title = "Method") method: String,
                 @(PropertyDescriptor @field)(title = "Relation") rel: String,
-                @(PropertyDescriptor @field)(title = "Title") title: String,
-                @(PropertyDescriptor @field)(title = "Link Type") linkType: LinkType,
-                @(PropertyDescriptor @field)(title = "Body") body: AnyRef)
+                @(PropertyDescriptor @field)(title = "Title") title: String)

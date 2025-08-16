@@ -16,8 +16,10 @@ import scala.compiletime.uninitialized
 @ApplicationScoped
 class FormJPAEntityLoader extends FormEntityLoader {
 
+/*
   @Inject
   var factory : EntityManagerFactory = uninitialized
+*/
 
   override def load(fields: Map[String, List[String]], aType: ResolvedClass, annotations: Array[Annotation]): AnyRef = {
     val doNotLoad = annotations.find(annotation => annotation.annotationType() == classOf[DoNotLoad])
@@ -29,7 +31,8 @@ class FormJPAEntityLoader extends FormEntityLoader {
       if (option.isDefined && doNotLoad.isEmpty) {
         val entityClass = aType.raw.asInstanceOf[Class[AnyRef]]
         val uuid = UUID.fromString(option.get)
-        factory.createEntityManager().find(entityClass, uuid)
+//        factory.createEntityManager().find(entityClass, uuid)
+        null
       } else {
         null
       }

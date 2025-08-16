@@ -15,7 +15,6 @@ case class JsonContext(parent : JsonContext,
                        validator : Validator,
                        registry: JsonConverterRegistry,
                        schema: SchemaBuilder,
-                       links : mutable.Buffer[Link],
                        loader: JsonEntityLoader) extends Context {
 
   var filter : Array[String] = Array()
@@ -32,7 +31,6 @@ object JsonContext {
       context.validator,
       context.registry,
       propertySchema,
-      context.links,
       context.loader
     )
 

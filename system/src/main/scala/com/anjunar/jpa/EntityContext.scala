@@ -3,38 +3,34 @@ package com.anjunar.jpa
 import com.anjunar.scala.mapper.IdProvider
 import com.anjunar.scala.mapper.exceptions.{ValidationException, ValidationViolation}
 import com.anjunar.scala.universe.TypeResolver
+import io.smallrye.mutiny.Uni
 import jakarta.enterprise.inject.spi.CDI
 import jakarta.persistence.EntityManager
 import jakarta.validation.Validator
+import org.hibernate.reactive.mutiny.Mutiny
+import org.hibernate.reactive.stage.Stage
 
 import java.util
+import java.util.concurrent.CompletionStage
 
 trait EntityContext[E <: EntityContext[E]] extends IdProvider { self: E =>
 
-  def saveOrUpdate(): E = {
-    val managed = if (version == null || version == 0) {
-      entityManager.persist(this)
-      return this
-    } else {
-      if (entityManager.contains(this)) {
-        this
-      } else {
-        entityManager.merge(this)
-      }
-    }
-
-    CDI.current().getBeanContainer.getEvent.select(new SaveLiteral).fire(managed)
-
-    managed
+  def persist() : CompletionStage[Void] = {
+    sessionFactory.withTransaction(session => {
+      session.persist(this)
+    })
+  }
+  
+  def merge() : CompletionStage[E] = {
+    sessionFactory.withTransaction(session => {
+      session.merge(this)
+    })
   }
 
-  def delete(): Unit = {
-    entityManager.remove(this)
-    CDI.current().getBeanContainer.getEvent.select(new DeleteLiteral).fire(this)
-  }
-
-  def detach(): Unit = {
-    entityManager.detach(this)
+  def delete(): CompletionStage[Void] = {
+    sessionFactory.withTransaction(session => {
+      session.remove(this)
+    })
   }
 
   def validate(groups: Class[?]*): Unit = {
@@ -66,10 +62,8 @@ trait EntityContext[E <: EntityContext[E]] extends IdProvider { self: E =>
     }
   }
 
-  def isPersistent: Boolean = entityManager.contains(this)
-
-  def entityManager: EntityManager = {
-    CDI.current().select(classOf[EntityManager]).get()
+  def sessionFactory: Stage.SessionFactory = {
+    CDI.current().select(classOf[Stage.SessionFactory]).get()
   }
 
 

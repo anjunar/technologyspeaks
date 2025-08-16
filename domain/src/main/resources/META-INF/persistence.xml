@@ -7,9 +7,9 @@
 
             <properties>
                 <!-- Vert.x Reactive SQL Client URL -->
-                <property name="hibernate.connection.url" value="vertx-reactive:postgresql://localhost:5432/technology-speaks"/>
-                <property name="hibernate.connection.username" value="username"/>
-                <property name="hibernate.connection.password" value="password"/>
+                <property name="hibernate.connection.url" value="vertx-reactive:postgresql://localhost:5432/technology_speaks"/>
+                <property name="hibernate.connection.username" value="postgres"/>
+                <property name="hibernate.connection.password" value="postgres"/>
 
                 <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
 

@@ -1,29 +1,53 @@
 package com.anjunar.technologyspeaks
 
 import com.anjunar.nodejs.NodeJSEnvironment
-import com.anjunar.vertx.CDIApiVerticle
+import com.anjunar.scala.universe.{ClassPathResolver, ResolvedClass}
+import com.anjunar.vertx.CDIVerticle
+import com.anjunar.vertx.fsm.FSMEngine
 import com.typesafe.scalalogging.Logger
 import io.vertx.core.{Vertx, VertxOptions}
 import jakarta.annotation.PreDestroy
-import jakarta.enterprise.context.{ApplicationScoped, Dependent}
+import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.event.Observes
-import jakarta.enterprise.inject.Produces
-import jakarta.enterprise.inject.spi.CDI
-import jakarta.persistence.Persistence
-import org.hibernate.SessionFactory
+import jakarta.enterprise.inject.spi.BeanManager
+import jakarta.enterprise.inject.{Instance, Produces}
+import jakarta.persistence.{Entity, EntityManagerFactory, Persistence}
+import jakarta.validation.{Validation, Validator}
+import org.hibernate.reactive.mutiny.Mutiny
+import org.hibernate.reactive.provider.ReactiveServiceRegistryBuilder
+import org.hibernate.reactive.stage.Stage
 import org.jboss.weld.environment.se.Weld
 import org.jboss.weld.environment.se.events.ContainerInitialized
 
 @ApplicationScoped
 class Main {
 
-  val logger = Logger[Main]
+  @Produces
+  @ApplicationScoped
+  lazy val validator: Validator = Validation
+    .buildDefaultValidatorFactory()
+    .getValidator
 
   @Produces
   @ApplicationScoped
-  lazy val sessionFactory: SessionFactory = Persistence
-    .createEntityManagerFactory("default")
-    .unwrap(classOf[SessionFactory])
+  lazy val sessionFactory: Stage.SessionFactory = {
+    val configuration = new org.hibernate.cfg.Configuration()
+
+    configuration.setProperty("jakarta.persistence.jdbc.url", "postgresql://localhost:5432/technology_speaks")
+    configuration.setProperty("jakarta.persistence.jdbc.user", "postgres")
+    configuration.setProperty("jakarta.persistence.jdbc.password", "postgres")
+    configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect")
+
+    val serviceRegistry = new ReactiveServiceRegistryBuilder()
+      .applySettings(configuration.getProperties)
+      .build();
+
+    val classes = ClassPathResolver.findAnnotation(classOf[Entity])
+
+    classes.foreach(annotation => configuration.addAnnotatedClass(annotation.target.asInstanceOf[ResolvedClass].raw))
+
+    configuration.buildSessionFactory(serviceRegistry).unwrap(classOf[Stage.SessionFactory])
+  }
 
   @Produces
   @ApplicationScoped
@@ -31,12 +55,13 @@ class Main {
     val options = new VertxOptions().setEventLoopPoolSize(8)
     Vertx.vertx(options)
   }
+  val logger = Logger[Main]
 
   @PreDestroy
   def destroy(): Unit = {
     logger.info("Executing @PreDestroy hook...")
     try {
-      if (!sessionFactory.isClosed) {
+      if (sessionFactory.isOpen) {
         logger.info("Closing SessionFactory...")
         sessionFactory.close()
       }
@@ -52,9 +77,14 @@ class Main {
     logger.info("@PreDestroy hook completed.")
   }
 
-  def onStartup(@Observes event: ContainerInitialized, vertx: Vertx, nodeJSEnvironment: NodeJSEnvironment): Unit = {
+  def onStartup(@Observes event: ContainerInitialized,
+                vertx: Vertx,
+                nodeJSEnvironment: NodeJSEnvironment,
+                engine: FSMEngine,
+                beanManager: BeanManager,
+                instance: Instance[AnyRef]): Unit = {
     nodeJSEnvironment.startContainer()
-    vertx.deployVerticle(new CDIApiVerticle(CDI.current()))
+    vertx.deployVerticle(new CDIVerticle(beanManager, instance, engine))
   }
 
 }
