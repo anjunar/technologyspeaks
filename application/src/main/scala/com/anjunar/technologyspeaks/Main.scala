@@ -36,7 +36,9 @@ class Main {
     configuration.setProperty("jakarta.persistence.jdbc.url", "postgresql://localhost:5432/technology_speaks")
     configuration.setProperty("jakarta.persistence.jdbc.user", "postgres")
     configuration.setProperty("jakarta.persistence.jdbc.password", "postgres")
-    configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect")
+    configuration.setProperty("hibernate.hbm2ddl.auto", "update")
+    configuration.setProperty("hibernate.show_sql", "true")
+    configuration.setProperty("hibernate.format_sql", "true")
 
     val serviceRegistry = new ReactiveServiceRegistryBuilder()
       .applySettings(configuration.getProperties)

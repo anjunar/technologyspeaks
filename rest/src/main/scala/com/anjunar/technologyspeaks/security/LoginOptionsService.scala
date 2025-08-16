@@ -1,6 +1,7 @@
 package com.anjunar.technologyspeaks.security
 
 import com.anjunar.vertx.fsm.services.JsonFSMService
+import com.anjunar.vertx.webauthn.CredentialStore
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
 import com.webauthn4j.data.{PublicKeyCredentialParameters, PublicKeyCredentialType}
 import com.webauthn4j.data.client.challenge.DefaultChallenge
@@ -19,6 +20,9 @@ import scala.compiletime.uninitialized
 @ApplicationScoped
 class LoginOptionsService extends JsonFSMService[JsonObject]  with WebAuthnService {
 
+  @Inject
+  var store: CredentialStore = uninitialized
+
   override def run(ctx : RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val username = body.getString("username")
@@ -28,25 +32,23 @@ class LoginOptionsService extends JsonFSMService[JsonObject]  with WebAuthnServi
     val challenge = new DefaultChallenge(challengeBytes)
     challengeStore.put(username, challenge)
 
-    val allowCredentials = Option(credentialStore.get(username))
-      .map(_.asScala.map(cred => new JsonObject()
-        .put("type", "public-key")
-        .put("id", cred.asInstanceOf[CredentialRecordImpl].getCredentialId)))
-      .getOrElse(Seq.empty)
-      .asJava
+    Future.fromCompletionStage(store.loadByUsername(username)
+      .thenApply(credentials => {
+        val allowCredentials = credentials
+          .stream().map(cred => new JsonObject()
+            .put("type", "public-key")
+            .put("id", store.credentialId(cred)))
+          .toList
 
-    val response = new JsonObject()
-      .put("publicKey", new JsonObject()
-        .put("challenge", Base64UrlUtil.encodeToString(challengeBytes))
-        .put("rpId", RP_ID)
-        .put("allowCredentials", new JsonArray(allowCredentials))
-        .put("userVerification", "discouraged")
-        .put("timeout", 60000))
-
-    val promise = Promise.promise[JsonObject]()
-    promise.succeed(response)
+        new JsonObject()
+          .put("publicKey", new JsonObject()
+            .put("challenge", Base64UrlUtil.encodeToString(challengeBytes))
+            .put("rpId", RP_ID)
+            .put("allowCredentials", new JsonArray(allowCredentials))
+            .put("userVerification", "discouraged")
+            .put("timeout", 60000))
+      }))
     
-    promise.future()
   }
 
 

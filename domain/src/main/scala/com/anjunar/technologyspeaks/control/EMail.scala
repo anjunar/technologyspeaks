@@ -1,6 +1,6 @@
 package com.anjunar.technologyspeaks.control
 
-import com.anjunar.jpa.RepositoryContext
+import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.scala.schema.engine.{EntitySchemaDef, SchemaView}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
@@ -9,10 +9,11 @@ import jakarta.validation.constraints.{Email, NotBlank}
 
 import java.util
 import java.util.UUID
+import java.util.concurrent.CompletionStage
 import scala.compiletime.uninitialized
 
 @Entity
-class EMail extends AbstractEntity {
+class EMail extends AbstractEntity with EntityContext[EMail]{
 
   @Email
   @NotBlank

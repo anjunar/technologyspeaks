@@ -1,6 +1,8 @@
 package com.anjunar.technologyspeaks.security
 
 import com.anjunar.vertx.fsm.services.JsonFSMService
+import com.anjunar.vertx.webauthn.{CredentialStore, WebAuthnCredentialRecord}
+import com.typesafe.scalalogging.Logger
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
 import com.webauthn4j.data.{PublicKeyCredentialParameters, PublicKeyCredentialType, RegistrationParameters}
 import com.webauthn4j.data.client.Origin
@@ -19,6 +21,11 @@ import scala.compiletime.uninitialized
 
 @ApplicationScoped
 class RegisterFinishService extends JsonFSMService[JsonObject] with WebAuthnService {
+
+  val log = Logger[RegisterFinishService]
+  
+  @Inject
+  var store: CredentialStore = uninitialized
 
   override def run(ctx : RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
@@ -43,19 +50,30 @@ class RegisterFinishService extends JsonFSMService[JsonObject] with WebAuthnServ
             )
 
             webAuthnManager.verify(registrationData, registrationParameters)
-              .thenApply { _ =>
-                val credentialRecord = CredentialRecordImpl(
-                  credentialId,
+              .thenCompose { _ =>
+                val webAuthnCredentialRecord = new WebAuthnCredentialRecord(
+                  username, 
                   registrationData.getAttestationObject,
                   registrationData.getCollectedClientData,
-                  registrationData.getTransports,
-                  0L
+                  registrationData.getClientExtensions,
+                  registrationData.getTransports
                 )
-                val existingCredentials = Option(credentialStore.get(username))
-                  .map(_.asScala.toList)
-                  .getOrElse(List.empty)
-                credentialStore.put(username, (credentialRecord :: existingCredentials).asJava)
-                new JsonObject().put("status", "success").put("credentialId", credentialId)
+                
+                store.saveRecord(username, webAuthnCredentialRecord)
+                  .handle((credentials, failure) => {
+                    if (failure != null) {
+                      
+                      log.error(failure.getMessage, failure.getCause)
+                      
+                      new JsonObject()
+                        .put("status", "error")
+                        .put("message", failure.getMessage);
+                    } else {
+                      new JsonObject()
+                        .put("status", "success")
+                        .put("credentialId", credentialId);
+                    }
+                  })            
               }
           case None =>
             CompletableFuture.failedFuture(new IllegalStateException("No challenge found for user"))

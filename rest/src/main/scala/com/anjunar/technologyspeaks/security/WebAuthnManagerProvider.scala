@@ -11,7 +11,6 @@ object WebAuthnManagerProvider {
 
   val webAuthnManager = WebAuthnAsyncManager.createNonStrictWebAuthnAsyncManager()
 
-  val credentialStore = new ConcurrentHashMap[String, util.List[CredentialRecord]]()
   val challengeStore = new ConcurrentHashMap[String, Challenge]()
 
 

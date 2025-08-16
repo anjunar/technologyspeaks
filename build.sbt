@@ -47,11 +47,11 @@ lazy val system = (project in file("system"))
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.19.2",
       "com.fasterxml.jackson.jaxrs" % "jackson-jaxrs-json-provider" % "2.19.2",
       "com.google.guava" % "guava" % "33.4.8-jre",
+      "com.pgvector" % "pgvector" % "0.1.6",
       "commons-io" % "commons-io" % "2.20.0",
       "org.hibernate.reactive" % "hibernate-reactive-core" % "4.1.0.Final",
       "com.webauthn4j" % "webauthn4j-core-async" % "0.29.5.RELEASE",
       "io.vertx" % "vertx-web" % "5.0.3",
-      "io.vertx" % "vertx-auth-webauthn4j" % "5.0.3",
       "io.vertx" % "vertx-pg-client" % "5.0.3",
       "jakarta.json.bind" % "jakarta.json.bind-api" % "3.0.1",
       "org.glassfish" % "jakarta.el" % "4.0.2",
@@ -69,7 +69,6 @@ lazy val domain = (project in file("domain"))
   .dependsOn(system)
   .settings(
     libraryDependencies ++= Seq(
-      "com.pgvector" % "pgvector" % "0.1.6",
       "org.hibernate" % "hibernate-validator" % "9.0.0.Beta3",
       "org.hibernate.orm" % "hibernate-core" % "7.1.0.Final",
       "org.hibernate.orm" % "hibernate-envers" % "7.1.0.Final",

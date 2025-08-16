@@ -1,10 +1,9 @@
 package com.anjunar.technologyspeaks.control
 
 import com.anjunar.jaxrs.types.OwnerProvider
-import com.anjunar.jpa.RepositoryContext
+import com.anjunar.jpa.{EntityContext, PostgresIndex, PostgresIndices, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.security.SecurityUser
-import com.anjunar.jpa.{PostgresIndex, PostgresIndices}
 import com.anjunar.scala.schema.engine.{EntitySchemaDef, Link, RequestContext, SchemaView, VisibilityRule}
 import com.anjunar.technologyspeaks.shared.property.EntityView
 import io.smallrye.mutiny.Uni
@@ -23,7 +22,7 @@ import scala.compiletime.uninitialized
 @PostgresIndices(Array(
   new PostgresIndex(name = "user_idx_nickName", columnList = "nickName", using = "GIN")
 ))
-class User extends Identity with OwnerProvider with SecurityUser {
+class User extends Identity with OwnerProvider with SecurityUser with EntityContext[User]  {
 
   @Size(min = 3, max = 80)
   @PropertyDescriptor(title = "Nickname", naming = true)

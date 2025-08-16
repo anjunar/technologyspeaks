@@ -34,21 +34,25 @@ function RegisterPage(properties: RegisterPage.Attributes) {
 
         const credentialCreateOptions = await optionsRequest.json()
 
-        const publicKeyCredential = await webauthnJson.create(credentialCreateOptions);
+        try {
+            const publicKeyCredential = await webauthnJson.create(credentialCreateOptions);
 
-        const registerRequest = await fetch("/service/security/register/finish", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                username : domain.username,
-                publicKeyCredential
-            })
-        });
+            const registerRequest = await fetch("/service/security/register/finish", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    username: domain.username,
+                    publicKeyCredential
+                })
+            });
 
-        if (registerRequest.ok) {
-            navigate("/security/login")
-        } else {
-            alert("Something went wrong")
+            if (registerRequest.ok) {
+                navigate("/security/login")
+            } else {
+                alert("Something went wrong")
+            }
+        } catch (e) {
+            alert(e)
         }
 
     }

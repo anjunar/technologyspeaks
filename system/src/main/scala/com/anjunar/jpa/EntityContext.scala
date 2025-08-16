@@ -17,24 +17,24 @@ trait EntityContext[E <: EntityContext[E]] extends IdProvider { self: E =>
 
   def persist() : CompletionStage[Void] = {
     sessionFactory.withTransaction(session => {
-      session.persist(this)
+      session.persist(self)
     })
   }
   
   def merge() : CompletionStage[E] = {
     sessionFactory.withTransaction(session => {
-      session.merge(this)
+      session.merge(self)
     })
   }
 
   def delete(): CompletionStage[Void] = {
     sessionFactory.withTransaction(session => {
-      session.remove(this)
+      session.remove(self)
     })
   }
 
   def validate(groups: Class[?]*): Unit = {
-    val constraintViolation = CDI.current().select(classOf[Validator]).get().validate(this, groups *)
+    val constraintViolation = CDI.current().select(classOf[Validator]).get().validate(self, groups *)
 
     val validationViolation = constraintViolation.stream()
       .map(violation => {

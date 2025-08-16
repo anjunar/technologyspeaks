@@ -31,7 +31,7 @@ class IndexRoute extends Handler[RoutingContext] {
       val path = ctx.request().path()
       val search = if (ctx.request().query() == null) "?" else "?" + ctx.request().query()
       val cookies = ctx.request().cookies()
-      val host = ctx.request().authority().host() + ":" + ctx.request().authority().port()
+      val host = ctx.request().authority().host() + (if ctx.request().authority().port() == -1 then "" else ":" + ctx.request().authority().port())
       val language = ctx.request().headers().get("Language")
 
       val requestInfo = new JsonObject()

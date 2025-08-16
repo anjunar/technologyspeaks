@@ -1,22 +1,32 @@
 package com.anjunar.technologyspeaks.security
 
 import com.anjunar.vertx.fsm.services.JsonFSMService
+import com.anjunar.vertx.webauthn.CredentialStore
 import com.webauthn4j.credential.CredentialRecord
 import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.server.ServerProperty
 import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.User
 import io.vertx.ext.web.RoutingContext
 import jakarta.enterprise.context.ApplicationScoped
-
-import java.util.concurrent.CompletableFuture
-import scala.jdk.CollectionConverters.*
+import jakarta.inject.Inject
+import org.hibernate.reactive.stage.Stage
 
 import java.util
+import java.util.concurrent.CompletableFuture
+import scala.compiletime.uninitialized
+import scala.jdk.CollectionConverters.*
 
 @ApplicationScoped
 class LoginFinishService extends JsonFSMService[JsonObject] with WebAuthnService {
+
+  @Inject
+  var store: CredentialStore = uninitialized
+
+  @Inject
+  var sessionFactory: Stage.SessionFactory = uninitialized
 
   override def run(ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
@@ -29,9 +39,8 @@ class LoginFinishService extends JsonFSMService[JsonObject] with WebAuthnService
 
     Future.fromCompletionStage(webAuthnManager.parseAuthenticationResponseJSON(publicKeyCredential.encode())
       .thenCompose { authenticationData =>
-        Option(credentialStore.get(username))
-          .flatMap(_.asScala.find(_.asInstanceOf[CredentialRecordImpl].getCredentialId == credentialId))
-          .map { credentialRecord =>
+        store.loadByCredentialId(credentialId)
+          .thenCompose(credentialRecord => {
             Option(challengeStore.get(username)) match {
               case Some(challenge) =>
                 val serverProperty = new ServerProperty(new Origin(ORIGIN), RP_ID, challenge)
@@ -44,30 +53,31 @@ class LoginFinishService extends JsonFSMService[JsonObject] with WebAuthnService
                 )
 
                 webAuthnManager.verify(authenticationData, authenticationParameters)
-                  .thenApply { _ =>
-                    updateCounter(username, credentialId, authenticationData.getAuthenticatorData.getSignCount)
-                    new JsonObject().put("status", "success").put("credentialId", credentialId)
+                  .thenCompose { _ =>
+                    sessionFactory
+                      .withTransaction(session => {
+                        session.createMutationQuery("update CredentialWebAuthn c set c.counter = : counter where c.credentialId = : credentialId")
+                          .setParameter("counter", authenticationData.getAuthenticatorData.getSignCount)
+                          .setParameter("credentialId", credentialId)
+                          .executeUpdate()
+                      })
+                      .thenCompose(entity => {
+                        store.loadUser(credentialId)
+                          .thenApply(user => {
+                            ctx.put("user", user)
+
+                            new JsonObject()
+                              .put("status", "success")
+                              .put("credentialId", credentialId)
+                              .put("username", username)
+                          })
+                      })
                   }
               case None =>
                 CompletableFuture.failedFuture(new IllegalStateException("No challenge found for user"))
             }
-          }
-          .getOrElse(CompletableFuture.failedFuture(new IllegalStateException("No credential found for user")))
+          })
       })
-  }
-
-  private def updateCounter(username: String, credentialId: String, signCount: Long): Unit = {
-    Option(credentialStore.get(username)) match {
-      case Some(credentials) =>
-        val updatedCredentials : util.List[CredentialRecord] = credentials.asScala.map {
-          case record: CredentialRecordImpl if record.getCredentialId == credentialId =>
-            record.setCounter(signCount)
-            record
-          case record => record
-        }.asJava
-        credentialStore.put(username, updatedCredentials)
-      case None =>
-    }
   }
 
 }

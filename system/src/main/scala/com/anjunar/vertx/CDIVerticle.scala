@@ -53,6 +53,6 @@ class CDIVerticle(beanManager: BeanManager, instance: Instance[AnyRef], engine: 
 
     vertx.createHttpServer()
       .requestHandler(router)
-      .listen(8080)
+      .listen(80)
   }
 }
