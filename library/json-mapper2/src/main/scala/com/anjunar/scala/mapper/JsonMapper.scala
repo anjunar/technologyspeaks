@@ -27,8 +27,8 @@ class JsonMapper {
     converter.toJava(jsonNode, aType, context).asInstanceOf[AnyRef]
   }
 
-  def toJsonObjectForJava(value: String) : JsonNode = {
+  def toJsonObjectForJava(value: String) : JsonObject = {
     val tokens = Tokenizer.tokenize(value)
-    Parser.parse(tokens.listIterator())
+    Parser.parse(tokens.listIterator()).asInstanceOf[JsonObject]
   }
 }

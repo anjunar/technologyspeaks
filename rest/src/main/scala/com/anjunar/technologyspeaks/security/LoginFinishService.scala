@@ -10,6 +10,7 @@ import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.User
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import org.hibernate.reactive.stage.Stage
@@ -64,12 +65,13 @@ class LoginFinishService extends JsonFSMService[JsonObject] with WebAuthnService
                       .thenCompose(entity => {
                         store.loadUser(credentialId)
                           .thenApply(user => {
-                            ctx.put("user", user)
+                            val handler = ctx.get[SessionHandler]("sessionHandler")
 
+                            handler.setUser(ctx, user)
+                            
                             new JsonObject()
                               .put("status", "success")
-                              .put("credentialId", credentialId)
-                              .put("username", username)
+                              .put("user", user.principal())
                           })
                       })
                   }

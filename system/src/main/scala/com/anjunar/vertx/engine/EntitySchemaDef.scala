@@ -1,8 +1,8 @@
-package com.anjunar.scala.schema.engine
+package com.anjunar.vertx.engine
 
 import com.anjunar.scala.introspector.DescriptionIntrospector
 import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
-import com.anjunar.scala.schema.engine.SchemaView.Full
+import SchemaView.Full
 import com.anjunar.scala.schema.model
 
 import java.util

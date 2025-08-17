@@ -3,24 +3,30 @@ package com.anjunar.vertx
 import com.anjunar.scala.mapper.loader.JsonEntityLoader
 import com.anjunar.scala.mapper.{JsonContext, JsonMapper}
 import com.anjunar.scala.schema.builder.EntitySchemaBuilder
-import com.anjunar.scala.schema.{JsonDescriptorsContext, JsonDescriptorsGenerator}
-import com.anjunar.scala.schema.engine.{EntitySchemaDef, RequestContext, User}
 import com.anjunar.scala.schema.model.{Link, ObjectDescriptor}
+import com.anjunar.scala.schema.{JsonDescriptorsContext, JsonDescriptorsGenerator}
 import com.anjunar.scala.universe.TypeResolver
+import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext}
 import com.anjunar.vertx.fsm.FSMEngine
 import com.anjunar.vertx.fsm.services.{DefaultFSMService, FSMService, JsonFSMService, TableFSMService}
 import com.anjunar.vertx.fsm.states.*
+import com.google.common.collect.Lists
 import com.typesafe.scalalogging.Logger
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.User
 import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Instance
 import jakarta.inject.Inject
 import jakarta.validation.Validator
+import org.hibernate.reactive.stage.Stage
 
 import java.lang.reflect.Type
 import java.util.UUID
 import scala.compiletime.uninitialized
+import java.util
+import scala.collection.JavaConverters.asScalaBufferConverter
 
 @ApplicationScoped
 class VertxAPIEngine {
@@ -36,7 +42,10 @@ class VertxAPIEngine {
   @Inject
   var validator: Validator = uninitialized
 
-  def start(engine: FSMEngine, router: Router): Unit = {
+  @Inject
+  var sessionFactory: Stage.SessionFactory = uninitialized
+
+  def start(engine: FSMEngine, router: Router, sessionHandler: SessionHandler): Unit = {
 
     try {
       engine.fsm.transitions.foreach((state, transitions) => {
@@ -48,57 +57,68 @@ class VertxAPIEngine {
           None
         }
 
-        val service = instance.select(state.service).get().asInstanceOf[FSMService]
-
-        val user = new User {
-          val id = UUID.randomUUID()
-        }
-
-        val roles = Set("Administrator")
-
-
         router.route("/service" + state.url).handler(event => {
 
+          event.put("sessionHandler", sessionHandler)
+
+          val user = if event.user() == null then User.fromName("Guest") else event.user()
+          val list = user.principal().getJsonArray("roles")
+          val roles = if list == null then Set("Guest") else list.getList.asInstanceOf[util.List[String]].asScala.toSet
+
           state match {
+            case formState: FormStateDef =>
+              event.request().method().name() match {
+                case "GET" =>
+                  val id = UUID.fromString(event.pathParam("id"))
+                  sessionFactory
+                    .withTransaction(session => {
+                      session.find(state.entity, id)
+                        .thenApply(entity => {
+                          event.response()
+                            .putHeader("Content-Type", state.contentType)
+                            .end(serialize(engine, state, entitySchemaDef, entity, user, roles))
+                        })
+                    })
+                case "PUT" =>
+                  val entity = deserialize(state, entitySchemaDef, event.body().asString(), state.entity, user, roles)
+                  event.end()
+              }
             case jsonState: JsonStateDef =>
-              service match {
-                case service: JsonFSMService[AnyRef] =>
-                  service.run(event, deserialize(state, entitySchemaDef, event.body().asString(), state.entity, user, roles))
-                    .onComplete(
-                      success => {
-                        event.response()
-                          .putHeader("Content-Type", state.contentType)
-                          .end(serialize(engine, state, entitySchemaDef, success, user, roles))
-                      },
-                      failure => {
-                        event.fail(failure.getCause)
-                      }
-                    )
-              }
+              val service = instance.select(jsonState.service).get()
+              service.run(event, deserialize(state, entitySchemaDef, event.body().asString(), jsonState.entity, user, roles))
+                .onComplete(
+                  success => {
+                    event.response()
+                      .putHeader("Content-Type", state.contentType)
+                      .end(serialize(engine, state, entitySchemaDef, success, user, roles))
+                  },
+                  failure => {
+                    event.fail(failure.getCause)
+                  }
+                )
             case defaultState: DefaultStateDef =>
-              service match {
-                case service: DefaultFSMService[AnyRef] =>
-                  service.run(result => event.response()
+              val service = instance.select(defaultState.service).get()
+
+              service.run(event)
+                .andThen(application => {
+                  event.response()
                     .putHeader("Content-Type", state.contentType)
-                    .end(serialize(engine, state, entitySchemaDef, result, user, roles))
-                  )
-              }
+                    .end(serialize(engine, state, entitySchemaDef, application.result(), user, roles))
+                })
             case tableSearch: TableSearchStateDef =>
-              service match {
-                case service: TableFSMService[AnyRef, AnyRef] =>
-                  service.search(result => event.response()
-                    .putHeader("Content-Type", state.contentType)
-                    .end(serialize(engine, state, entitySchemaDef, result, user, roles))
-                  )
-              }
+              val service = instance.select(tableSearch.service).get()
+
+              service.search(result => event.response()
+                .putHeader("Content-Type", state.contentType)
+                .end(serialize(engine, state, entitySchemaDef, result, user, roles))
+              )
             case tableSearch: TableListStateDef =>
-              service match {
-                case service: TableFSMService[AnyRef, AnyRef] =>
-                  service.list(result => event.response()
-                    .putHeader("Content-Type", state.contentType)
-                    .end(serialize(engine, state, entitySchemaDef, result, user, roles))
-                  )
-              }
+              val service = instance.select(tableSearch.service).get()
+
+              service.list(result => event.response()
+                .putHeader("Content-Type", state.contentType)
+                .end(serialize(engine, state, entitySchemaDef, result, user, roles))
+              )
           }
 
         })
@@ -111,13 +131,13 @@ class VertxAPIEngine {
 
   }
 
-  private def serialize(engine: FSMEngine, state: StateDef[?], entitySchemaDef: Option[EntitySchemaDef[AnyRef]], result: AnyRef, user: User, roles: Set[String]) = {
+  private def serialize[E](engine: FSMEngine, state: StateDef[?], entitySchemaDef: Option[EntitySchemaDef[E]], result: Any, user: User, roles: Set[String]) = {
     if (entitySchemaDef.isDefined) {
-      val schemaBuilder = entitySchemaDef.get.build(result, RequestContext(user, roles), state.view)
+      val schemaBuilder = entitySchemaDef.get.build(result.asInstanceOf[E], RequestContext(user, roles), state.view)
 
       val transitions = engine.fsm.transitions(state)
 
-      schemaBuilder.forInstance(result, result.getClass.asInstanceOf[Class[AnyRef]], (builder : EntitySchemaBuilder[AnyRef]) => {
+      schemaBuilder.forInstance(result, result.getClass.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
         builder.withLinks((entity, context) => {
           transitions.foreach(state => {
             context.addLink(state.name, Link(state.url, state.method, state.name, state.name))
@@ -131,7 +151,7 @@ class VertxAPIEngine {
 
       val resolvedClass = TypeResolver.resolve(state.entity)
 
-      val jsonObject = jsonMapper.toJson(result, resolvedClass, context)
+      val jsonObject = jsonMapper.toJson(result.asInstanceOf[AnyRef], resolvedClass, context)
 
       val objectDescriptor = JsonDescriptorsGenerator.generateObject(resolvedClass, schemaBuilder, JsonDescriptorsContext(null))
 
@@ -144,19 +164,21 @@ class VertxAPIEngine {
     }
   }
 
-  private def deserialize(state: StateDef[?], entitySchemaDef: Option[EntitySchemaDef[AnyRef]], result: String, aType: Type, user: User, roles: Set[String]) = {
+  private def deserialize[E](state: StateDef[?], entitySchemaDef: Option[EntitySchemaDef[AnyRef]], result: String, aType: Type, user: User, roles: Set[String]) : E = {
     if (entitySchemaDef.isDefined) {
-      val schemaBuilder = entitySchemaDef.get.build(result, RequestContext(user, roles), state.view)
-
       val jsonMapper = JsonMapper()
-
-      val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, entityLoader)
 
       val jsonObject = jsonMapper.toJsonObjectForJava(result)
 
-      jsonMapper.toJava(jsonObject, TypeResolver.resolve(aType), context)
+      val entity = entityLoader.load(jsonObject, TypeResolver.resolve(aType))
+
+      val schemaBuilder = entitySchemaDef.get.build(entity, RequestContext(user, roles), state.view)
+
+      val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, entityLoader)
+
+      jsonMapper.toJava(jsonObject, TypeResolver.resolve(aType), context).asInstanceOf[E]
     } else {
-      new JsonObject(result)
+      new JsonObject(result).asInstanceOf[E]
     }
   }
 

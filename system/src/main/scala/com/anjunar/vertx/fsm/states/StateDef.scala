@@ -1,6 +1,6 @@
 package com.anjunar.vertx.fsm.states
 
-import com.anjunar.scala.schema.engine.SchemaView
+import com.anjunar.vertx.engine.SchemaView
 import com.anjunar.vertx.fsm.services.FSMService
 
 trait StateDef[S <: FSMService] {

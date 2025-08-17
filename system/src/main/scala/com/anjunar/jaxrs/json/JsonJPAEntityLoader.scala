@@ -16,13 +16,11 @@ import scala.compiletime.uninitialized
 @ApplicationScoped
 class JsonJPAEntityLoader extends JsonEntityLoader {
 
-  override def load(jsonObject: JsonObject, aType: ResolvedClass, annotations : Array[Annotation]): AnyRef = {
-
-    val doNotLoad = annotations.find(annotation => annotation.annotationType() == classOf[DoNotLoad])
+  override def load(jsonObject: JsonObject, aType: ResolvedClass): AnyRef = {
 
     val option = jsonObject.value.get("id")
 
-    var entity: AnyRef = if (option.isDefined && doNotLoad.isEmpty) {
+    var entity: AnyRef = if (option.isDefined) {
       val entityClass = aType.raw.asInstanceOf[Class[AnyRef]]
       val uuid = UUID.fromString(option.get.value.toString)
 //      factory.createEntityManager().find(entityClass, uuid)

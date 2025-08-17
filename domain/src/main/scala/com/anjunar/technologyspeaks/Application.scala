@@ -1,9 +1,9 @@
 package com.anjunar.technologyspeaks
 
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.scala.schema.engine.EntitySchemaDef
-import com.anjunar.scala.schema.engine.SchemaView.Compact
+import com.anjunar.vertx.engine.SchemaView.Compact
 import com.anjunar.technologyspeaks.control.User
+import com.anjunar.vertx.engine.EntitySchemaDef
 
 import scala.compiletime.uninitialized
 

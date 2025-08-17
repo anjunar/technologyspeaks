@@ -35,6 +35,7 @@ class CDIVerticle(beanManager: BeanManager, instance: Instance[AnyRef], engine: 
     val sessionHandler = SessionHandler
       .create(LocalSessionStore.create(vertx))
       .setSessionCookieName("JSESSIONID")
+
     router.route().handler(sessionHandler);
 
     val beans = new util.ArrayList[Bean[?]](beanManager.getBeans(classOf[AnyRef]))
@@ -49,7 +50,7 @@ class CDIVerticle(beanManager: BeanManager, instance: Instance[AnyRef], engine: 
     })
 
     val aPIEngine = instance.select(classOf[VertxAPIEngine]).get()
-    aPIEngine.start(engine, router)
+    aPIEngine.start(engine, router, sessionHandler)
 
     vertx.createHttpServer()
       .requestHandler(router)

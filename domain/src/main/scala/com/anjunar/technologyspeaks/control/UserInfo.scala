@@ -4,7 +4,7 @@ import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.technologyspeaks.media.Media
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.jpa.{PostgresIndex, PostgresIndices, RepositoryContext}
-import com.anjunar.scala.schema.engine.{EntitySchemaDef, RequestContext, SchemaView, VisibilityRule}
+import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext, SchemaView, VisibilityRule}
 import jakarta.persistence.*
 import jakarta.validation.constraints.{NotBlank, NotNull, Past, Size}
 import jakarta.ws.rs.FormParam
@@ -57,7 +57,7 @@ object UserInfo extends RepositoryContext[UserInfo](classOf[UserInfo]) {
     override def isVisible(entity: UserInfo, property: String, ctx: RequestContext): Boolean = true
 
     override def isWriteable(entity: UserInfo, property: String, ctx: RequestContext): Boolean = {
-      ctx.currentUser.id == entity.user.id || ctx.roles.contains("Administrator")
+      ctx.currentUser.get("id") == entity.user.id.toString || ctx.roles.contains("Administrator")
     }
   }
 

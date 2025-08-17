@@ -7,6 +7,6 @@ import java.lang.annotation.Annotation
 
 trait JsonEntityLoader {
 
-  def load(jsonObject: JsonObject, aType: ResolvedClass, annotations: Array[Annotation]): AnyRef
+  def load(jsonObject: JsonObject, aType: ResolvedClass): AnyRef
 
 }

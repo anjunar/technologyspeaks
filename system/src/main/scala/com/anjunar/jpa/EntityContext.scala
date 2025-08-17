@@ -3,25 +3,30 @@ package com.anjunar.jpa
 import com.anjunar.scala.mapper.IdProvider
 import com.anjunar.scala.mapper.exceptions.{ValidationException, ValidationViolation}
 import com.anjunar.scala.universe.TypeResolver
-import io.smallrye.mutiny.Uni
 import jakarta.enterprise.inject.spi.CDI
-import jakarta.persistence.EntityManager
+import jakarta.inject.Inject
+import jakarta.persistence.Transient
 import jakarta.validation.Validator
-import org.hibernate.reactive.mutiny.Mutiny
 import org.hibernate.reactive.stage.Stage
 
 import java.util
 import java.util.concurrent.CompletionStage
+import scala.compiletime.uninitialized
 
-trait EntityContext[E <: EntityContext[E]] extends IdProvider { self: E =>
+trait EntityContext[E <: EntityContext[E]] extends IdProvider {
+  self: E =>
 
-  def persist() : CompletionStage[Void] = {
+  @Inject
+  @Transient
+  var sessionFactory: Stage.SessionFactory = uninitialized
+
+  def persist(): CompletionStage[Void] = {
     sessionFactory.withTransaction(session => {
       session.persist(self)
     })
   }
-  
-  def merge() : CompletionStage[E] = {
+
+  def merge(): CompletionStage[E] = {
     sessionFactory.withTransaction(session => {
       session.merge(self)
     })
@@ -61,10 +66,5 @@ trait EntityContext[E <: EntityContext[E]] extends IdProvider { self: E =>
       throw new ValidationException(validationViolation)
     }
   }
-
-  def sessionFactory: Stage.SessionFactory = {
-    CDI.current().select(classOf[Stage.SessionFactory]).get()
-  }
-
 
 }

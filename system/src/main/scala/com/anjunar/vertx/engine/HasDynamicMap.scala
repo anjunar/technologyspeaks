@@ -1,4 +1,4 @@
-package com.anjunar.scala.schema.engine
+package com.anjunar.vertx.engine
 
 trait HasDynamicMap {
   def dynamicMap: Map[String, Map[String, Any]]

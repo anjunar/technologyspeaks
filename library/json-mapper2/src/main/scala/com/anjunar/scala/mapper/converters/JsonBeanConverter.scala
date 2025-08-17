@@ -189,7 +189,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
           jsonSubTypes.value().find(subType => subType.value().getSimpleName == jsonObject.value(if jsonTypeInfo == null then "$type" else jsonTypeInfo.property()).value).get.value()
         )
 
-      val entity = context.loader.load(jsonObject, beanModel.underlying, Array())
+      val entity = context.loader.load(jsonObject, beanModel.underlying)
 
       val schema = context.schema
 

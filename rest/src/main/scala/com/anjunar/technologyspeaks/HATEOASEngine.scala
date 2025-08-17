@@ -1,10 +1,9 @@
 package com.anjunar.technologyspeaks
 
-import com.anjunar.vertx.fsm.*
 import com.anjunar.technologyspeaks.document.{Document, DocumentSearch}
 import com.anjunar.technologyspeaks.security.{LoginFinishService, LoginOptionsService, RegisterFinishService, RegisterOptionsService}
+import com.anjunar.vertx.fsm.states.*
 import com.anjunar.vertx.fsm.{FSMBuilder, FSMEngine}
-import com.anjunar.vertx.fsm.states.{DefaultStateDef, JsonStateDef, TableListStateDef, TableSearchStateDef}
 import io.vertx.core.json.JsonObject
 import jakarta.enterprise.context.ApplicationScoped
 
@@ -68,7 +67,14 @@ class HATEOASEngine extends FSMEngine {
               url = "/documents",
               entity = classOf[Document],
               service = classOf[DocumentsService]
-            ), documents => Seq())))
+            ), documents => Seq(
+              fsm.transition(
+                FormStateDef(
+                  name = "document",
+                  url = "/documents/document/:id",
+                  entity = classOf[Document]
+                ), document => Seq())
+            ))))
 
       Seq(loginOptions, registerOptions, documentSearch)
     }

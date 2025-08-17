@@ -2,8 +2,8 @@ package com.anjunar.technologyspeaks.control
 
 import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.scala.schema.engine.EntitySchemaDef
 import com.anjunar.technologyspeaks.shared.AbstractEntity
+import com.anjunar.vertx.engine.EntitySchemaDef
 import jakarta.persistence.{Basic, CascadeType, Embedded, Entity, OneToOne}
 import jakarta.validation.constraints.{NotBlank, Pattern, Size}
 import jakarta.ws.rs.FormParam

@@ -1,4 +1,4 @@
-package com.anjunar.scala.schema.engine
+package com.anjunar.vertx.engine
 
 import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
 

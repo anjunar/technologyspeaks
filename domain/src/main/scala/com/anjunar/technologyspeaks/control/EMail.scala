@@ -2,8 +2,8 @@ package com.anjunar.technologyspeaks.control
 
 import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.scala.schema.engine.{EntitySchemaDef, SchemaView}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
+import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaView}
 import jakarta.persistence.*
 import jakarta.validation.constraints.{Email, NotBlank}
 

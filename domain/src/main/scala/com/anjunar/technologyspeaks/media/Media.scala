@@ -2,8 +2,8 @@ package com.anjunar.technologyspeaks.media
 
 import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.scala.schema.engine.EntitySchemaDef
 import com.anjunar.technologyspeaks.control.User
+import com.anjunar.vertx.engine.EntitySchemaDef
 import jakarta.persistence.{CascadeType, Entity, OneToOne, Table}
 
 import java.util.UUID

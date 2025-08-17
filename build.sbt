@@ -7,6 +7,8 @@ ThisBuild / scalaVersion := "3.7.2"
 ThisBuild / javacOptions ++= Seq("--release", "24")
 ThisBuild / scalacOptions ++= Seq("-release", "24")
 
+javaOptions += "--add-opens=java.base/sun.misc=ALL-UNNAMED"
+
 lazy val scalaUniverse2 = (project in file("library/scala-universe2"))
   .settings(
     libraryDependencies ++= Seq(

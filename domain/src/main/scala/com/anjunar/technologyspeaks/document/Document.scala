@@ -4,12 +4,12 @@ import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.scala.mapper.file.{File, FileContext}
-import com.anjunar.scala.schema.engine.EntitySchemaDef
 import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.control.User
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.technologyspeaks.shared.editor.{ASTDiffUtil, Change, Editor, EditorFile}
 import com.anjunar.technologyspeaks.shared.hashtag.HashTag
+import com.anjunar.vertx.engine.EntitySchemaDef
 import com.github.gumtreediff.actions.{ChawatheScriptGenerator, EditScriptGenerator, InsertDeleteChawatheScriptGenerator}
 import com.github.gumtreediff.matchers.Matchers
 import jakarta.persistence.*

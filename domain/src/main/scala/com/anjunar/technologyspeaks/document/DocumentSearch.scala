@@ -1,7 +1,7 @@
 package com.anjunar.technologyspeaks.document
 
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.scala.schema.engine.EntitySchemaDef
+import com.anjunar.vertx.engine.EntitySchemaDef
 
 import scala.compiletime.uninitialized
 

@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks
 
+import com.anjunar.jpa.PostgresIndexIntegrator
 import com.anjunar.nodejs.NodeJSEnvironment
 import com.anjunar.scala.universe.{ClassPathResolver, ResolvedClass}
 import com.anjunar.vertx.CDIVerticle
@@ -11,16 +12,24 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.event.Observes
 import jakarta.enterprise.inject.spi.BeanManager
 import jakarta.enterprise.inject.{Instance, Produces}
+import jakarta.inject.Inject
 import jakarta.persistence.{Entity, EntityManagerFactory, Persistence}
 import jakarta.validation.{Validation, Validator}
+import org.hibernate.boot.registry.{BootstrapServiceRegistryBuilder, StandardServiceRegistryBuilder}
 import org.hibernate.reactive.mutiny.Mutiny
 import org.hibernate.reactive.provider.ReactiveServiceRegistryBuilder
 import org.hibernate.reactive.stage.Stage
+import org.hibernate.reactive.vertx.VertxInstance
 import org.jboss.weld.environment.se.Weld
 import org.jboss.weld.environment.se.events.ContainerInitialized
 
+import scala.compiletime.uninitialized
+
 @ApplicationScoped
 class Main {
+
+  @Inject
+  var beanManager : BeanManager = uninitialized
 
   @Produces
   @ApplicationScoped
@@ -31,21 +40,36 @@ class Main {
   @Produces
   @ApplicationScoped
   lazy val sessionFactory: Stage.SessionFactory = {
+    val bootstrapServiceRegistry = new BootstrapServiceRegistryBuilder()
+      .applyIntegrator(new PostgresIndexIntegrator())
+      .build()
+
+    val standardServiceRegistryBuilder = new StandardServiceRegistryBuilder(bootstrapServiceRegistry)
+
+    val properties = new java.util.Properties()
+    properties.setProperty("jakarta.persistence.jdbc.url", "postgresql://localhost:5432/technology_speaks")
+    properties.setProperty("jakarta.persistence.jdbc.user", "postgres")
+    properties.setProperty("jakarta.persistence.jdbc.password", "postgres")
+    properties.setProperty("hibernate.hbm2ddl.auto", "create")
+    properties.put("jakarta.persistence.bean.manager", beanManager)
+    //    properties.setProperty("hibernate.show_sql", "true")
+    //    properties.setProperty("hibernate.format_sql", "true")
+
+
+    standardServiceRegistryBuilder.applySettings(properties)
+
     val configuration = new org.hibernate.cfg.Configuration()
+    configuration.addProperties(properties)
 
-    configuration.setProperty("jakarta.persistence.jdbc.url", "postgresql://localhost:5432/technology_speaks")
-    configuration.setProperty("jakarta.persistence.jdbc.user", "postgres")
-    configuration.setProperty("jakarta.persistence.jdbc.password", "postgres")
-    configuration.setProperty("hibernate.hbm2ddl.auto", "update")
-    configuration.setProperty("hibernate.show_sql", "true")
-    configuration.setProperty("hibernate.format_sql", "true")
-
-    val serviceRegistry = new ReactiveServiceRegistryBuilder()
+    val serviceRegistry = new ReactiveServiceRegistryBuilder(bootstrapServiceRegistry)
       .applySettings(configuration.getProperties)
-      .build();
+      .addService(classOf[VertxInstance], new VertxInstance {
+        override def getVertx: Vertx = vertx
+      })
+      .applySetting("jakarta.persistence.bean.manager", beanManager)
+      .build()
 
     val classes = ClassPathResolver.findAnnotation(classOf[Entity])
-
     classes.foreach(annotation => configuration.addAnnotatedClass(annotation.target.asInstanceOf[ResolvedClass].raw))
 
     configuration.buildSessionFactory(serviceRegistry).unwrap(classOf[Stage.SessionFactory])

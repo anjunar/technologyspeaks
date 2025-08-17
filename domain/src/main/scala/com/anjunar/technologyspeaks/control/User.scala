@@ -4,8 +4,8 @@ import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.jpa.{EntityContext, PostgresIndex, PostgresIndices, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.security.SecurityUser
-import com.anjunar.scala.schema.engine.{EntitySchemaDef, Link, RequestContext, SchemaView, VisibilityRule}
 import com.anjunar.technologyspeaks.shared.property.EntityView
+import com.anjunar.vertx.engine.{EntitySchemaDef, Link, RequestContext, SchemaView, VisibilityRule}
 import io.smallrye.mutiny.Uni
 import jakarta.persistence.*
 import jakarta.validation.constraints.*
@@ -53,7 +53,7 @@ object User extends RepositoryContext[User](classOf[User]) {
   object NicknameRule extends VisibilityRule[User] {
     override def isVisible(entity: User, property: String, ctx: RequestContext): Boolean = true
     override def isWriteable(entity: User, property: String, ctx: RequestContext): Boolean = {
-      ctx.currentUser.id == entity.id || ctx.roles.contains("Administrator")
+      ctx.currentUser.get("id") == entity.id.toString || ctx.roles.contains("Administrator")
     }
   }
 
@@ -61,7 +61,7 @@ object User extends RepositoryContext[User](classOf[User]) {
     override def isVisible(entity: User, property: String, ctx: RequestContext): Boolean = true
 
     override def isWriteable(entity: User, property: String, ctx: RequestContext): Boolean = {
-      ctx.currentUser.id == entity.id || ctx.roles.contains("Administrator")
+      ctx.currentUser.get("id") == entity.id.toString || ctx.roles.contains("Administrator")
     }
   }
 
