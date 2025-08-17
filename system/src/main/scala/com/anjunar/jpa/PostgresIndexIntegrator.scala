@@ -72,18 +72,30 @@ class PostgresIndexIntegrator extends Integrator {
               case "hnsw" => "vector_l2_ops"
             }
 
-            val sql = if (index.where().isEmpty) {
-              s"CREATE INDEX ${index.name} ON $tableName USING ${index.using} (${index.columnList} $column)"
-            } else {
-              s"CREATE INDEX ${index.name} ON $tableName USING ${index.using} (${index.columnList} $column) WHERE ${index.where}"
-            }
+            val checkSql = s"SELECT 1 FROM pg_indexes WHERE tablename = '${tableName.toLowerCase()}' AND indexname = '${index.name.toLowerCase()}';"
 
             val future: CompletableFuture[Void] =
-              connection.execute(sql)
-                .thenAccept(_ => log.info(s"Index created: $sql"))
-                .exceptionally { t =>
-                  log.error(t.getMessage, t)
-                  null
+              connection
+                .select(checkSql)
+                .thenCompose { rows =>
+                  if (rows.size() == 0) {
+                    val sql = if (index.where().isEmpty) {
+                      s"CREATE INDEX ${index.name} ON $tableName USING ${index.using} (${index.columnList} $column)"
+                    } else {
+                      s"CREATE INDEX ${index.name} ON $tableName USING ${index.using} (${index.columnList} $column) WHERE ${index.where}"
+                    }
+
+                    connection.execute(sql)
+                      .thenAccept(_ => log.info(s"Index created: $sql"))
+                      .exceptionally { t =>
+                        log.error(t.getMessage, t)
+                        null
+                      }
+                      .toCompletableFuture
+                  } else {
+                    log.info(s"Index already exists: ${index.name}")
+                    CompletableFuture.completedFuture(null.asInstanceOf[Void])
+                  }
                 }
                 .toCompletableFuture
 
@@ -92,7 +104,7 @@ class PostgresIndexIntegrator extends Integrator {
             metadata.getDatabase.addAuxiliaryDatabaseObject(
               new SimpleAuxiliaryDatabaseObject(
                 metadata.getDatabase.getDefaultNamespace,
-                sql,
+                s"CREATE INDEX ${index.name} ON $tableName USING ${index.using} (${index.columnList} $column)",
                 null,
                 dialects,
                 false
@@ -107,9 +119,7 @@ class PostgresIndexIntegrator extends Integrator {
 
     val futureArray: Array[CompletableFuture[Void]] = futures.toArray
 
-    java.util.concurrent.CompletableFuture
-      .allOf(futureArray*)
-      .thenApply(_ => null.asInstanceOf[Void])
+    CompletableFuture.allOf(futureArray*).thenApply(_ => null.asInstanceOf[Void])
   }
 
 }
