@@ -1,28 +1,14 @@
 package com.anjunar.technologyspeaks.control
 
-import com.anjunar.hibernate.reactive.UUIDConverter
 import com.anjunar.jpa.{EntityContext, RepositoryContext}
-import com.anjunar.scala.mapper.annotations.{Converter, PropertyDescriptor}
-import com.anjunar.technologyspeaks.shared.editor.RootType
-import com.webauthn4j.credential.CredentialRecord
-import com.webauthn4j.data.AuthenticatorTransport
-import com.webauthn4j.data.attestation.AttestationObject
-import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData
-import com.webauthn4j.data.client.CollectedClientData
-import io.smallrye.mutiny.Uni
-import jakarta.enterprise.inject.spi.Bean
+import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import jakarta.persistence
-import jakarta.persistence.{Basic, Column, Convert, Entity, Lob, NoResultException}
-import org.hibernate.Session
-import org.hibernate.annotations.Type
+import jakarta.persistence.{Basic, Entity}
 import org.hibernate.reactive.stage.Stage
 
-import java.security.SecureRandom
-import java.util
-import java.util.{Base64, UUID}
-import java.lang
+import java.{lang, util}
+import java.util.UUID
 import java.util.concurrent.CompletionStage
-import scala.beans.{BeanProperty, BooleanBeanProperty}
 import scala.compiletime.uninitialized
 
 @Entity
@@ -36,28 +22,28 @@ class CredentialWebAuthn extends Credential with EntityContext[CredentialWebAuth
   var credentialId: String = uninitialized
 
   @Basic
-  var publicKey : Array[Byte] = uninitialized
+  var publicKey: Array[Byte] = uninitialized
 
   @Basic
-  var publicKeyAlgorithm : Long = uninitialized
+  var publicKeyAlgorithm: Long = uninitialized
 
   @Basic
   var counter: Long = uninitialized
 
   @Basic
-  var aaguid : UUID = uninitialized
+  var aaguid: UUID = uninitialized
 
 }
 
 object CredentialWebAuthn extends RepositoryContext[CredentialWebAuthn](classOf[CredentialWebAuthn]) {
 
-  def loadByCredentialId(credentialId : String)(implicit session : Stage.Session) : CompletionStage[CredentialWebAuthn] = {
+  def loadByCredentialId(credentialId: String)(implicit session: Stage.Session): CompletionStage[CredentialWebAuthn] = {
     session.createQuery("from CredentialWebAuthn c join fetch c.email join fetch c.roles where c.credentialId = :credentialId", classOf[CredentialWebAuthn])
       .setParameter("credentialId", credentialId)
       .getSingleResultOrNull
   }
 
-  def findByEmail(email: String)(implicit session : Stage.Session): CompletionStage[util.List[CredentialWebAuthn]] = {
+  def findByEmail(email: String)(implicit session: Stage.Session): CompletionStage[util.List[CredentialWebAuthn]] = {
     session.createQuery("select c from CredentialWebAuthn c join c.email e where e.value = :email and type(c) = CredentialWebAuthn", classOf[CredentialWebAuthn])
       .setParameter("email", email)
       .getResultList

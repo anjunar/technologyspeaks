@@ -66,7 +66,8 @@ class RegisterFinishResource extends WebAuthnService {
                   registrationData.getClientExtensions,
                   registrationData.getTransports
                 )
-                
+
+
                 store.saveRecord(username, webAuthnCredentialRecord)
                   .thenApply(_ => {
                     new JsonObject()

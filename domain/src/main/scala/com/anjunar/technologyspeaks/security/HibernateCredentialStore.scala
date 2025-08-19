@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.security
 
+import com.anjunar.futures.Futures
 import com.anjunar.technologyspeaks.control.{CredentialWebAuthn, EMail, Role}
 import com.anjunar.vertx.webauthn.{CredentialStore, WebAuthnCredentialRecord}
 import com.webauthn4j.credential.CredentialRecord
@@ -45,38 +46,40 @@ class HibernateCredentialStore extends CredentialStore {
 
   override def saveRecord(email: String, record: WebAuthnCredentialRecord): CompletionStage[Void] = {
     sessionFactory.withTransaction(implicit session => {
-      Role.query("name" -> "Guest")
-        .thenCompose(role => {
-          EMail.query("value" -> email)
-            .thenCompose(eMail => {
-              val targetEmailFuture =
-                if (eMail == null) {
-                  val mail = new EMail
-                  mail.value = email
-                  val user = new control.User
-                  user.emails.add(mail)
-                  mail.user = user
-                  user.persist().thenApply(_ => mail)
-                } else {
-                  CompletableFuture.completedFuture(eMail)
-                }
+      val roleAction = () => Role.query("name" -> "Guest")
+      val emailAction = () => EMail.query("value" -> email)
 
-              targetEmailFuture.thenCompose(mail => {
-                val requiredPersistedData = record.getRequiredPersistedData
-                val credential = new CredentialWebAuthn()
-                credential.credentialId = requiredPersistedData.credentialId()
-                credential.publicKey = requiredPersistedData.publicKey()
-                credential.publicKeyAlgorithm = requiredPersistedData.publicKeyAlgorithm()
-                credential.counter = requiredPersistedData.counter()
-                credential.aaguid = requiredPersistedData.aaguid()
-                credential.roles.add(role)
-                credential.email = mail
+      Futures.combineAll(List(roleAction, emailAction))
+        .thenCompose {
+          case List(role : Role, eMail : EMail) =>
+            val targetEmailFuture =
+              if (eMail == null) {
+                val mail = new EMail
+                mail.value = email
+                val user = new control.User
+                user.emails.add(mail)
+                mail.user = user
+                user.persist().thenApply(_ => mail)
+              } else {
+                CompletableFuture.completedFuture(eMail)
+              }
 
-                credential.persist()
-              })
+            targetEmailFuture.thenCompose(mail => {
+              val requiredPersistedData = record.getRequiredPersistedData
+              val credential = new CredentialWebAuthn()
+              credential.credentialId = requiredPersistedData.credentialId()
+              credential.publicKey = requiredPersistedData.publicKey()
+              credential.publicKeyAlgorithm = requiredPersistedData.publicKeyAlgorithm()
+              credential.counter = requiredPersistedData.counter()
+              credential.aaguid = requiredPersistedData.aaguid()
+              credential.roles.add(role)
+              credential.email = mail
+
+              credential.persist()
             })
-        })
+        }
     })
+
   }
   
   override def loadByUsername(username: String): CompletionStage[util.List[? <: CredentialRecord]] = {
