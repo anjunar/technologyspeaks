@@ -46,37 +46,46 @@ class HibernateCredentialStore extends CredentialStore {
 
   override def saveRecord(email: String, record: WebAuthnCredentialRecord): CompletionStage[Void] = {
     sessionFactory.withTransaction(implicit session => {
-      val roleAction = () => Role.query("name" -> "Guest")
-      val emailAction = () => EMail.query("value" -> email)
+      val roleAction = sessionFactory.openSession().thenCompose(implicit session => {
+        Role.query("name" -> "Guest")
+          .whenComplete((_, _) => session.close())
+      }).toCompletableFuture
 
-      Futures.combineAll(List(roleAction, emailAction))
-        .thenCompose {
-          case List(role : Role, eMail : EMail) =>
-            val targetEmailFuture =
-              if (eMail == null) {
-                val mail = new EMail
-                mail.value = email
-                val user = new control.User
-                user.emails.add(mail)
-                mail.user = user
-                user.persist().thenApply(_ => mail)
-              } else {
-                CompletableFuture.completedFuture(eMail)
-              }
+      val emailAction = sessionFactory.openSession().thenCompose(implicit session => {
+        EMail.query("value" -> email)
+          .whenComplete((_, _) => session.close())
+      }).toCompletableFuture
 
-            targetEmailFuture.thenCompose(mail => {
-              val requiredPersistedData = record.getRequiredPersistedData
-              val credential = new CredentialWebAuthn()
-              credential.credentialId = requiredPersistedData.credentialId()
-              credential.publicKey = requiredPersistedData.publicKey()
-              credential.publicKeyAlgorithm = requiredPersistedData.publicKeyAlgorithm()
-              credential.counter = requiredPersistedData.counter()
-              credential.aaguid = requiredPersistedData.aaguid()
-              credential.roles.add(role)
-              credential.email = mail
+      CompletableFuture.allOf(roleAction, emailAction)
+        .thenCompose(_ => {
+          roleAction.thenCombine(emailAction, (role, eMail) => (role, eMail))
+        })
+        .thenCompose { case (role, eMail) =>
+          val targetEmailFuture =
+            if (eMail == null) {
+              val mail = new EMail
+              mail.value = email
+              val user = new control.User
+              user.emails.add(mail)
+              mail.user = user
+              user.persist().thenApply(_ => mail)
+            } else {
+              CompletableFuture.completedFuture(eMail)
+            }
 
-              credential.persist()
-            })
+          targetEmailFuture.thenCompose { mail =>
+            val requiredPersistedData = record.getRequiredPersistedData
+            val credential = new CredentialWebAuthn()
+            credential.credentialId = requiredPersistedData.credentialId()
+            credential.publicKey = requiredPersistedData.publicKey()
+            credential.publicKeyAlgorithm = requiredPersistedData.publicKeyAlgorithm()
+            credential.counter = requiredPersistedData.counter()
+            credential.aaguid = requiredPersistedData.aaguid()
+            credential.roles.add(role)
+            credential.email = mail
+
+            credential.persist()
+          }
         }
     })
 
