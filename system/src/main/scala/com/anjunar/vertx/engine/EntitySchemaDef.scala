@@ -1,12 +1,11 @@
 package com.anjunar.vertx.engine
 
 import com.anjunar.scala.introspector.DescriptionIntrospector
-import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
+import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, PropertyBuilder, SchemaBuilder}
 import SchemaView.Full
 import com.anjunar.scala.schema.model
 
 import java.util
-
 import scala.collection.mutable
 
 abstract class EntitySchemaDef[E](val entityName: String) {
@@ -27,6 +26,8 @@ abstract class EntitySchemaDef[E](val entityName: String) {
   def build(entity: E, ctx: RequestContext, view: SchemaView = Full): SchemaBuilder = {
     val builder = new SchemaBuilder()
 
+    if entity == null then return builder
+
     builder
       .forInstance(entity, entity.getClass.asInstanceOf[Class[E]], (builder: EntitySchemaBuilder[E]) => {
         props
@@ -38,9 +39,19 @@ abstract class EntitySchemaDef[E](val entityName: String) {
                 val model = DescriptionIntrospector.createWithType(entity.getClass)
                 val entityProperty = model.findProperty(property.name)
                 val value = entityProperty.get(entity.asInstanceOf[AnyRef])
-                val schemas = typeHandler(value, ctx)
-                val schemaOption = schemas.find(schema => schema.instanceMapping.contains(value))
-                propertyBuilder.schemaBuilder = schemaOption.orNull
+                value match {
+                  case collection: util.Collection[?] =>
+                    val schemas = typeHandler(value, ctx)
+                    collection.forEach(instance => {
+                      propertyBuilder.forInstance(instance, instance.getClass.asInstanceOf[Class[Any]], (builder : EntitySchemaBuilder[Any]) => {
+                        builder.mapping.addAll(schemas.find(schema => schema.instanceMapping.contains(instance)).get.findInstanceMapping(instance).asInstanceOf[Map[String, PropertyBuilder[Any]]])
+                      })
+                    })
+                  case _ =>
+                    val schemas = typeHandler(value, ctx)
+                    val schemaOption = schemas.find(schema => schema.instanceMapping.contains(value))
+                    propertyBuilder.schemaBuilder = schemaOption.orNull
+                }
               }
               propertyBuilder.withWriteable(property.visibility.isWriteable(entity, property.name, ctx))
               propertyBuilder.withLinks(linkContext => {

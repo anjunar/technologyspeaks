@@ -1,7 +1,7 @@
 package com.anjunar.technologyspeaks
 
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.vertx.engine.SchemaView.Compact
+import com.anjunar.vertx.engine.SchemaView.{Compact, Full}
 import com.anjunar.technologyspeaks.control.User
 import com.anjunar.vertx.engine.EntitySchemaDef
 
@@ -18,8 +18,8 @@ object Application {
 
   val schema = new EntitySchemaDef[Application]("Application") {
     val user = column[User]("user")
-      .forType(ctx => User.schema.buildType(classOf[User], ctx, Compact))
-      .forInstance((user, ctx) => Seq(User.schema.build(user, ctx, Compact)))
+      .forType(ctx => User.schema.buildType(classOf[User], ctx, Full))
+      .forInstance((user, ctx) => Seq(User.schema.build(user, ctx, Full)))
   }
   
 }

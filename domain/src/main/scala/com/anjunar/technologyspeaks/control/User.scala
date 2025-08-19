@@ -17,12 +17,20 @@ import java.util
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import java.util.{Objects, UUID}
 import scala.compiletime.uninitialized
-
+import scala.jdk.CollectionConverters.*
 
 @Entity
 @PostgresIndices(Array(
   new PostgresIndex(name = "user_idx_nickName", columnList = "nickName", using = "GIN")
 ))
+@NamedEntityGraph(
+  name = "User.full",
+  attributeNodes = Array(
+    new NamedAttributeNode("emails"),
+    new NamedAttributeNode("info"),
+    new NamedAttributeNode("address")
+  )
+)
 class User extends Identity with OwnerProvider with SecurityUser with EntityContext[User]  {
 
   @Size(min = 3, max = 80)
@@ -70,9 +78,9 @@ object User extends RepositoryContext[User](classOf[User]) {
     val id = column[UUID]("id", views = Set(SchemaView.Full, SchemaView.Compact))
     val nickName = column[String]("nickName", views = Set(SchemaView.Full, SchemaView.Compact))
       .visibleWhen(NicknameRule)
-    val emails = column[EMail]("emails")
+    val emails = column[util.Set[EMail]]("emails")
       .forType(ctx => EMail.schema.buildType(classOf[EMail], ctx))
-      .forInstance((email, ctx) => Seq(EMail.schema.build(email, ctx)))
+      .forInstance((emails, ctx) => emails.asScala.map(elem => EMail.schema.build(elem, ctx)).toSeq)
       .visibleWhen(ManagedRule)
     val info = column[UserInfo]("info")
       .forType(ctx => UserInfo.schema.buildType(classOf[UserInfo], ctx))

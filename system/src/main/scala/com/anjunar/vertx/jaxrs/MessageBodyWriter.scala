@@ -9,6 +9,8 @@ import java.lang.annotation.Annotation
 import java.util.concurrent.CompletableFuture
 
 trait MessageBodyWriter {
+  
+  val contentType : String
 
   def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean
 

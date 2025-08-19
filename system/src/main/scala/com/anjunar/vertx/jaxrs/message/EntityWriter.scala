@@ -27,11 +27,12 @@ import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 
 @ApplicationScoped
-@Produces(Array(MediaType.APPLICATION_JSON))
 class EntityWriter extends MessageBodyWriter {
   
   @Inject
   var validator : Validator = uninitialized
+
+  override val contentType: String = MediaType.APPLICATION_JSON
 
   override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
     javaType.methods.exists(method => method.name == "schema")

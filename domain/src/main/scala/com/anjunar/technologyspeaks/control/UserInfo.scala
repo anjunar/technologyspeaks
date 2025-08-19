@@ -72,7 +72,7 @@ object UserInfo extends RepositoryContext[UserInfo](classOf[UserInfo]) {
       .forType(ctx => Media.schema.buildType(classOf[Media], ctx))
       .forInstance((media, ctx) => Seq(Media.schema.build(media, ctx)))
       .visibleWhen(GlobalRule)
-    val birthDate = column[LocalDate]("birthData")
+    val birthDate = column[LocalDate]("birthDate")
       .visibleWhen(GlobalRule)
   }
 }

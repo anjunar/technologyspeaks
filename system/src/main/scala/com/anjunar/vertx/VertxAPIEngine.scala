@@ -50,10 +50,12 @@ class VertxAPIEngine {
             .exceptionally(exception => {
               log.error(exception.getMessage, exception)
               handler.fail(500, exception.getCause)
-              exception.getMessage
+              (exception.getMessage, "text/plain")
             })
-            .thenApply(result => {
-              handler.end(result)
+            .thenApply((contentType, result) => {
+              handler.response()
+                .putHeader("Content-Type", contentType)
+                .send(result)
             })
         } else {
           handler.fail(403)

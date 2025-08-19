@@ -14,9 +14,10 @@ import java.lang.annotation.Annotation
 import java.util.concurrent.CompletableFuture
 
 @ApplicationScoped
-@Produces(Array(MediaType.APPLICATION_JSON))
 class JsonObjectWriter extends MessageBodyWriter {
-
+  
+  val contentType : String = MediaType.APPLICATION_JSON
+  
   override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
     javaType.raw == classOf[JsonObject]
   }

@@ -66,16 +66,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
 
     val beanModel = DescriptionIntrospector.createWithType(resolvedType)
 
-    var typeMapping = schema.findInstanceMapping(instance.asInstanceOf[AnyRef])
-
-    if (typeMapping.isEmpty) {
-
-      typeMapping = schema.findTypeMapping2(instance.getClass)
-
-      if (typeMapping.isEmpty) {
-        typeMapping = schema.findTypeMapping2(aType.underlying)
-      }
-    }
+    val typeMapping = schema.findInstanceMapping(instance.asInstanceOf[AnyRef])
 
     if (!(aType <:< TypeResolver.resolve(classOf[NodeDescriptor]))) {
       val nodeId = typeMapping.get("id")

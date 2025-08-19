@@ -175,7 +175,12 @@ class PropertyBuilder[C](val name : String, val aClass : Type, isTable : Boolean
     this
   }
 
-  def forInstance[D](instance : util.Collection[D], aClass : Class[D], builder: D => EntitySchemaBuilder[D] => Unit) : PropertyBuilder[C] = {
+  def forInstance[D](instance: D, aClass: Class[D], builder: EntitySchemaBuilder[D] => Unit): PropertyBuilder[C] = {
+    schemaBuilder.forInstance(instance, aClass, builder)
+    this
+  }
+
+  def forInstances[D](instance : util.Collection[D], aClass : Class[D], builder: D => EntitySchemaBuilder[D] => Unit) : PropertyBuilder[C] = {
     schemaBuilder.table = true
     instance.forEach(instance => schemaBuilder.forInstance(instance, aClass, builder(instance)))
     this

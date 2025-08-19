@@ -3,7 +3,7 @@ package com.anjunar.jpa
 import com.typesafe.scalalogging.Logger
 import jakarta.enterprise.inject.spi.CDI
 import jakarta.inject.Inject
-import jakarta.persistence.{Entity, NoResultException}
+import jakarta.persistence.{Entity, EntityGraph, NoResultException}
 import org.hibernate.reactive.stage.Stage
 
 import java.util
@@ -18,6 +18,11 @@ trait RepositoryContext[E](clazz: Class[E]) {
   def find(id: Object)(implicit session : Stage.Session): CompletionStage[E] = {
     session.find(clazz, id)
   }
+
+  def find(graph : EntityGraph[E], id: Object)(implicit session: Stage.Session): CompletionStage[E] = {
+    session.find(graph, id)
+  }
+
 
   def findAll()(implicit session : Stage.Session): CompletionStage[util.List[E]] = {
     val builder = session.getCriteriaBuilder

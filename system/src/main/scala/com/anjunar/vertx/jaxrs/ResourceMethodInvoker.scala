@@ -24,7 +24,7 @@ class ResourceMethodInvoker {
   @Inject
   var bodyWriters: Instance[MessageBodyWriter] = uninitialized
 
-  def invoke(ctx: RoutingContext, sessionHandler: SessionHandler, state: StateDef, transitions: Seq[StateDef], instance: AnyRef): CompletableFuture[String] = {
+  def invoke(ctx: RoutingContext, sessionHandler: SessionHandler, state: StateDef, transitions: Seq[StateDef], instance: AnyRef): CompletableFuture[(String, String)] = {
 
     val futures = state.method.parameters.map(parameter => {
       paramReaders.stream()
@@ -39,14 +39,16 @@ class ResourceMethodInvoker {
     compositeFuture
       .thenCompose(async => {
         val parameters = futures.map(future => future.get())
-        state.method.invoke(instance, parameters *)
+        state.method.invoke(instance, parameters*)
           .asInstanceOf[CompletableFuture[AnyRef]]
           .thenCompose(async => {
-            bodyWriters.stream()
+            val bodyWriter = bodyWriters.stream()
               .filter(writer => writer.canWrite(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions))
               .findFirst()
               .get()
-              .write(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions)
+              
+            bodyWriter.write(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions)
+              .thenApply(body => (bodyWriter.contentType, body))
           })
       })
   }

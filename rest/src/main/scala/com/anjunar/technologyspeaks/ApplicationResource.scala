@@ -37,8 +37,8 @@ class ApplicationResource {
       CompletableFuture.completedFuture(application)
     } else {
       val id = user.principal().getString("id")
-      sessionFactory.withTransaction(implicit session => {
-        User.find(UUID.fromString(id))
+      sessionFactory.withSession(implicit session => {
+        User.find(session.getEntityGraph(classOf[User], "User.full"), UUID.fromString(id))
           .thenApply(user => {
             val application = new Application
             application.user = user
