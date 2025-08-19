@@ -46,13 +46,14 @@ class VertxAPIEngine {
         sessionHandler.setUser(handler, user)
 
         if (state.rolesAllowed.exists(roles.contains)) {
-          resourceMethodInvoker.invoke(handler, state, transitions, instance.select(state.resource).get)
-            .onFailure(exception => {
+          resourceMethodInvoker.invoke(handler, sessionHandler, state, transitions, instance.select(state.resource).get)
+            .exceptionally(exception => {
               log.error(exception.getMessage, exception)
-              handler.fail(500, exception)
+              handler.fail(500, exception.getCause)
+              exception.getMessage
             })
-            .andThen(result => {
-              handler.end(result.result())
+            .thenApply(result => {
+              handler.end(result)
             })
         } else {
           handler.fail(403)

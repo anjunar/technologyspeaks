@@ -7,6 +7,7 @@ import com.anjunar.vertx.fsm.StateDef
 import com.anjunar.vertx.jaxrs.ParamReader
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.ws.rs.PathParam
@@ -15,6 +16,7 @@ import org.hibernate.reactive.stage.Stage
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import scala.compiletime.uninitialized
 
 @ApplicationScoped
@@ -27,14 +29,14 @@ class PathParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[PathParam])
   }
 
-  override def read(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): Future[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = {
     val value = ctx.pathParam(annotations.find(annotation => annotation.annotationType() == classOf[PathParam]).get.asInstanceOf[PathParam].value())
 
     javaType.raw match {
       case clazz : Class[Any] if classOf[IdProvider].isAssignableFrom(clazz) =>
-        Future.fromCompletionStage(sessionFactory.withTransaction(session => {
+        sessionFactory.withTransaction(session => {
           session.find(clazz, UUID.fromString(value))
-        }))
+        }).toCompletableFuture
     }
   }
 }

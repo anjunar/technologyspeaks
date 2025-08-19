@@ -10,6 +10,7 @@ import io.smallrye.mutiny.Uni
 import jakarta.persistence.*
 import jakarta.validation.constraints.*
 import jakarta.ws.rs.FormParam
+import org.hibernate.reactive.stage.Stage
 
 import java.time.LocalDate
 import java.util
@@ -83,12 +84,10 @@ object User extends RepositoryContext[User](classOf[User]) {
       .visibleWhen(ManagedRule)
   }
 
-  def findByEmail(email: String): CompletionStage[User] = {
-    User.withTransaction { session =>
-      session.createQuery("select u from User u join u.emails e where e.value = :value", classOf[User])
-        .setParameter("value", email)
-        .getSingleResult
-    }
+  def findByEmail(email: String)(implicit session : Stage.Session): CompletionStage[User] = {
+    session.createQuery("select u from User u join u.emails e where e.value = :value", classOf[User])
+      .setParameter("value", email)
+      .getSingleResult
   }
 
   @Entity(name = "UserView")
@@ -98,21 +97,19 @@ object User extends RepositoryContext[User](classOf[User]) {
   }
 
   object View extends RepositoryContext[View](classOf[View]) {
-    def findByUser(user: User): CompletionStage[View] = {
-      User.View.withTransaction { session =>
-        session.createQuery("select v from UserView v where v.user = :user", classOf[View])
-          .setParameter("user", user)
-          .getSingleResultOrNull
-          .thenCompose(view => {
-            if (view != null) {
-              CompletableFuture.completedFuture(view)
-            } else {
-              val newView = new View()
-              newView.user = user
-              session.persist(newView).thenApply(_ => newView)
-            }
-          })
-      }
+    def findByUser(user: User)(implicit session : Stage.Session): CompletionStage[View] = {
+      session.createQuery("select v from UserView v where v.user = :user", classOf[View])
+        .setParameter("user", user)
+        .getSingleResultOrNull
+        .thenCompose(view => {
+          if (view != null) {
+            CompletableFuture.completedFuture(view)
+          } else {
+            val newView = new View()
+            newView.user = user
+            session.persist(newView).thenApply(_ => newView)
+          }
+        })
     }
   }
 

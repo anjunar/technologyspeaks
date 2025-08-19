@@ -10,6 +10,7 @@ import com.anjunar.vertx.jaxrs.ParamReader
 import io.vertx.core.Future
 import io.vertx.ext.auth.User
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.ws.rs.core.Context
@@ -17,6 +18,7 @@ import jakarta.ws.rs.{BeanParam, MatrixParam, PathParam, QueryParam}
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
+import java.util.concurrent.CompletableFuture
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 
@@ -31,7 +33,7 @@ class EntityParamReader extends ParamReader {
     javaType.findMethod("schema") != null && ! annotations.exists(annotation => blackList.contains(annotation.annotationType()))
   }
 
-  override def read(ctx: RoutingContext, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef): Future[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = {
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
 
@@ -48,7 +50,7 @@ class EntityParamReader extends ParamReader {
     val context = JsonContext(null, null, false, null, jsonMapper.registry, schemaBuilder, entityLoader)
 
     val value = jsonMapper.toJava(jsonObject, resolvedClass, context)
-    
-    Future.succeededFuture(value)
+
+    CompletableFuture.completedFuture(value)
   }
 }

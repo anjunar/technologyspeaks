@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.security
 
+import com.anjunar.technologyspeaks.control.Role
 import com.anjunar.vertx.webauthn.{CredentialStore, WebAuthnCredentialRecord}
 import com.typesafe.scalalogging.Logger
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
@@ -26,7 +27,7 @@ import scala.compiletime.uninitialized
 class RegisterFinishResource extends WebAuthnService {
 
   val log = Logger[RegisterFinishResource]
-  
+
   @Inject
   var store: CredentialStore = uninitialized
 
@@ -34,13 +35,13 @@ class RegisterFinishResource extends WebAuthnService {
   @Consumes(Array(MediaType.APPLICATION_JSON))
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous"))
-  def run(@Context ctx : RoutingContext, entity: JsonObject): Future[JsonObject] = {
+  def run(@Context ctx : RoutingContext, entity: JsonObject): CompletableFuture[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val publicKeyCredential = body.getJsonObject("publicKeyCredential")
     val credentialId = publicKeyCredential.getString("id")
     val username = body.getString("username")
 
-    Future.fromCompletionStage(webAuthnManager.parseRegistrationResponseJSON(publicKeyCredential.encode())
+    webAuthnManager.parseRegistrationResponseJSON(publicKeyCredential.encode())
       .thenCompose { registrationData =>
         Option(challengeStore.get(username)) match {
           case Some(challenge) =>
@@ -59,7 +60,7 @@ class RegisterFinishResource extends WebAuthnService {
             webAuthnManager.verify(registrationData, registrationParameters)
               .thenCompose { _ =>
                 val webAuthnCredentialRecord = new WebAuthnCredentialRecord(
-                  username, 
+                  username,
                   registrationData.getAttestationObject,
                   registrationData.getCollectedClientData,
                   registrationData.getClientExtensions,
@@ -67,25 +68,18 @@ class RegisterFinishResource extends WebAuthnService {
                 )
                 
                 store.saveRecord(username, webAuthnCredentialRecord)
-                  .handle((credentials, failure) => {
-                    if (failure != null) {
-                      
-                      log.error(failure.getMessage, failure.getCause)
-                      
-                      new JsonObject()
-                        .put("status", "error")
-                        .put("message", failure.getMessage);
-                    } else {
-                      new JsonObject()
-                        .put("status", "success")
-                        .put("credentialId", credentialId);
-                    }
-                  })            
+                  .thenApply(_ => {
+                    new JsonObject()
+                      .put("status", "success")
+                      .put("credentialId", credentialId);
+                  })
               }
+
           case None =>
             CompletableFuture.failedFuture(new IllegalStateException("No challenge found for user"))
         }
-      })
+      }
+      .toCompletableFuture
   }
 
 }

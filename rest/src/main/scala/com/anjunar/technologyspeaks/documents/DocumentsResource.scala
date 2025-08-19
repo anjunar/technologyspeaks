@@ -12,7 +12,7 @@ import jakarta.ws.rs.{BeanParam, GET, Path, Produces}
 import org.hibernate.reactive.mutiny.Mutiny
 import org.hibernate.reactive.stage.Stage
 
-import java.util.concurrent.CompletionStage
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 
 @ApplicationScoped
@@ -25,14 +25,15 @@ class DocumentsResource {
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))  
-  def list(@Context ctx: RoutingContext, @BeanParam search : DocumentSearch): Future[Table[Document]] = {
-    Future.fromCompletionStage(sessionFactory
+  def list(@Context ctx: RoutingContext, @BeanParam search : DocumentSearch): CompletableFuture[Table[Document]] = {
+    sessionFactory
       .withTransaction((session, tx) => {
         session
           .createQuery("from Document", classOf[Document])
           .getResultList
           .thenApply(documents => new Table[Document](documents, documents.size()))
-      }))
+      })
+      .toCompletableFuture
   }
   
 }

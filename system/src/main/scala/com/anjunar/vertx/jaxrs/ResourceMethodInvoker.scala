@@ -4,10 +4,12 @@ import com.anjunar.vertx.fsm.StateDef
 import com.typesafe.scalalogging.Logger
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Instance
 import jakarta.inject.Inject
 
+import java.util.concurrent.CompletableFuture
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 
@@ -22,29 +24,29 @@ class ResourceMethodInvoker {
   @Inject
   var bodyWriters: Instance[MessageBodyWriter] = uninitialized
 
-  def invoke(ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef], instance: AnyRef): Future[String] = {
+  def invoke(ctx: RoutingContext, sessionHandler: SessionHandler, state: StateDef, transitions: Seq[StateDef], instance: AnyRef): CompletableFuture[String] = {
 
     val futures = state.method.parameters.map(parameter => {
       paramReaders.stream()
         .filter(reader => reader.canRead(ctx, parameter.parameterType, parameter.annotations))
         .findFirst()
         .get()
-        .read(ctx, parameter.parameterType, parameter.annotations, state)
+        .read(ctx, sessionHandler, parameter.parameterType, parameter.annotations, state)
     })
 
-    val compositeFuture = Future.all(futures.toList.asJava)
+    val compositeFuture = CompletableFuture.allOf(futures*)
 
     compositeFuture
-      .transform(async => {
-        val parameters = async.result().list().toArray()
+      .thenCompose(async => {
+        val parameters = futures.map(future => future.get())
         state.method.invoke(instance, parameters *)
-          .asInstanceOf[Future[AnyRef]]
-          .transform(async => {
+          .asInstanceOf[CompletableFuture[AnyRef]]
+          .thenCompose(async => {
             bodyWriters.stream()
-              .filter(writer => writer.canWrite(async.result(), state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions))
+              .filter(writer => writer.canWrite(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions))
               .findFirst()
               .get()
-              .write(async.result(), state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions)
+              .write(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions)
           })
       })
   }

@@ -7,6 +7,8 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.{GET, Path, Produces}
 
+import java.util.concurrent.CompletableFuture
+
 @ApplicationScoped
 @Path("documents/document")
 class DocumentCreateResource {
@@ -14,8 +16,8 @@ class DocumentCreateResource {
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("User", "Administrator"))
-  def create() : Future[Document] = {
-    Future.succeededFuture(new Document)
+  def create() : CompletableFuture[Document] = {
+    CompletableFuture.completedFuture(new Document)
   }
 
 }

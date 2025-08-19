@@ -5,14 +5,16 @@ import com.anjunar.scala.universe.members.ResolvedMethod
 import com.anjunar.vertx.fsm.StateDef
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.SessionHandler
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
+import java.util.concurrent.CompletableFuture
 
 trait ParamReader {
   
   def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean
   
-  def read(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): Future[Any]
+  def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any]
 
 }

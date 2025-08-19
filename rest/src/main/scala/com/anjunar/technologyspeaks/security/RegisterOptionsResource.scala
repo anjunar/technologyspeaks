@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.security
 
+import com.anjunar.technologyspeaks.control.Role
 import com.anjunar.vertx.webauthn.CredentialStore
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
 import com.webauthn4j.data.client.challenge.DefaultChallenge
@@ -16,6 +17,7 @@ import jakarta.ws.rs.{Consumes, POST, Path, Produces}
 
 import java.security.SecureRandom
 import java.util
+import java.util.concurrent.CompletableFuture
 import scala.compiletime.uninitialized
 
 @ApplicationScoped
@@ -29,7 +31,7 @@ class RegisterOptionsResource extends WebAuthnService {
   @Consumes(Array(MediaType.APPLICATION_JSON))
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous"))
-  def run(@Context ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
+  def run(@Context ctx: RoutingContext, entity: JsonObject): CompletableFuture[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val username = body.getString("username")
     val displayName = body.getString("displayName", username)
@@ -44,7 +46,7 @@ class RegisterOptionsResource extends WebAuthnService {
       new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.RS256)
     )
 
-    Future.fromCompletionStage(store.loadByUsername(username)
+    store.loadByUsername(username)
       .thenApply(credentials => {
         val excludeCredentials = credentials.stream()
           .map(cred => new JsonObject()
@@ -72,7 +74,8 @@ class RegisterOptionsResource extends WebAuthnService {
             .put("timeout", 60000)
             .put("excludeCredentials", new JsonArray(excludeCredentials)))
 
-      }))
+      })
+      .toCompletableFuture
   }
 
 }

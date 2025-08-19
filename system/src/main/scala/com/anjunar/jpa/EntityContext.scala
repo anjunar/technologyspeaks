@@ -17,29 +17,19 @@ trait EntityContext[E <: EntityContext[E]] extends IdProvider {
   self: E =>
 
   @Inject
-  @Transient
-  var sessionFactory: Stage.SessionFactory = uninitialized
-  
-  @Inject
   @Transient  
   var validator : Validator = uninitialized
 
-  def persist(): CompletionStage[Void] = {
-    sessionFactory.withTransaction(session => {
-      session.persist(self)
-    })
+  def persist()(implicit session : Stage.Session): CompletionStage[Void] = {
+    session.persist(self)
   }
 
-  def merge(): CompletionStage[E] = {
-    sessionFactory.withTransaction(session => {
-      session.merge(self)
-    })
+  def merge()(implicit session : Stage.Session): CompletionStage[E] = {
+    session.merge(self)
   }
 
-  def delete(): CompletionStage[Void] = {
-    sessionFactory.withTransaction(session => {
-      session.remove(self)
-    })
+  def delete()(implicit session : Stage.Session): CompletionStage[Void] = {
+    session.remove(self)
   }
 
   def validate(groups: Class[?]*): Unit = {

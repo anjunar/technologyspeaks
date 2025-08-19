@@ -32,7 +32,7 @@ class LoginFinishResource extends WebAuthnService {
   @Consumes(Array(MediaType.APPLICATION_JSON))
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous"))
-  def run(@Context ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
+  def run(@Context ctx: RoutingContext, @Context session : SessionHandler, entity: JsonObject): CompletableFuture[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val publicKeyCredential = body.getJsonObject("publicKeyCredential")
     val username = body.getString("username")
@@ -41,7 +41,7 @@ class LoginFinishResource extends WebAuthnService {
       throw new IllegalArgumentException("Credential ID is missing in response")
     }
 
-    Future.fromCompletionStage(webAuthnManager.parseAuthenticationResponseJSON(publicKeyCredential.encode())
+    webAuthnManager.parseAuthenticationResponseJSON(publicKeyCredential.encode())
       .thenCompose { authenticationData =>
         store.loadByCredentialId(credentialId)
           .thenCompose(credentialRecord => {
@@ -68,9 +68,7 @@ class LoginFinishResource extends WebAuthnService {
                       .thenCompose(entity => {
                         store.loadUser(credentialId)
                           .thenApply(user => {
-                            val handler = ctx.get[SessionHandler]("sessionHandler")
-
-                            handler.setUser(ctx, user)
+                            session.setUser(ctx, user)
 
                             new JsonObject()
                               .put("status", "success")
@@ -82,7 +80,8 @@ class LoginFinishResource extends WebAuthnService {
                 CompletableFuture.failedFuture(new IllegalStateException("No challenge found for user"))
             }
           })
-      })
+      }
+      .toCompletableFuture
   }
 
 

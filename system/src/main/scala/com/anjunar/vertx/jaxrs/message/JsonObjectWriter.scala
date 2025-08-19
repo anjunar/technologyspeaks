@@ -11,6 +11,7 @@ import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
 
 import java.lang.annotation.Annotation
+import java.util.concurrent.CompletableFuture
 
 @ApplicationScoped
 @Produces(Array(MediaType.APPLICATION_JSON))
@@ -20,8 +21,8 @@ class JsonObjectWriter extends MessageBodyWriter {
     javaType.raw == classOf[JsonObject]
   }
 
-  override def write(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Future[String] = {
-    Future.succeededFuture(entity.asInstanceOf[JsonObject].encode())
+  override def write(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): CompletableFuture[String] = {
+    CompletableFuture.completedFuture(entity.asInstanceOf[JsonObject].encode())
   }
 
 }

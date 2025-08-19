@@ -6,10 +6,13 @@ import com.anjunar.vertx.fsm.StateDef
 import com.anjunar.vertx.jaxrs.ParamReader
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.SessionHandler
 import jakarta.ws.rs.core.Context
+import org.jboss.weld.context.SessionContext
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
+import java.util.concurrent.CompletableFuture
 
 class ContextParamReader extends ParamReader {
 
@@ -17,6 +20,12 @@ class ContextParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[Context])
   }
 
-  override def read(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): Future[Any] = Future.succeededFuture(ctx)
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = {
+    javaType.raw match {
+      case clazz : Class[?] if clazz == classOf[RoutingContext] => CompletableFuture.completedFuture(ctx)
+      case clazz : Class[?] if clazz == classOf[SessionHandler] => CompletableFuture.completedFuture(sessionHandler)
+    }
+    
+  }
   
 }

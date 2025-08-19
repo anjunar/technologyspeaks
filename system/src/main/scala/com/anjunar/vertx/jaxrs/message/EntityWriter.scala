@@ -22,6 +22,7 @@ import jakarta.ws.rs.core.MediaType
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
+import java.util.concurrent.CompletableFuture
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 
@@ -36,7 +37,7 @@ class EntityWriter extends MessageBodyWriter {
     javaType.methods.exists(method => method.name == "schema")
   }
 
-  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef]): Future[String] = {
+  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef]): CompletableFuture[String] = {
 
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
@@ -52,7 +53,7 @@ class EntityWriter extends MessageBodyWriter {
           schemaBuilder.forInstance(item, item.getClass.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
             builder.withLinks((entity, context) => {
               transitions
-                .filter(state => !state.isRef || state.ref == item.getClass)
+                .filter(state => (!state.isRef || state.ref == item.getClass) && state.rolesAllowed.exists(role => roles.contains(role)))
                 .foreach(state => {
                   context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
                 })
@@ -62,7 +63,7 @@ class EntityWriter extends MessageBodyWriter {
         schemaBuilder.forInstance(entity, resolvedClass.raw.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
           builder.withLinks((entity, context) => {
             transitions
-              .filter(state => !state.isRef || state.ref == resolvedClass.raw)
+              .filter(state => (!state.isRef || state.ref == classOf[Table[?]]) && state.rolesAllowed.exists(role => roles.contains(role)))
               .foreach(state => {
                 context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
               })
@@ -78,7 +79,7 @@ class EntityWriter extends MessageBodyWriter {
         schemaBuilder.forInstance(entity, resolvedClass.raw.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
           builder.withLinks((entity, context) => {
             transitions
-              .filter(state => !state.isRef || state.ref == resolvedClass.raw)
+              .filter(state => (!state.isRef || state.ref == resolvedClass.raw) && state.rolesAllowed.exists(role => roles.contains(role)))
               .foreach(state => {
                 context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
               })
@@ -101,6 +102,6 @@ class EntityWriter extends MessageBodyWriter {
 
     val string = jsonMapper.toJsonObjectForJson(jsonObject)
 
-    Future.succeededFuture(string)
+    CompletableFuture.completedFuture(string)
   }
 }

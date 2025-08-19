@@ -7,9 +7,11 @@ import com.anjunar.vertx.jaxrs.ParamReader
 import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.SessionHandler
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
+import java.util.concurrent.CompletableFuture
 
 class JsonObjectParamReader extends ParamReader {
 
@@ -17,6 +19,6 @@ class JsonObjectParamReader extends ParamReader {
     javaType.raw == classOf[JsonObject]
   }
 
-  override def read(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): Future[Any] = Future.succeededFuture(ctx.body().asJsonObject())
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = CompletableFuture.completedFuture(ctx.body().asJsonObject())
   
 }

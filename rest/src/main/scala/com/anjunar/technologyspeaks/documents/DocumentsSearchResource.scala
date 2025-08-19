@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.Context
 import org.hibernate.reactive.mutiny.Mutiny
 import org.hibernate.reactive.stage.Stage
 
-import java.util.concurrent.CompletionStage
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 
 @ApplicationScoped
@@ -24,8 +24,8 @@ class DocumentsSearchResource  {
 
   @GET
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
-  def search(@Context ctx: RoutingContext, @BeanParam documentSearch: DocumentSearch): Future[DocumentSearch] = {
-    Future.succeededFuture(documentSearch)
+  def search(@Context ctx: RoutingContext, @BeanParam documentSearch: DocumentSearch): CompletableFuture[DocumentSearch] = {
+    CompletableFuture.completedFuture(documentSearch)
   }
 
 }

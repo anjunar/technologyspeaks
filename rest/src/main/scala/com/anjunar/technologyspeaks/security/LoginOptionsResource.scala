@@ -16,6 +16,7 @@ import jakarta.ws.rs.{Consumes, POST, Path, Produces}
 
 import java.security.SecureRandom
 import java.util
+import java.util.concurrent.CompletableFuture
 import scala.jdk.CollectionConverters.*
 import scala.compiletime.uninitialized
 
@@ -30,7 +31,7 @@ class LoginOptionsResource extends WebAuthnService {
   @Consumes(Array(MediaType.APPLICATION_JSON))
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous"))
-  def run(@Context ctx : RoutingContext, entity: JsonObject): Future[JsonObject] = {
+  def run(@Context ctx : RoutingContext, entity: JsonObject): CompletableFuture[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val username = body.getString("username")
 
@@ -39,7 +40,7 @@ class LoginOptionsResource extends WebAuthnService {
     val challenge = new DefaultChallenge(challengeBytes)
     challengeStore.put(username, challenge)
 
-    Future.fromCompletionStage(store.loadByUsername(username)
+    store.loadByUsername(username)
       .thenApply(credentials => {
         val allowCredentials = credentials
           .stream().map(cred => new JsonObject()
@@ -54,7 +55,8 @@ class LoginOptionsResource extends WebAuthnService {
             .put("allowCredentials", new JsonArray(allowCredentials))
             .put("userVerification", "discouraged")
             .put("timeout", 60000))
-      }))
+      })
+      .toCompletableFuture
     
   }
 

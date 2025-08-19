@@ -15,6 +15,7 @@ import jakarta.persistence
 import jakarta.persistence.{Basic, Column, Convert, Entity, Lob, NoResultException}
 import org.hibernate.Session
 import org.hibernate.annotations.Type
+import org.hibernate.reactive.stage.Stage
 
 import java.security.SecureRandom
 import java.util
@@ -50,20 +51,16 @@ class CredentialWebAuthn extends Credential with EntityContext[CredentialWebAuth
 
 object CredentialWebAuthn extends RepositoryContext[CredentialWebAuthn](classOf[CredentialWebAuthn]) {
 
-  def loadByCredentialId(credentialId : String) : CompletionStage[CredentialWebAuthn] = {
-    withTransaction(session => {
-      session.createQuery("from CredentialWebAuthn c join fetch c.email join fetch c.roles where c.credentialId = :credentialId", classOf[CredentialWebAuthn])
-        .setParameter("credentialId", credentialId)
-        .getSingleResultOrNull
-    })
+  def loadByCredentialId(credentialId : String)(implicit session : Stage.Session) : CompletionStage[CredentialWebAuthn] = {
+    session.createQuery("from CredentialWebAuthn c join fetch c.email join fetch c.roles where c.credentialId = :credentialId", classOf[CredentialWebAuthn])
+      .setParameter("credentialId", credentialId)
+      .getSingleResultOrNull
   }
 
-  def findByEmail(email: String): CompletionStage[util.List[CredentialWebAuthn]] = {
-    withTransaction(session => {
-      session.createQuery("select c from CredentialWebAuthn c join c.email e where e.value = :email and type(c) = CredentialWebAuthn", classOf[CredentialWebAuthn])
-        .setParameter("email", email)
-        .getResultList
-    })
+  def findByEmail(email: String)(implicit session : Stage.Session): CompletionStage[util.List[CredentialWebAuthn]] = {
+    session.createQuery("select c from CredentialWebAuthn c join c.email e where e.value = :email and type(c) = CredentialWebAuthn", classOf[CredentialWebAuthn])
+      .setParameter("email", email)
+      .getResultList
   }
 
 
