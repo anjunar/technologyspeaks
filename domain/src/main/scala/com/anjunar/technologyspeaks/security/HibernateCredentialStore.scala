@@ -45,22 +45,22 @@ class HibernateCredentialStore extends CredentialStore {
   }
 
   override def saveRecord(email: String, record: WebAuthnCredentialRecord): CompletionStage[Void] = {
-    sessionFactory.withTransaction(implicit session => {
-      val roleAction = sessionFactory.openSession().thenCompose(implicit session => {
-        Role.query("name" -> "Guest")
-          .whenComplete((_, _) => session.close())
-      }).toCompletableFuture
+    val roleAction = sessionFactory.openSession().thenCompose(implicit session => {
+      Role.query("name" -> "Guest")
+        .whenComplete((_, _) => session.close())
+    }).toCompletableFuture
 
-      val emailAction = sessionFactory.openSession().thenCompose(implicit session => {
-        EMail.query("value" -> email)
-          .whenComplete((_, _) => session.close())
-      }).toCompletableFuture
+    val emailAction = sessionFactory.openSession().thenCompose(implicit session => {
+      EMail.query("value" -> email)
+        .whenComplete((_, _) => session.close())
+    }).toCompletableFuture
 
-      CompletableFuture.allOf(roleAction, emailAction)
-        .thenCompose(_ => {
-          roleAction.thenCombine(emailAction, (role, eMail) => (role, eMail))
-        })
-        .thenCompose { case (role, eMail) =>
+    CompletableFuture.allOf(roleAction, emailAction)
+      .thenCompose(_ => {
+        roleAction.thenCombine(emailAction, (role, eMail) => (role, eMail))
+      })
+      .thenCompose { case (role, eMail) =>
+        sessionFactory.withTransaction(implicit session => {
           val targetEmailFuture =
             if (eMail == null) {
               val mail = new EMail
@@ -86,8 +86,9 @@ class HibernateCredentialStore extends CredentialStore {
 
             credential.persist()
           }
-        }
-    })
+        })
+      }
+
 
   }
   
