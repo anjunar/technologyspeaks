@@ -45,9 +45,9 @@ class HibernateCredentialStore extends CredentialStore {
 
   override def saveRecord(email: String, record: WebAuthnCredentialRecord): CompletionStage[Void] = {
     sessionFactory.withTransaction(implicit session => {
-      Role.query("name" -> "Guest").toCompletableFuture
+      Role.query("name" -> "Guest")
         .thenCompose(role => {
-          EMail.query("value" -> email).toCompletableFuture
+          EMail.query("value" -> email)
             .thenCompose(eMail => {
               val targetEmailFuture =
                 if (eMail == null) {
