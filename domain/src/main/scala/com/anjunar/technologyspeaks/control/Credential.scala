@@ -40,8 +40,4 @@ class Credential extends AbstractEntity with SecurityCredential with OwnerProvid
 
 object Credential extends RepositoryContext[Credential](classOf[Credential]){
   
-  def current(): Credential = {
-    val identityContext = CDI.current().select(classOf[IdentityContext]).select().get()
-    identityContext.getPrincipal.asInstanceOf[Credential]
-  }
 }

@@ -6,30 +6,38 @@ import com.anjunar.scala.universe.{ClassPathResolver, ResolvedClass}
 import com.anjunar.vertx.CDIVerticle
 import com.anjunar.vertx.fsm.FSMEngine
 import com.typesafe.scalalogging.Logger
+import io.opentelemetry.api.GlobalOpenTelemetry
+import io.opentelemetry.exporter.logging.LoggingSpanExporter
+import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.trace.SdkTracerProvider
+import io.opentelemetry.sdk.trace.`export`.{SimpleSpanProcessor, SpanExporter}
+import io.opentelemetry.sdk.trace.data.SpanData
+import io.vertx.core.tracing.TracingOptions
 import io.vertx.core.{Vertx, VertxOptions}
+import io.vertx.tracing.opentelemetry.{OpenTelemetryOptions, OpenTelemetryTracingFactory}
 import jakarta.annotation.PreDestroy
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.event.Observes
 import jakarta.enterprise.inject.spi.BeanManager
 import jakarta.enterprise.inject.{Instance, Produces}
 import jakarta.inject.Inject
-import jakarta.persistence.{Entity, EntityManagerFactory, Persistence}
+import jakarta.persistence.Entity
 import jakarta.validation.{Validation, Validator}
 import org.hibernate.boot.registry.{BootstrapServiceRegistryBuilder, StandardServiceRegistryBuilder}
-import org.hibernate.reactive.mutiny.Mutiny
 import org.hibernate.reactive.provider.ReactiveServiceRegistryBuilder
 import org.hibernate.reactive.stage.Stage
 import org.hibernate.reactive.vertx.VertxInstance
 import org.jboss.weld.environment.se.Weld
 import org.jboss.weld.environment.se.events.ContainerInitialized
 
+import java.util
 import scala.compiletime.uninitialized
 
 @ApplicationScoped
 class Main {
 
-  @Inject
-  var beanManager : BeanManager = uninitialized
+  val logger = Logger[Main]
 
   @Produces
   @ApplicationScoped
@@ -50,7 +58,7 @@ class Main {
     properties.setProperty("jakarta.persistence.jdbc.url", "postgresql://localhost:5432/technology_speaks")
     properties.setProperty("jakarta.persistence.jdbc.user", "postgres")
     properties.setProperty("jakarta.persistence.jdbc.password", "postgres")
-    properties.setProperty("hibernate.hbm2ddl.auto", "create")
+    properties.setProperty("hibernate.hbm2ddl.auto", "update")
     properties.put("jakarta.persistence.bean.manager", beanManager)
     //    properties.setProperty("hibernate.show_sql", "true")
     //    properties.setProperty("hibernate.format_sql", "true")
@@ -78,10 +86,14 @@ class Main {
   @Produces
   @ApplicationScoped
   lazy val vertx: Vertx = {
-    val options = new VertxOptions().setEventLoopPoolSize(8)
-    Vertx.vertx(options)
+    val vertxOptions = new VertxOptions()
+      .setTracingOptions(new OpenTelemetryOptions())
+
+    Vertx.vertx()
   }
-  val logger = Logger[Main]
+
+  @Inject
+  var beanManager: BeanManager = uninitialized
 
   @PreDestroy
   def destroy(): Unit = {

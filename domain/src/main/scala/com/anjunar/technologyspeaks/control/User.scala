@@ -70,18 +70,17 @@ object User extends RepositoryContext[User](classOf[User]) {
     val nickName = column[String]("nickName", views = Set(SchemaView.Full, SchemaView.Compact))
       .visibleWhen(NicknameRule)
     val emails = column[EMail]("emails")
-      .forType((email, ctx) => EMail.schema.build(email, ctx))
+      .forType(ctx => EMail.schema.buildType(classOf[EMail], ctx))
+      .forInstance((email, ctx) => Seq(EMail.schema.build(email, ctx)))
+      .visibleWhen(ManagedRule)
     val info = column[UserInfo]("info")
-      .forType((userInfo, ctx) => UserInfo.schema.build(userInfo, ctx))
+      .forType(ctx => UserInfo.schema.buildType(classOf[UserInfo], ctx))
+      .forInstance((userInfo, ctx) => Seq(UserInfo.schema.build(userInfo, ctx)))
       .visibleWhen(ManagedRule)
     val address = column[Address]("address")
-      .forType((address, ctx) => Address.schema.build(address, ctx))
+      .forType(ctx => Address.schema.buildType(classOf[Address], ctx))
+      .forInstance((address, ctx) => Seq(Address.schema.build(address, ctx)))
       .visibleWhen(ManagedRule)
-  }
-
-  def current(): User = {
-    val token = Credential.current()
-    token.email.user
   }
 
   def findByEmail(email: String): CompletionStage[User] = {

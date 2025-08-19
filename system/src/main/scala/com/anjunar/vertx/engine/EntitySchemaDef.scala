@@ -33,20 +33,14 @@ abstract class EntitySchemaDef[E](val entityName: String) {
           .filter(property => property.views.contains(view) && property.visibility.isVisible(entity, property.name, ctx))
           .foreach(property => {
             builder.property(property.name, propertyBuilder => {
-              if (property.typeHandler.isDefined) {
-                val typeHandler = property.typeHandler.get.asInstanceOf[(AnyRef, RequestContext) => SchemaBuilder]
+              if (property.instanceHandler.isDefined) {
+                val typeHandler = property.instanceHandler.get.asInstanceOf[(Any, RequestContext) => Seq[SchemaBuilder]]
                 val model = DescriptionIntrospector.createWithType(entity.getClass)
                 val entityProperty = model.findProperty(property.name)
                 val value = entityProperty.get(entity.asInstanceOf[AnyRef])
-                value match {
-                  case collection : util.Collection[?] => collection.forEach(item => {
-                    val schemaBuilder = typeHandler(item, ctx)
-                    propertyBuilder.schemaBuilder = schemaBuilder
-                  })
-                  case element : AnyRef =>
-                    val schemaBuilder = typeHandler(element, ctx)
-                    propertyBuilder.schemaBuilder = schemaBuilder
-                }
+                val schemas = typeHandler(value, ctx)
+                val schemaOption = schemas.find(schema => schema.instanceMapping.contains(value))
+                propertyBuilder.schemaBuilder = schemaOption.orNull
               }
               propertyBuilder.withWriteable(property.visibility.isWriteable(entity, property.name, ctx))
               propertyBuilder.withLinks(linkContext => {
@@ -56,32 +50,29 @@ abstract class EntitySchemaDef[E](val entityName: String) {
             })
           })
       })
-      .forType(entity.getClass, (builder: EntitySchemaBuilder[E]) => {
+  }
+
+  def buildType(entityType: Class[E], ctx: RequestContext, view: SchemaView = Full): SchemaBuilder = {
+    val builder = new SchemaBuilder()
+
+    builder
+      .forType(entityType, (builder: EntitySchemaBuilder[E]) => {
         props
           .filter(property => property.views.contains(view))
           .foreach(property => {
             builder.property(property.name, propertyBuilder => {
               if (property.typeHandler.isDefined) {
-                val typeHandler = property.typeHandler.get.asInstanceOf[(AnyRef, RequestContext) => SchemaBuilder]
-                val model = DescriptionIntrospector.createWithType(entity.getClass)
-                val entityProperty = model.findProperty(property.name)
-                val value = entityProperty.get(entity.asInstanceOf[AnyRef])
-                value match {
-                  case collection : util.Collection[?] => collection.forEach(item => {
-                    val schemaBuilder = typeHandler(item, ctx)
-                    propertyBuilder.schemaBuilder = schemaBuilder
-                  })
-                  case element : AnyRef =>
-                    val schemaBuilder = typeHandler(element, ctx)
-                    propertyBuilder.schemaBuilder = schemaBuilder
-                }
+                val typeHandler = property.typeHandler.get
+                val schema = typeHandler(ctx)
+                propertyBuilder.schemaBuilder = schema
               }
               propertyBuilder.withLinks(linkContext => {
-                property.links.foreach(link => linkContext.addLink(link.rel, model.Link(link.href(entity), link.method, link.rel, link.title)))
+                property.links.foreach(link => linkContext.addLink(link.rel, model.Link(link.href(null.asInstanceOf[E]), link.method, link.rel, link.title)))
               })
               propertyBuilder
             })
           })
       })
   }
+
 }

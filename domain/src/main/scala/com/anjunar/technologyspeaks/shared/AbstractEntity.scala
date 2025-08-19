@@ -13,7 +13,7 @@ import scala.compiletime.uninitialized
 import java.lang
 
 @MappedSuperclass
-abstract class AbstractEntity  {
+abstract class AbstractEntity extends IdProvider {
 
   @Id
   @Column(name = "id", unique = true, nullable = false)

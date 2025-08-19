@@ -17,7 +17,9 @@ class Application {
 object Application {
 
   val schema = new EntitySchemaDef[Application]("Application") {
-    val user = column[User]("user").forType((user, ctx) => User.schema.build(user, ctx, Compact))
+    val user = column[User]("user")
+      .forType(ctx => User.schema.buildType(classOf[User], ctx, Compact))
+      .forInstance((user, ctx) => Seq(User.schema.build(user, ctx, Compact)))
   }
   
 }

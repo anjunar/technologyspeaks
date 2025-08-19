@@ -1,17 +1,22 @@
 package com.anjunar.technologyspeaks
 
 import com.anjunar.technologyspeaks.control.User
-import com.anjunar.vertx.fsm.services.DefaultFSMService
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
 import jakarta.enterprise.context.ApplicationScoped
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.{GET, Path, Produces}
 
 import java.util.UUID
+import javax.ws.rs.core.MediaType
 
 @ApplicationScoped
-class ApplicationService extends DefaultFSMService[Application] {
+@Path("/")
+class ApplicationResource {
   
-  def run(event : RoutingContext): Future[Application] = {
+  @GET
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  def load(@Context event : RoutingContext): Future[Application] = {
 
     val user = event.user()
 
@@ -31,6 +36,7 @@ class ApplicationService extends DefaultFSMService[Application] {
           application
         }))
     }
+    
   }
 
 }

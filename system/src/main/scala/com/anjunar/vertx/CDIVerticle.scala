@@ -5,7 +5,7 @@ import com.anjunar.vertx.fsm.FSMEngine
 import com.typesafe.scalalogging.Logger
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.{AbstractVerticle, Future, Handler, Promise, VerticleBase}
-import io.vertx.ext.web.handler.{BodyHandler, SessionHandler}
+import io.vertx.ext.web.handler.{BodyHandler, SessionHandler, TimeoutHandler}
 import io.vertx.ext.web.sstore.LocalSessionStore
 import io.vertx.ext.web.{Router, RoutingContext}
 import jakarta.enterprise.context.ApplicationScoped
@@ -26,11 +26,18 @@ class CDIVerticle(beanManager: BeanManager, instance: Instance[AnyRef], engine: 
 
     router.route().handler(BodyHandler.create())
 
-    router.errorHandler(500, ctx => {
+    router.route().failureHandler { ctx =>
       val failure = ctx.failure()
-      if (failure != null) log.error(failure.getMessage, failure)
-      ctx.response.setStatusCode(500).end("Internal Server Error")
-    })
+      if (failure != null) {
+        log.error(failure.getMessage, failure)
+      } else {
+        log.error(">>> Request failed without explicit exception (timeout or missing response).")
+      }
+
+      if (!ctx.response().ended()) {
+        ctx.response().setStatusCode(500).end("Internal server error")
+      }
+    }
 
     val sessionHandler = SessionHandler
       .create(LocalSessionStore.create(vertx))
@@ -48,6 +55,8 @@ class CDIVerticle(beanManager: BeanManager, instance: Instance[AnyRef], engine: 
         .order(routeAnn.order())
         .handler(handler)
     })
+
+//    router.route().handler(TimeoutHandler.create(5000))
 
     val aPIEngine = instance.select(classOf[VertxAPIEngine]).get()
     aPIEngine.start(engine, router, sessionHandler)

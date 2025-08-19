@@ -4,7 +4,6 @@ import com.anjunar.hibernate.reactive.UUIDConverter
 import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.{Converter, PropertyDescriptor}
 import com.anjunar.technologyspeaks.shared.editor.RootType
-import com.anjunar.vertx.webauthn.{AttestationObjectConverter, AttestationObjectType, CollectedClientDataConverter, CollectedClientDataType}
 import com.webauthn4j.credential.CredentialRecord
 import com.webauthn4j.data.AuthenticatorTransport
 import com.webauthn4j.data.attestation.AttestationObject

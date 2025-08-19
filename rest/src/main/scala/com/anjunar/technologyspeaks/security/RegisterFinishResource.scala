@@ -1,6 +1,5 @@
 package com.anjunar.technologyspeaks.security
 
-import com.anjunar.vertx.fsm.services.JsonFSMService
 import com.anjunar.vertx.webauthn.{CredentialStore, WebAuthnCredentialRecord}
 import com.typesafe.scalalogging.Logger
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
@@ -12,6 +11,8 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import jakarta.ws.rs.core.{Context, MediaType}
+import jakarta.ws.rs.{Consumes, POST, Path, Produces}
 
 import java.util
 import java.util.Base64
@@ -20,14 +21,18 @@ import scala.jdk.CollectionConverters.*
 import scala.compiletime.uninitialized
 
 @ApplicationScoped
-class RegisterFinishService extends JsonFSMService[JsonObject] with WebAuthnService {
+@Path("security/register/finish")
+class RegisterFinishResource extends WebAuthnService {
 
-  val log = Logger[RegisterFinishService]
+  val log = Logger[RegisterFinishResource]
   
   @Inject
   var store: CredentialStore = uninitialized
 
-  override def run(ctx : RoutingContext, entity: JsonObject): Future[JsonObject] = {
+  @POST
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  def run(@Context ctx : RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val publicKeyCredential = body.getJsonObject("publicKeyCredential")
     val credentialId = publicKeyCredential.getString("id")

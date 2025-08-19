@@ -1,6 +1,5 @@
 package com.anjunar.technologyspeaks.security
 
-import com.anjunar.vertx.fsm.services.JsonFSMService
 import com.anjunar.vertx.webauthn.CredentialStore
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
 import com.webauthn4j.data.client.challenge.DefaultChallenge
@@ -11,18 +10,24 @@ import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.ext.web.RoutingContext
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import jakarta.ws.rs.core.{Context, MediaType}
+import jakarta.ws.rs.{Consumes, POST, Path, Produces}
 
 import java.security.SecureRandom
 import java.util
 import scala.compiletime.uninitialized
 
 @ApplicationScoped
-class RegisterOptionsService extends JsonFSMService[JsonObject] with WebAuthnService {
+@Path("security/register")
+class RegisterOptionsResource extends WebAuthnService {
 
   @Inject
   var store: CredentialStore = uninitialized
 
-  override def run(ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
+  @POST
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  def run(@Context ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val username = body.getString("username")
     val displayName = body.getString("displayName", username)

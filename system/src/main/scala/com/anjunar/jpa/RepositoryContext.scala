@@ -1,20 +1,19 @@
 package com.anjunar.jpa
 
-import io.smallrye.mutiny.Uni
 import jakarta.enterprise.inject.spi.CDI
-import jakarta.persistence.{Entity, EntityManager, NoResultException, TypedQuery}
-import org.hibernate.reactive.mutiny.Mutiny
+import jakarta.inject.Inject
+import jakarta.persistence.{Entity, NoResultException}
 import org.hibernate.reactive.stage.Stage
-import org.hibernate.reactive.stage.Stage.SelectionQuery
 
 import java.util
-import java.util.UUID
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import java.util.function.Function
+import scala.compiletime.uninitialized
 
 trait RepositoryContext[E](clazz: Class[E]) {
 
-  private val sessionFactories = CDI.current().select(classOf[Stage.SessionFactory])
+  @Inject
+  var sessionFactory : Stage.SessionFactory = uninitialized
 
   def find(id: Object): CompletionStage[E] = {
     sessionFactory.withTransaction(session => {
@@ -22,7 +21,7 @@ trait RepositoryContext[E](clazz: Class[E]) {
     })
   }
 
-  def findAll() : CompletionStage[util.List[E]] = {
+  def findAll(): CompletionStage[util.List[E]] = {
     sessionFactory.withTransaction(session => {
       val builder = session.getCriteriaBuilder
       val query = builder.createQuery(clazz)
@@ -31,7 +30,7 @@ trait RepositoryContext[E](clazz: Class[E]) {
     })
   }
 
-  def query(parameters: (key : String, value : Any)*): CompletionStage[E] = {
+  def query(parameters: (key: String, value: Any)*): CompletionStage[E] = {
     sessionFactory.withTransaction(session => {
       val entityAnnotation: Entity = clazz.getAnnotation(classOf[Entity])
       var entityName: String = entityAnnotation.name()
@@ -51,8 +50,6 @@ trait RepositoryContext[E](clazz: Class[E]) {
     })
   }
 
-  def sessionFactory: Stage.SessionFactory = sessionFactories.get()
-  
   def withTransaction[T](work: Function[Stage.Session, CompletionStage[T]]) = sessionFactory.withTransaction(work)
 
 }

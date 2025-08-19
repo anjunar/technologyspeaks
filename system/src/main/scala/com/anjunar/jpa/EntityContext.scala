@@ -19,6 +19,10 @@ trait EntityContext[E <: EntityContext[E]] extends IdProvider {
   @Inject
   @Transient
   var sessionFactory: Stage.SessionFactory = uninitialized
+  
+  @Inject
+  @Transient  
+  var validator : Validator = uninitialized
 
   def persist(): CompletionStage[Void] = {
     sessionFactory.withTransaction(session => {
@@ -39,7 +43,7 @@ trait EntityContext[E <: EntityContext[E]] extends IdProvider {
   }
 
   def validate(groups: Class[?]*): Unit = {
-    val constraintViolation = CDI.current().select(classOf[Validator]).get().validate(self, groups *)
+    val constraintViolation = validator.validate(self, groups *)
 
     val validationViolation = constraintViolation.stream()
       .map(violation => {

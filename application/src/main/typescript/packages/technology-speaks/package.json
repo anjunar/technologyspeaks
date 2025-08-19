@@ -7,7 +7,7 @@
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "watch": "webpack --config webpack.config.js --watch",
-    "start": "ts-node-dev --respawn --transpile-only src/entry-server.tsx"
+    "start": "ts-node-dev --inspect --respawn --transpile-only src/entry-server.tsx"
   },
   "keywords": [],
   "author": "",

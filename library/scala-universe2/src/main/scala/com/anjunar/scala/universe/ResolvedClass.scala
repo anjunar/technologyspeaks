@@ -61,31 +61,55 @@ class ResolvedClass(val underlying : Type) extends Annotated {
   def <:<(aClass: ResolvedClass): Boolean = TypeToken.of(TypeToken.of(underlying).wrap().getType).isSubtypeOf(aClass.underlying)
   
   def findDeclaredField(name : String) : ResolvedField =
-    val field = raw.getDeclaredField(name)  
-    declaredFields.find(resolvedField => resolvedField == field).orNull
+    try {
+      val field = raw.getDeclaredField(name)
+      declaredFields.find(resolvedField => resolvedField == field).orNull
+    } catch {
+      case e : NoSuchFieldException => null
+    }
 
   def findDeclaredConstructor(args : Class[?]*) : ResolvedConstructor = {
-    val constructor = raw.getDeclaredConstructor(args *)
-    declaredConstructors.find(resolvedConstructor => resolvedConstructor.underlying == constructor).orNull
+    try {
+      val constructor = raw.getDeclaredConstructor(args *)
+      declaredConstructors.find(resolvedConstructor => resolvedConstructor.underlying == constructor).orNull
+    } catch {
+      case e : NoSuchMethodException => null
+    }
   }
   
   def findDeclaredMethod(name : String, args : Class[?]*) : ResolvedMethod =
-    val method = raw.getDeclaredMethod(name, args*)
-    declaredMethods.find(resolvedMethod => resolvedMethod.underlying == method).orNull
+    try {
+      val method = raw.getDeclaredMethod(name, args *)
+      declaredMethods.find(resolvedMethod => resolvedMethod.underlying == method).orNull
+    } catch {
+      case e : NoSuchMethodException => null
+    }
 
 
   def findField(name: String): ResolvedField =
-    val field = raw.getField(name)
-    fields.find(resolvedField => resolvedField == field).orNull
+    try {
+      val field = raw.getField(name)
+      fields.find(resolvedField => resolvedField == field).orNull
+    } catch {
+      case e : NoSuchFieldException => null
+    }
 
   def findConstructor(args: Class[?]*): ResolvedConstructor = {
-    val constructor = raw.getConstructor(args *)
-    constructors.find(resolvedConstructor => resolvedConstructor.underlying == constructor).orNull
+    try {
+      val constructor = raw.getConstructor(args *)
+      constructors.find(resolvedConstructor => resolvedConstructor.underlying == constructor).orNull
+    } catch {
+      case e: NoSuchMethodException => null
+    }
   }
 
   def findMethod(name: String, args: Class[?]*): ResolvedMethod =
-    val method = raw.getMethod(name, args *)
-    methods.find(resolvedMethod => resolvedMethod.underlying == method).orNull
+    try {
+      val method = raw.getMethod(name, args *)
+      methods.find(resolvedMethod => resolvedMethod.underlying == method).orNull
+    } catch {
+      case e : NoSuchMethodException => null
+    }
 
   override lazy val declaredAnnotations: Array[Annotation] = raw.getDeclaredAnnotations
 

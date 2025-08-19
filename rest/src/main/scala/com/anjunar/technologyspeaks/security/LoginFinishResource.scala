@@ -1,35 +1,36 @@
 package com.anjunar.technologyspeaks.security
 
-import com.anjunar.vertx.fsm.services.JsonFSMService
 import com.anjunar.vertx.webauthn.CredentialStore
-import com.webauthn4j.credential.CredentialRecord
 import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.server.ServerProperty
 import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.auth.User
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import jakarta.ws.rs.{Consumes, POST, Path, Produces}
+import jakarta.ws.rs.core.{Context, MediaType}
 import org.hibernate.reactive.stage.Stage
 
-import java.util
 import java.util.concurrent.CompletableFuture
 import scala.compiletime.uninitialized
-import scala.jdk.CollectionConverters.*
 
 @ApplicationScoped
-class LoginFinishService extends JsonFSMService[JsonObject] with WebAuthnService {
-
+@Path("security/login/finish")
+class LoginFinishResource extends WebAuthnService {
+  
   @Inject
   var store: CredentialStore = uninitialized
 
   @Inject
   var sessionFactory: Stage.SessionFactory = uninitialized
 
-  override def run(ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
+  @POST
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  @Produces(Array(MediaType.APPLICATION_JSON))  
+  def run(@Context ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val publicKeyCredential = body.getJsonObject("publicKeyCredential")
     val username = body.getString("username")
@@ -68,7 +69,7 @@ class LoginFinishService extends JsonFSMService[JsonObject] with WebAuthnService
                             val handler = ctx.get[SessionHandler]("sessionHandler")
 
                             handler.setUser(ctx, user)
-                            
+
                             new JsonObject()
                               .put("status", "success")
                               .put("user", user.principal())
@@ -81,5 +82,6 @@ class LoginFinishService extends JsonFSMService[JsonObject] with WebAuthnService
           })
       })
   }
+
 
 }

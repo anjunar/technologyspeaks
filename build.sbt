@@ -55,6 +55,8 @@ lazy val system = (project in file("system"))
       "com.webauthn4j" % "webauthn4j-core-async" % "0.29.5.RELEASE",
       "io.vertx" % "vertx-web" % "5.0.3",
       "io.vertx" % "vertx-pg-client" % "5.0.3",
+      "io.vertx" % "vertx-opentelemetry" % "5.0.3",
+      "io.opentelemetry" % "opentelemetry-exporter-logging" % "1.53.0",
       "jakarta.json.bind" % "jakarta.json.bind-api" % "3.0.1",
       "org.glassfish" % "jakarta.el" % "4.0.2",
       "javax.ws.rs" % "javax.ws.rs-api" % "2.1.1",
