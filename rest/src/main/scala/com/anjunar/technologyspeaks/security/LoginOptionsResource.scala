@@ -8,6 +8,7 @@ import com.webauthn4j.util.Base64UrlUtil
 import io.vertx.core.{Future, Promise}
 import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.ext.web.RoutingContext
+import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.ws.rs.core.{Context, MediaType}
@@ -28,6 +29,7 @@ class LoginOptionsResource extends WebAuthnService {
   @POST
   @Consumes(Array(MediaType.APPLICATION_JSON))
   @Produces(Array(MediaType.APPLICATION_JSON))
+  @RolesAllowed(Array("Anonymous"))
   def run(@Context ctx : RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val username = body.getString("username")

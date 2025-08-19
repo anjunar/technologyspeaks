@@ -1,32 +1,20 @@
 package com.anjunar.vertx
 
-import com.anjunar.jaxrs.types.Table
-import com.anjunar.scala.mapper.loader.JsonEntityLoader
-import com.anjunar.scala.mapper.{JsonContext, JsonMapper}
-import com.anjunar.scala.schema.builder.EntitySchemaBuilder
-import com.anjunar.scala.schema.model.{Link, ObjectDescriptor}
-import com.anjunar.scala.schema.{JsonDescriptorsContext, JsonDescriptorsGenerator}
-import com.anjunar.scala.universe.TypeResolver
-import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext}
 import com.anjunar.vertx.fsm.FSMEngine
 import com.anjunar.vertx.jaxrs.ResourceMethodInvoker
+import com.google.common.collect.Lists
 import com.typesafe.scalalogging.Logger
 import io.vertx.core.http.HttpMethod
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.JsonArray
 import io.vertx.ext.auth.User
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Instance
 import jakarta.inject.Inject
-import jakarta.validation.Validator
-import org.hibernate.reactive.stage.Stage
 
-import java.lang.reflect.Type
-import java.util
-import java.util.UUID
-import scala.jdk.CollectionConverters.*
 import scala.compiletime.uninitialized
+import scala.jdk.CollectionConverters.*
 
 @ApplicationScoped
 class VertxAPIEngine {
@@ -37,10 +25,7 @@ class VertxAPIEngine {
   var instance: Instance[AnyRef] = uninitialized
 
   @Inject
-  var resourceMethodInvoker : ResourceMethodInvoker = uninitialized
-
-  @Inject
-  var sessionFactory: Stage.SessionFactory = uninitialized
+  var resourceMethodInvoker: ResourceMethodInvoker = uninitialized
 
   def start(engine: FSMEngine, router: Router, sessionHandler: SessionHandler): Unit = {
 
@@ -53,10 +38,26 @@ class VertxAPIEngine {
       state.produces.foreach(contentType => route.produces(contentType))
 
       route.handler(handler => {
-        resourceMethodInvoker.invoke(handler, state, transitions, instance.select(state.resource).get)
-          .andThen(result => {
-            handler.end(result.result())
-          })
+        val anonymous = User.fromName("Anonymous")
+        anonymous.principal().put("roles", JsonArray(Lists.newArrayList("Anonymous")))
+        val user = if handler.user() == null then anonymous else handler.user()
+        val roles = if handler.user() == null then Set("Anonymous") else user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
+
+        sessionHandler.setUser(handler, user)
+
+        if (state.rolesAllowed.exists(roles.contains)) {
+          resourceMethodInvoker.invoke(handler, state, transitions, instance.select(state.resource).get)
+            .onFailure(exception => {
+              log.error(exception.getMessage, exception)
+              handler.fail(500, exception)
+            })
+            .andThen(result => {
+              handler.end(result.result())
+            })
+        } else {
+          handler.fail(403)
+        }
+
       })
 
     })

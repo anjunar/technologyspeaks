@@ -86,10 +86,8 @@ class Main {
   @Produces
   @ApplicationScoped
   lazy val vertx: Vertx = {
-    val vertxOptions = new VertxOptions()
-      .setTracingOptions(new OpenTelemetryOptions())
-
-    Vertx.vertx()
+    Vertx.builder()
+      .build()
   }
 
   @Inject

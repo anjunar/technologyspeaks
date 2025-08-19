@@ -56,8 +56,6 @@ class CDIVerticle(beanManager: BeanManager, instance: Instance[AnyRef], engine: 
         .handler(handler)
     })
 
-//    router.route().handler(TimeoutHandler.create(5000))
-
     val aPIEngine = instance.select(classOf[VertxAPIEngine]).get()
     aPIEngine.start(engine, router, sessionHandler)
 

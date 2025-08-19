@@ -1,5 +1,6 @@
 package com.anjunar.vertx.jaxrs.params
 
+import com.anjunar.scala.universe.ResolvedClass
 import com.anjunar.scala.universe.members.ResolvedMethod
 import com.anjunar.vertx.fsm.StateDef
 import com.anjunar.vertx.jaxrs.ParamReader
@@ -12,10 +13,10 @@ import java.lang.reflect.Type
 
 class ContextParamReader extends ParamReader {
 
-  override def canRead(ctx: RoutingContext, javaType: Type, annotations: Array[Annotation], method: ResolvedMethod): Boolean = {
+  override def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean = {
     annotations.exists(annotation => annotation.annotationType() == classOf[Context])
   }
 
-  override def read(ctx: RoutingContext, javaType: Type, annotations: Array[Annotation], method: ResolvedMethod, state : StateDef): Future[Any] = Future.succeededFuture(ctx)
+  override def read(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): Future[Any] = Future.succeededFuture(ctx)
   
 }

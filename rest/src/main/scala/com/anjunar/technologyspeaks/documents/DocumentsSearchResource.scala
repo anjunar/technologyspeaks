@@ -4,6 +4,7 @@ import com.anjunar.jaxrs.types.Table
 import com.anjunar.technologyspeaks.document.{Document, DocumentSearch}
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
+import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.ws.rs.{BeanParam, GET, Path}
@@ -22,6 +23,7 @@ class DocumentsSearchResource  {
   var sessionFactory: Stage.SessionFactory = uninitialized
 
   @GET
+  @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
   def search(@Context ctx: RoutingContext, @BeanParam documentSearch: DocumentSearch): Future[DocumentSearch] = {
     Future.succeededFuture(documentSearch)
   }

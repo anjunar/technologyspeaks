@@ -5,7 +5,7 @@ import com.anjunar.scala.mapper.{JsonContext, JsonMapper}
 import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
 import com.anjunar.scala.schema.model.{Link, ObjectDescriptor}
 import com.anjunar.scala.schema.{JsonDescriptorsContext, JsonDescriptorsGenerator}
-import com.anjunar.scala.universe.TypeResolver
+import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.anjunar.scala.universe.members.ResolvedMethod
 import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext}
 import com.anjunar.vertx.fsm.StateDef
@@ -32,18 +32,17 @@ class EntityWriter extends MessageBodyWriter {
   @Inject
   var validator : Validator = uninitialized
 
-  override def canWrite(entity: Any, javaType: Type, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
-    TypeResolver.resolve(javaType).typeArguments(0).findMethod("schema") != null
+  override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
+    javaType.methods.exists(method => method.name == "schema")
   }
 
-  override def write(entity: Any, javaType: Type, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef]): Future[String] = {
+  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef]): Future[String] = {
 
-    val user = if ctx.user() == null then User.fromName("Guest") else ctx.user()
-    val roles = if ctx.user() == null then Set("Guest") else user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
+    val user = ctx.user()
+    val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
     
     entity match {
       case table: Table[AnyRef] =>
-        val resolvedClass = TypeResolver.resolve(javaType)
         val tableType = resolvedClass.typeArguments(0).raw.asInstanceOf[Class[AnyRef]]
         val entitySchemaDef = Table.schema(tableType, state.view)
         val schemaBuilder = entitySchemaDef.build(entity.asInstanceOf[Table[AnyRef]], RequestContext(user, roles), state.view)
@@ -69,9 +68,8 @@ class EntityWriter extends MessageBodyWriter {
               })
           })
         })
-        write(entity, javaType, schemaBuilder, schemaBuilderType)
+        write(entity, resolvedClass, schemaBuilder, schemaBuilderType)
       case _ =>
-        val resolvedClass = TypeResolver.resolve(javaType).typeArguments(0)
         val resolvedMethod = resolvedClass.findMethod("schema")
         val entitySchemaDef = resolvedMethod.invoke(null).asInstanceOf[EntitySchemaDef[Any]]
         val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), state.view)
@@ -86,16 +84,14 @@ class EntityWriter extends MessageBodyWriter {
               })
           })
         })
-        write(entity, javaType, schemaBuilder, schemaBuilderType)
+        write(entity, resolvedClass, schemaBuilder, schemaBuilderType)
     }
   }
 
-  def write(entity: Any, javaType: Type, schemaBuilder: SchemaBuilder, schemaBuilderType: SchemaBuilder) = {
+  def write(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: SchemaBuilder, schemaBuilderType: SchemaBuilder) = {
     val jsonMapper = JsonMapper()
 
     val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, null)
-
-    val resolvedClass = TypeResolver.resolve(javaType)
 
     val jsonObject = jsonMapper.toJson(entity.asInstanceOf[AnyRef], resolvedClass, context)
 

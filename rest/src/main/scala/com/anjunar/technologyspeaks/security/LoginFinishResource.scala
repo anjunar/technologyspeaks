@@ -8,6 +8,7 @@ import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.SessionHandler
+import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.ws.rs.{Consumes, POST, Path, Produces}
@@ -29,7 +30,8 @@ class LoginFinishResource extends WebAuthnService {
 
   @POST
   @Consumes(Array(MediaType.APPLICATION_JSON))
-  @Produces(Array(MediaType.APPLICATION_JSON))  
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  @RolesAllowed(Array("Anonymous"))
   def run(@Context ctx: RoutingContext, entity: JsonObject): Future[JsonObject] = {
     val body = Option(ctx.body().asJsonObject()).getOrElse(new JsonObject())
     val publicKeyCredential = body.getJsonObject("publicKeyCredential")

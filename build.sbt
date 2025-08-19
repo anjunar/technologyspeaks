@@ -4,8 +4,8 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.7.2"
 
-ThisBuild / javacOptions ++= Seq("--release", "24")
-ThisBuild / scalacOptions ++= Seq("-release", "24")
+ThisBuild / javacOptions ++= Seq("--release", "21")
+ThisBuild / scalacOptions ++= Seq("-release", "21")
 
 javaOptions += "--add-opens=java.base/sun.misc=ALL-UNNAMED"
 

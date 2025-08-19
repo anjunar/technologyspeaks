@@ -4,6 +4,7 @@ import com.anjunar.scala.universe.members.ResolvedMethod
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.anjunar.vertx.engine.SchemaView
 import com.anjunar.vertx.engine.SchemaView.Full
+import jakarta.annotation.security.RolesAllowed
 import jakarta.ws.rs.{Consumes, HttpMethod, Path, Produces}
 
 import java.lang.reflect.Type
@@ -99,6 +100,15 @@ case class StateDef(rel : String,
       } else {
         classProduces.value() ++ methodProduces.value()
       }
+    }
+  }
+  
+  val rolesAllowed : Array[String] = {
+    val allowed = method.findAnnotation(classOf[RolesAllowed])
+    if (allowed == null) {
+      Array("Administrator")
+    } else {
+      allowed.value()  
     }
   }
 

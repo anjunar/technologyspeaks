@@ -21,7 +21,7 @@ class PropertyBuilder[C](val name : String, val aClass : Type, isTable : Boolean
     val beanProperty = model.findProperty(name)
     
     if (beanProperty == null) {
-      throw new IllegalStateException(s"Property $name not fount on Class ${aClass.getTypeName}")
+      throw new IllegalStateException(s"Property $name not found on Class ${aClass.getTypeName}")
     }
     
     beanProperty

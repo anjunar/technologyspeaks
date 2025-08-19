@@ -4,6 +4,7 @@ import com.anjunar.jaxrs.types.Table
 import com.anjunar.technologyspeaks.document.{Document, DocumentSearch}
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
+import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.ws.rs.core.{Context, MediaType}
@@ -22,7 +23,8 @@ class DocumentsResource {
   var sessionFactory: Stage.SessionFactory = uninitialized
 
   @GET
-  @Produces(Array(MediaType.APPLICATION_JSON))  
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))  
   def list(@Context ctx: RoutingContext, @BeanParam search : DocumentSearch): Future[Table[Document]] = {
     Future.fromCompletionStage(sessionFactory
       .withTransaction((session, tx) => {

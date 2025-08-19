@@ -2,7 +2,7 @@ package com.anjunar.technologyspeaks
 
 import com.anjunar.jaxrs.types.Table
 import com.anjunar.technologyspeaks.document.{Document, DocumentSearch}
-import com.anjunar.technologyspeaks.documents.DocumentsSearchResource
+import com.anjunar.technologyspeaks.documents.{DocumentsResource, DocumentsSearchResource}
 import com.anjunar.technologyspeaks.documents.document.{DocumentCreateResource, DocumentReadResource}
 import com.anjunar.technologyspeaks.security.{LoginFinishResource, LoginOptionsResource, RegisterFinishResource, RegisterOptionsResource}
 import com.anjunar.vertx.fsm.{FSMBuilder, FSMEngine, StateDef}
@@ -61,7 +61,7 @@ class HATEOASEngine extends FSMEngine {
             StateDef(
               rel = "list",
               name = "Documents",
-              resource = classOf[DocumentsSearchResource]
+              resource = classOf[DocumentsResource]
             ), documents => Seq(
               fsm.transition(
                 StateDef(
