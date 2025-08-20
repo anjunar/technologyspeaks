@@ -46,7 +46,7 @@ class ResourceMethodInvoker {
               .filter(writer => writer.canWrite(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions))
               .findFirst()
               .get()
-              
+
             bodyWriter.write(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions)
               .thenApply(body => (bodyWriter.contentType, body))
           })

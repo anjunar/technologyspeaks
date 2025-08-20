@@ -9,7 +9,7 @@ import com.anjunar.technologyspeaks.control.User
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.technologyspeaks.shared.editor.{ASTDiffUtil, Change, Editor, EditorFile}
 import com.anjunar.technologyspeaks.shared.hashtag.HashTag
-import com.anjunar.vertx.engine.EntitySchemaDef
+import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaProvider}
 import com.github.gumtreediff.actions.{ChawatheScriptGenerator, EditScriptGenerator, InsertDeleteChawatheScriptGenerator}
 import com.github.gumtreediff.matchers.Matchers
 import jakarta.persistence.*
@@ -71,7 +71,7 @@ class Document extends AbstractEntity with OwnerProvider {
   override def toString = s"Document($title, $description, $language)"
 }
 
-object Document extends RepositoryContext[Document](classOf[Document]) {
+object Document extends RepositoryContext[Document](classOf[Document]) with SchemaProvider[Document] {
 
   val schema = new EntitySchemaDef[Document]("Document") {
     val id = column[UUID]("id")

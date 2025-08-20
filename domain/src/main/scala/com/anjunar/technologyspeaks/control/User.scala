@@ -4,8 +4,9 @@ import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.jpa.{EntityContext, PostgresIndex, PostgresIndices, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.security.SecurityUser
+import com.anjunar.technologyspeaks.document.Document
 import com.anjunar.technologyspeaks.shared.property.EntityView
-import com.anjunar.vertx.engine.{EntitySchemaDef, Link, RequestContext, SchemaView, VisibilityRule}
+import com.anjunar.vertx.engine.{EntitySchemaDef, Link, RequestContext, SchemaProvider, SchemaView, VisibilityRule}
 import io.smallrye.mutiny.Uni
 import jakarta.persistence.*
 import jakarta.validation.constraints.*
@@ -57,7 +58,7 @@ class User extends Identity with OwnerProvider with SecurityUser with EntityCont
   override def toString = s"User($nickName)"
 }
 
-object User extends RepositoryContext[User](classOf[User]) {
+object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[User] {
 
   object NicknameRule extends VisibilityRule[User] {
     override def isVisible(entity: User, property: String, ctx: RequestContext): Boolean = true

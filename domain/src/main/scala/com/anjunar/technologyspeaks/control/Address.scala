@@ -3,7 +3,7 @@ package com.anjunar.technologyspeaks.control
 import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.technologyspeaks.shared.AbstractEntity
-import com.anjunar.vertx.engine.EntitySchemaDef
+import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaProvider}
 import jakarta.persistence.{Basic, CascadeType, Embedded, Entity, OneToOne}
 import jakarta.validation.constraints.{NotBlank, Pattern, Size}
 import jakarta.ws.rs.FormParam
@@ -44,7 +44,7 @@ class Address extends AbstractEntity with EntityContext[Address] {
   override def toString = s"Address($street, $number, $zipCode, $country)"
 }
 
-object Address extends RepositoryContext[Address](classOf[Address]) {
+object Address extends RepositoryContext[Address](classOf[Address]) with SchemaProvider[Address] {
 
   val schema = new EntitySchemaDef[Address]("Address") {
     val id = column[UUID]("id")

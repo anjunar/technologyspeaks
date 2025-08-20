@@ -7,6 +7,28 @@ object TypeResolver {
   
   val cache = new mutable.HashMap[Type, ResolvedClass]()
   
+  def companionClass(clazz : Class[?]) : Class[?] = {
+    val companionClassName = clazz.getName + "$"
+    try {
+      Class.forName(companionClassName)
+    } catch {
+      case e: ClassNotFoundException => null
+    }
+  }
+  
+  def companionInstance(clazz : Class[?]) : AnyRef = {
+    try {
+      val value = companionClass(clazz)
+      if (value == null) {
+        null
+      } else {
+        value.getField("MODULE$").get(null)
+      }
+    } catch {
+      case e : NoSuchFieldException => null
+    }
+  }
+  
   def resolve(aType : Type) : ResolvedClass = {
     val option = cache.get(aType)
     if (option.isDefined) {

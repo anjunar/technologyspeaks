@@ -7,7 +7,7 @@ import com.anjunar.scala.schema.model.{Link, ObjectDescriptor}
 import com.anjunar.scala.schema.{JsonDescriptorsContext, JsonDescriptorsGenerator}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.anjunar.scala.universe.members.ResolvedMethod
-import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext}
+import com.anjunar.vertx.engine.{DynamicSchemaProvider, EntitySchemaDef, RequestContext, SchemaProvider}
 import com.anjunar.vertx.fsm.StateDef
 import com.anjunar.vertx.jaxrs.MessageBodyWriter
 import io.vertx.core.Future
@@ -35,7 +35,16 @@ class EntityWriter extends MessageBodyWriter {
   override val contentType: String = MediaType.APPLICATION_JSON
 
   override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
-    javaType.methods.exists(method => method.name == "schema")
+    val companion = TypeResolver.companionInstance(javaType.raw)
+    if (companion == null) {
+      false 
+    } else {
+      companion match {
+        case clazz: SchemaProvider[?] => true
+        case clazz: DynamicSchemaProvider => true
+        case _ => false
+      }
+    }
   }
 
   override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef]): CompletableFuture[String] = {
@@ -72,8 +81,7 @@ class EntityWriter extends MessageBodyWriter {
         })
         write(entity, resolvedClass, schemaBuilder, schemaBuilderType)
       case _ =>
-        val resolvedMethod = resolvedClass.findMethod("schema")
-        val entitySchemaDef = resolvedMethod.invoke(null).asInstanceOf[EntitySchemaDef[Any]]
+        val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[Any]].schema
         val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), state.view)
         val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Any]], RequestContext(user, roles), state.view)
 

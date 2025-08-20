@@ -4,7 +4,7 @@ import com.anjunar.scala.mapper.loader.JsonEntityLoader
 import com.anjunar.scala.mapper.{JsonContext, JsonMapper}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.anjunar.scala.universe.members.ResolvedMethod
-import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext}
+import com.anjunar.vertx.engine.{DynamicSchemaProvider, EntitySchemaDef, RequestContext, SchemaProvider}
 import com.anjunar.vertx.fsm.StateDef
 import com.anjunar.vertx.jaxrs.ParamReader
 import io.vertx.core.Future
@@ -30,7 +30,17 @@ class EntityParamReader extends ParamReader {
 
   override def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean = {
     val blackList : Set[Class[? <: Annotation]] = Set(classOf[QueryParam], classOf[BeanParam], classOf[PathParam], classOf[MatrixParam], classOf[Context])
-    javaType.findMethod("schema") != null && ! annotations.exists(annotation => blackList.contains(annotation.annotationType()))
+
+    val companion = TypeResolver.companionInstance(javaType.raw)
+    if (companion == null) {
+      false
+    } else {
+      companion match {
+        case clazz: SchemaProvider[?] => !annotations.exists(annotation => blackList.contains(annotation.annotationType()))
+        case clazz: DynamicSchemaProvider => !annotations.exists(annotation => blackList.contains(annotation.annotationType()))
+        case _ => false
+      }
+    }
   }
 
   override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = {
@@ -43,7 +53,7 @@ class EntityParamReader extends ParamReader {
 
     val entity = entityLoader.load(jsonObject, resolvedClass)
 
-    val entitySchemaDef = resolvedClass.findMethod("schema").invoke(null).asInstanceOf[EntitySchemaDef[AnyRef]]
+    val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[AnyRef]].schema
     
     val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), state.view)
 

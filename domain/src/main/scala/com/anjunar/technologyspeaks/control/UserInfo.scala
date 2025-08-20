@@ -4,7 +4,7 @@ import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.technologyspeaks.media.Media
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.jpa.{PostgresIndex, PostgresIndices, RepositoryContext}
-import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext, SchemaView, VisibilityRule}
+import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext, SchemaProvider, SchemaView, VisibilityRule}
 import jakarta.persistence.*
 import jakarta.validation.constraints.{NotBlank, NotNull, Past, Size}
 import jakarta.ws.rs.FormParam
@@ -51,7 +51,7 @@ class UserInfo extends AbstractEntity {
   override def toString = s"UserInfo($firstName, $lastName, $birthDate)"
 }
 
-object UserInfo extends RepositoryContext[UserInfo](classOf[UserInfo]) {
+object UserInfo extends RepositoryContext[UserInfo](classOf[UserInfo]) with SchemaProvider[UserInfo] {
 
   object GlobalRule extends VisibilityRule[UserInfo] {
     override def isVisible(entity: UserInfo, property: String, ctx: RequestContext): Boolean = true
