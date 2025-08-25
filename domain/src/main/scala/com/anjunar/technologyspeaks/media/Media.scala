@@ -3,7 +3,7 @@ package com.anjunar.technologyspeaks.media
 import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.technologyspeaks.control.User
-import com.anjunar.vertx.engine.EntitySchemaDef
+import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaProvider}
 import jakarta.persistence.{CascadeType, Entity, OneToOne, Table}
 
 import java.util.UUID
@@ -19,14 +19,9 @@ class Media extends Thumbnail {
 
 }
 
-object Media extends RepositoryContext[Media](classOf[Media]) {
+object Media extends RepositoryContext[Media](classOf[Media]) with SchemaProvider[Media] {
 
-  val schema = new EntitySchemaDef[Media]("Media") {
-    val id = column[UUID]("id")
-    val name = column[String]("name")
-    val contentType = column[String]("contentType")
-    val data = column[Array[Byte]]("data")
-  }
-
+  val schema = EntitySchemaDef(classOf[Media])
+  
 }
 

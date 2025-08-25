@@ -15,7 +15,7 @@ import jakarta.ws.rs.BeanParam
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 
@@ -29,7 +29,7 @@ class BeanParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[BeanParam])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = {
 
     val model = DescriptionIntrospector.create(javaType)
     val instance : AnyRef = model.underlying.findConstructor().underlying.newInstance()
@@ -42,9 +42,10 @@ class BeanParamReader extends ParamReader {
         .thenApply(async => {
           property.set(instance, async)
         })
+        .toCompletableFuture
     })
 
-    CompletableFuture.allOf(futures.toArray*)
+    CompletableFuture.allOf(futures*)
       .thenApply(_ => instance)
   }
 }

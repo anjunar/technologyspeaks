@@ -7,6 +7,7 @@ import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.fasterxml.jackson.annotation.{JsonCreator, JsonValue}
 
 import java.util
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import java.util.{Arrays, Objects}
 import scala.language.existentials
 
@@ -25,17 +26,17 @@ class JsonEnumConverter extends JsonAbstractConverter(TypeResolver.resolve(class
 
   }
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): Any = {
+  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
     val resolvedMethod = aType
       .methods
       .find(member => Objects.nonNull(member.findDeclaredAnnotation(classOf[JsonCreator])))
 
-    if (resolvedMethod.isDefined) { 
-      resolvedMethod.get.invoke(null, jsonNode.value)
+    if (resolvedMethod.isDefined) {
+      CompletableFuture.completedFuture(resolvedMethod.get.invoke(null, jsonNode.value))
     } else {
       val enumClass = aType.raw
       val enumConstants = enumClass.getEnumConstants.asInstanceOf[Array[Enum[?]]]
-      enumConstants.find((anEnum : Enum[?]) => anEnum.name() == jsonNode.value).get
+      CompletableFuture.completedFuture(enumConstants.find((anEnum : Enum[?]) => anEnum.name() == jsonNode.value).get)
     }
 
   }

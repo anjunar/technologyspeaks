@@ -104,7 +104,7 @@ function DocumentFormPage(properties: DocumentFormPage.Attributes) {
         }
     }
 
-    let actions = Object.values(domain.$links)
+    let actions = Object.values(domain.$links || {})
         .filter((link) => link.method !== "GET")
         .map((link) => <Button type={"submit"} key={link.rel} name={link.rel}>{link.title}</Button>)
 

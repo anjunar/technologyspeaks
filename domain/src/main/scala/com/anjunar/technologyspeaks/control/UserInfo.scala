@@ -61,18 +61,5 @@ object UserInfo extends RepositoryContext[UserInfo](classOf[UserInfo]) with Sche
     }
   }
 
-  val schema = new EntitySchemaDef[UserInfo]("UserInfo") {
-    val id = column[UUID]("id")
-      .visibleWhen(GlobalRule)
-    val firstName = column[String]("firstName")
-      .visibleWhen(GlobalRule)
-    val lastName = column[String]("lastName")
-      .visibleWhen(GlobalRule)
-    val image = column[Media]("image")
-      .forType(ctx => Media.schema.buildType(classOf[Media], ctx))
-      .forInstance((media, ctx) => Seq(Media.schema.build(media, ctx)))
-      .visibleWhen(GlobalRule)
-    val birthDate = column[LocalDate]("birthDate")
-      .visibleWhen(GlobalRule)
-  }
+  val schema = EntitySchemaDef(classOf[UserInfo])
 }

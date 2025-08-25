@@ -18,7 +18,7 @@ import jakarta.ws.rs.{BeanParam, MatrixParam, PathParam, QueryParam}
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 
@@ -43,24 +43,26 @@ class EntityParamReader extends ParamReader {
     }
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = {
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
 
     val jsonMapper = JsonMapper()
 
-    val jsonObject = jsonMapper.toJsonObjectForJava(ctx.body().asString())
+    jsonMapper.toJsonObjectForJava(ctx.body().asString())
+      .thenCompose(jsonObject => {
+        entityLoader.load(jsonObject, resolvedClass)
+          .thenCompose(entity => {
+            val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[AnyRef]].schema
 
-    val entity = entityLoader.load(jsonObject, resolvedClass)
+            val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), state.view)
 
-    val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[AnyRef]].schema
-    
-    val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), state.view)
+            val context = JsonContext(null, null, false, null, jsonMapper.registry, schemaBuilder, entityLoader)
 
-    val context = JsonContext(null, null, false, null, jsonMapper.registry, schemaBuilder, entityLoader)
+            jsonMapper.toJava(jsonObject, resolvedClass, context)
+          })
+      })
 
-    val value = jsonMapper.toJava(jsonObject, resolvedClass, context)
 
-    CompletableFuture.completedFuture(value)
   }
 }

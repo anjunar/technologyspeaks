@@ -36,9 +36,6 @@ class EMail extends AbstractEntity with EntityContext[EMail]{
 
 object EMail extends RepositoryContext[EMail](classOf[EMail]) with SchemaProvider[EMail] {
   
-  val schema = new EntitySchemaDef[EMail]("EMail") {
-    val id = column[UUID]("id")
-    val value = column[String]("value")
-  }
+  val schema = EntitySchemaDef(classOf[EMail])
   
 }

@@ -22,7 +22,7 @@ import jakarta.ws.rs.core.MediaType
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 
@@ -47,7 +47,7 @@ class EntityWriter extends MessageBodyWriter {
     }
   }
 
-  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef]): CompletableFuture[String] = {
+  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef]): CompletionStage[String] = {
 
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
@@ -79,7 +79,7 @@ class EntityWriter extends MessageBodyWriter {
               })
           })
         })
-        write(entity, resolvedClass, schemaBuilder, schemaBuilderType)
+        write2(entity, resolvedClass, schemaBuilder, schemaBuilderType)
       case _ =>
         val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[Any]].schema
         val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), state.view)
@@ -94,23 +94,25 @@ class EntityWriter extends MessageBodyWriter {
               })
           })
         })
-        write(entity, resolvedClass, schemaBuilder, schemaBuilderType)
+        write2(entity, resolvedClass, schemaBuilder, schemaBuilderType)
     }
   }
 
-  def write(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: SchemaBuilder, schemaBuilderType: SchemaBuilder) = {
+  def write2(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: SchemaBuilder, schemaBuilderType: SchemaBuilder): CompletionStage[String] = {
     val jsonMapper = JsonMapper()
 
     val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, null)
 
-    val jsonObject = jsonMapper.toJson(entity.asInstanceOf[AnyRef], resolvedClass, context)
+    jsonMapper.toJson(entity.asInstanceOf[AnyRef], resolvedClass, context)
+      .thenCompose(jsonObject => {
+        val objectDescriptor = JsonDescriptorsGenerator.generateObject(resolvedClass, schemaBuilderType, JsonDescriptorsContext(null))
 
-    val objectDescriptor = JsonDescriptorsGenerator.generateObject(resolvedClass, schemaBuilderType, JsonDescriptorsContext(null))
+        jsonMapper.toJson(objectDescriptor, TypeResolver.resolve(classOf[ObjectDescriptor]), context)
+          .thenCompose(descriptors => {
+            jsonObject.value.put("$descriptors", descriptors)
 
-    jsonObject.value.put("$descriptors", jsonMapper.toJson(objectDescriptor, TypeResolver.resolve(classOf[ObjectDescriptor]), context))
-
-    val string = jsonMapper.toJsonObjectForJson(jsonObject)
-
-    CompletableFuture.completedFuture(string)
+            jsonMapper.toJsonObjectForJson(jsonObject)
+          })
+      })
   }
 }

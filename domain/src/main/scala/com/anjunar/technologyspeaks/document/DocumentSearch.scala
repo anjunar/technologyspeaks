@@ -16,8 +16,6 @@ class DocumentSearch {
 
 object DocumentSearch extends SchemaProvider[DocumentSearch] {
 
-  val schema = new EntitySchemaDef[DocumentSearch]("DocumentSearch") {
-    val text = column[String]("text")
-  }
+  val schema = EntitySchemaDef(classOf[DocumentSearch])
 
 }

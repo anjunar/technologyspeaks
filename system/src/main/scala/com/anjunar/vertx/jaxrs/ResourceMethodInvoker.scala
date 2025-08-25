@@ -26,20 +26,24 @@ class ResourceMethodInvoker {
 
   def invoke(ctx: RoutingContext, sessionHandler: SessionHandler, state: StateDef, transitions: Seq[StateDef], instance: AnyRef): CompletableFuture[(String, String)] = {
 
-    val futures = state.method.parameters.map(parameter => {
-      paramReaders.stream()
-        .filter(reader => reader.canRead(ctx, parameter.parameterType, parameter.annotations))
-        .findFirst()
-        .get()
-        .read(ctx, sessionHandler, parameter.parameterType, parameter.annotations, state)
-    })
+    val futures = state.method.parameters
+      .map(parameter => {
+        paramReaders.stream()
+          .filter(reader => reader.canRead(ctx, parameter.parameterType, parameter.annotations))
+          .findFirst()
+          .get()
+          .read(ctx, sessionHandler, parameter.parameterType, parameter.annotations, state)
+          .toCompletableFuture
+      })
 
-    val compositeFuture = CompletableFuture.allOf(futures*)
-
+    val compositeFuture =
+      if (futures.isEmpty) CompletableFuture.completedFuture[Void](null)
+      else CompletableFuture.allOf(futures *)
+      
     compositeFuture
       .thenCompose(async => {
         val parameters = futures.map(future => future.get())
-        state.method.invoke(instance, parameters*)
+        state.method.invoke(instance, parameters *)
           .asInstanceOf[CompletableFuture[AnyRef]]
           .thenCompose(async => {
             val bodyWriter = bodyWriters.stream()

@@ -5,6 +5,7 @@ import com.anjunar.scala.mapper.intermediate.model.{JsonNode, JsonObject}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 
 import java.util
+import java.util.concurrent.CompletionStage
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.*
 
@@ -27,5 +28,5 @@ class JsonMapConverter extends JsonAbstractConverter(TypeResolver.resolve(classO
     case _ => throw new IllegalStateException("No Collection")
 
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): Any = ???
+  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = ???
 }

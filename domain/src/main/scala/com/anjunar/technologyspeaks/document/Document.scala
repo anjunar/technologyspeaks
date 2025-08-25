@@ -1,7 +1,7 @@
 package com.anjunar.technologyspeaks.document
 
 import com.anjunar.jaxrs.types.OwnerProvider
-import com.anjunar.jpa.RepositoryContext
+import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.scala.mapper.file.{File, FileContext}
 import com.anjunar.security.SecurityUser
@@ -28,7 +28,7 @@ import java.lang
 
 @Entity
 @Audited
-class Document extends AbstractEntity with OwnerProvider {
+class Document extends AbstractEntity with OwnerProvider with EntityContext[Document] {
 
   @Size(min = 3, max = 80)
   @PropertyDescriptor(title = "Title")
@@ -73,9 +73,6 @@ class Document extends AbstractEntity with OwnerProvider {
 
 object Document extends RepositoryContext[Document](classOf[Document]) with SchemaProvider[Document] {
 
-  val schema = new EntitySchemaDef[Document]("Document") {
-    val id = column[UUID]("id")
-    val title = column[String]("title")
-  }
+  val schema = EntitySchemaDef(classOf[Document])
   
 }

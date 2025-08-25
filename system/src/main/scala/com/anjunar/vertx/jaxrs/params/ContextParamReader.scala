@@ -12,7 +12,7 @@ import org.jboss.weld.context.SessionContext
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 
 class ContextParamReader extends ParamReader {
 
@@ -20,7 +20,7 @@ class ContextParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[Context])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = {
     javaType.raw match {
       case clazz : Class[?] if clazz == classOf[RoutingContext] => CompletableFuture.completedFuture(ctx)
       case clazz : Class[?] if clazz == classOf[SessionHandler] => CompletableFuture.completedFuture(sessionHandler)

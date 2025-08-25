@@ -75,7 +75,7 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
     }
   }
 
-  val schema = new EntitySchemaDef[User]("User") {
+  val schema = new EntitySchemaDef[User](classOf[User]) {
     val id = column[UUID]("id", views = Set(SchemaView.Full, SchemaView.Compact))
     val nickName = column[String]("nickName", views = Set(SchemaView.Full, SchemaView.Compact))
       .visibleWhen(NicknameRule)

@@ -5,6 +5,7 @@ import com.anjunar.scala.mapper.intermediate.model.{JsonArray, JsonNode}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 
 import java.util
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.jdk.CollectionConverters.*
 
 class JsonArrayConverter extends JsonAbstractConverter(TypeResolver.resolve(classOf[util.Collection[?]])) {
@@ -20,7 +21,7 @@ class JsonArrayConverter extends JsonAbstractConverter(TypeResolver.resolve(clas
       )
     case _ => throw new IllegalStateException("No Collection")
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): Any = jsonNode match
+  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = jsonNode match
     case array : JsonArray =>
 
       val collection: util.Collection[Any] = aType.raw match
@@ -30,8 +31,15 @@ class JsonArrayConverter extends JsonAbstractConverter(TypeResolver.resolve(clas
       val registry = context.registry
       val converter = registry.find(aType.typeArguments.head)
 
-      array.value.foreach(node => collection.add(converter.toJava(node, aType.typeArguments.head, context)))
-
-      collection
+      val futures = array.value.map(node => converter.toJava(node, aType.typeArguments.head, context).toCompletableFuture)
+      
+      CompletableFuture.allOf(futures.toArray*)
+        .thenApply(_ => {
+          futures.foreach(future => {
+            collection.add(future.join())
+          })
+          collection
+        })
+      
     case _ => throw IllegalStateException("No JsonArray")
 }

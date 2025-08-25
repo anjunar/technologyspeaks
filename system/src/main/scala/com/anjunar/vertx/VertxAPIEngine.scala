@@ -58,7 +58,8 @@ class VertxAPIEngine {
                 .send(result)
             })
         } else {
-          handler.fail(403)
+          handler.response.setStatusCode(403)
+          handler.response.send()
         }
 
       })

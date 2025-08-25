@@ -7,6 +7,7 @@ import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.{ChronoUnit, Temporal}
 import java.time.{LocalDate, LocalDateTime, LocalTime}
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 
 class JsonTemporalConverter extends JsonAbstractConverter(TypeResolver.resolve(classOf[Temporal])) {
 
@@ -16,9 +17,9 @@ class JsonTemporalConverter extends JsonAbstractConverter(TypeResolver.resolve(c
     case localTime : LocalTime  => JsonString(localTime.truncatedTo(ChronoUnit.MINUTES).format(DateTimeFormatter.ISO_TIME))
     case _ => throw new IllegalStateException(s"Unhandled time object ${instance}")
   
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): Any = {
+  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
     val method = aType.findDeclaredMethod("parse", classOf[CharSequence])
-    method.invoke(null, jsonNode.value)
+    CompletableFuture.completedFuture(method.invoke(null, jsonNode.value))
   }
   
 }

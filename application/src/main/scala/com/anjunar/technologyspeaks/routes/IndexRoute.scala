@@ -77,7 +77,7 @@ class IndexRoute extends Handler[RoutingContext] {
                 ws.close()
               case "redirect" =>
                 ctx.response()
-                  .putHeader("location", json.getString("redirect"))
+                  .putHeader("location", json.getString("url"))
                   .setStatusCode(302)
                   .end()
                 ws.close()

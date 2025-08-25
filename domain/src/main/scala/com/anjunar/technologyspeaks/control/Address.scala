@@ -46,13 +46,7 @@ class Address extends AbstractEntity with EntityContext[Address] {
 
 object Address extends RepositoryContext[Address](classOf[Address]) with SchemaProvider[Address] {
 
-  val schema = new EntitySchemaDef[Address]("Address") {
-    val id = column[UUID]("id")
-    val street = column[String]("street")
-    val number = column[String]("number")
-    val zipCode = column[String]("zipCode")
-    val country = column[String]("country")
-  }
+  val schema = EntitySchemaDef(classOf[Address])
 
 
 }

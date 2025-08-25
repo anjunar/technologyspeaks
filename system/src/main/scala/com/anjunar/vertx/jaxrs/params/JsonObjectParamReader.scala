@@ -11,7 +11,7 @@ import io.vertx.ext.web.handler.SessionHandler
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 
 class JsonObjectParamReader extends ParamReader {
 
@@ -19,6 +19,6 @@ class JsonObjectParamReader extends ParamReader {
     javaType.raw == classOf[JsonObject]
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = CompletableFuture.completedFuture(ctx.body().asJsonObject())
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = CompletableFuture.completedFuture(ctx.body().asJsonObject())
   
 }

@@ -13,7 +13,7 @@ class Table[E](@(PropertyDescriptor @field)(title = "Rows", widget = "table") va
                @(PropertyDescriptor @field)(title = "Size") val size: Long)
 
 object Table extends DynamicSchemaProvider {
-  def schema[E](clazz: Class[E], view: SchemaView) = new EntitySchemaDef[Table[E]]("Table") {
+  def schema[E](clazz: Class[E], view: SchemaView) = new EntitySchemaDef[Table[E]](classOf[Table[E]]) {
     val rows = column[util.List[E]]("rows")
       .forType(ctx => {
         val schemaDef = TypeResolver.companionInstance(clazz).asInstanceOf[SchemaProvider[E]]

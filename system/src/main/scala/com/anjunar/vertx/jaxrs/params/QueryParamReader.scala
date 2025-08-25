@@ -16,7 +16,7 @@ import org.hibernate.reactive.stage.Stage
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
 import java.util.UUID
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 
 @ApplicationScoped
@@ -29,7 +29,7 @@ class QueryParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[QueryParam])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletableFuture[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = {
     val value = ctx.queryParam(annotations.find(annotation => annotation.annotationType() == classOf[QueryParam]).get.asInstanceOf[QueryParam].value())
 
     if (value.isEmpty) {
