@@ -3,9 +3,12 @@ package com.anjunar.jaxrs.types
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.scala.universe.TypeResolver
 import com.anjunar.vertx.engine.{DynamicSchemaProvider, EntitySchemaDef, SchemaProvider, SchemaView}
+import io.netty.util.concurrent.CompleteFuture
+import org.hibernate.reactive.stage.Stage
 
 import java.util
 import java.util.List
+import java.util.concurrent.CompletableFuture
 import scala.annotation.meta.field
 import scala.jdk.CollectionConverters.*
 
@@ -19,9 +22,9 @@ object Table extends DynamicSchemaProvider {
         val schemaDef = TypeResolver.companionInstance(clazz).asInstanceOf[SchemaProvider[E]]
         schemaDef.schema.buildType(clazz, ctx, view)
       })
-      .forInstance((list, ctx) => {
+      .forInstance((list, ctx, session) => {
         val schemaDef = TypeResolver.companionInstance(clazz).asInstanceOf[SchemaProvider[E]]
-        list.asScala.map(elem => schemaDef.schema.build(elem, ctx, view)).toSeq
+        list.asScala.map(elem => schemaDef.schema.build(elem, ctx, session, view)).toSeq
       })
     val size = column[Long]("size")
   }

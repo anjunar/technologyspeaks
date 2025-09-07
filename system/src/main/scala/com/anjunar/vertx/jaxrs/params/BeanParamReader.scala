@@ -12,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Instance
 import jakarta.inject.Inject
 import jakarta.ws.rs.BeanParam
+import org.hibernate.reactive.stage.Stage
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
@@ -29,7 +30,7 @@ class BeanParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[BeanParam])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, session: Stage.Session): CompletionStage[Any] = {
 
     val model = DescriptionIntrospector.create(javaType)
     val instance : AnyRef = model.underlying.findConstructor().underlying.newInstance()
@@ -38,7 +39,7 @@ class BeanParamReader extends ParamReader {
         .filter(reader => reader.canRead(ctx, property.propertyType, property.annotations))
         .findFirst()
         .get()
-        .read(ctx, sessionHandler, property.propertyType, property.annotations, state)
+        .read(ctx, sessionHandler, property.propertyType, property.annotations, state, session)
         .thenApply(async => {
           property.set(instance, async)
         })

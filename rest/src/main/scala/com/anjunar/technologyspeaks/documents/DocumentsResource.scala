@@ -19,21 +19,16 @@ import scala.compiletime.uninitialized
 @Path("documents")
 class DocumentsResource {
 
-  @Inject
-  var sessionFactory: Stage.SessionFactory = uninitialized
-
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))  
-  def list(@Context ctx: RoutingContext, @BeanParam search : DocumentSearch): CompletableFuture[Table[Document]] = {
-    sessionFactory
-      .withTransaction((session, tx) => {
-        session
-          .createQuery("from Document", classOf[Document])
-          .getResultList
-          .thenApply(documents => new Table[Document](documents, documents.size()))
-      })
-      .toCompletableFuture
+  def list(@Context ctx: RoutingContext, 
+           @Context session : Stage.Session, 
+           @BeanParam search : DocumentSearch): CompletionStage[Table[Document]] = {
+    session
+      .createQuery("from Document", classOf[Document])
+      .getResultList
+      .thenApply(documents => new Table[Document](documents, documents.size()))
   }
   
 }

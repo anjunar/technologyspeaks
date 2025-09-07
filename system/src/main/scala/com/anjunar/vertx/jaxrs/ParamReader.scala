@@ -6,6 +6,7 @@ import com.anjunar.vertx.fsm.StateDef
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.SessionHandler
+import org.hibernate.reactive.stage.Stage
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
@@ -15,6 +16,6 @@ trait ParamReader {
   
   def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean
   
-  def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any]
+  def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, session: Stage.Session): CompletionStage[Any]
 
 }

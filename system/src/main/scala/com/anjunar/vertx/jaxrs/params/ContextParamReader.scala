@@ -8,6 +8,7 @@ import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.SessionHandler
 import jakarta.ws.rs.core.Context
+import org.hibernate.reactive.stage.Stage
 import org.jboss.weld.context.SessionContext
 
 import java.lang.annotation.Annotation
@@ -20,10 +21,11 @@ class ContextParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[Context])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, session: Stage.Session): CompletionStage[Any] = {
     javaType.raw match {
       case clazz : Class[?] if clazz == classOf[RoutingContext] => CompletableFuture.completedFuture(ctx)
       case clazz : Class[?] if clazz == classOf[SessionHandler] => CompletableFuture.completedFuture(sessionHandler)
+      case clazz : Class[?] if clazz == classOf[Stage.Session] => CompletableFuture.completedFuture(session)
     }
     
   }

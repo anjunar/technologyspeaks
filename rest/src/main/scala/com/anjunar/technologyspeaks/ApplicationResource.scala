@@ -11,7 +11,7 @@ import jakarta.ws.rs.{GET, Path, Produces}
 import org.hibernate.reactive.stage.Stage
 
 import java.util.UUID
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import javax.ws.rs.core.MediaType
 import scala.compiletime.uninitialized
 
@@ -19,13 +19,10 @@ import scala.compiletime.uninitialized
 @Path("/")
 class ApplicationResource {
   
-  @Inject
-  var sessionFactory : Stage.SessionFactory = uninitialized
-  
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
-  def load(@Context event : RoutingContext): CompletableFuture[Application] = {
+  def load(@Context event : RoutingContext, @Context session : Stage.Session): CompletionStage[Application] = {
     val user = event.user()
 
     if (user.get("username") == "Anonymous") {
@@ -37,14 +34,12 @@ class ApplicationResource {
       CompletableFuture.completedFuture(application)
     } else {
       val id = user.principal().getString("id")
-      sessionFactory.withSession(implicit session => {
-        User.find(session.getEntityGraph(classOf[User], "User.full"), UUID.fromString(id))
-          .thenApply(user => {
-            val application = new Application
-            application.user = user
-            application
-          })
-      }).toCompletableFuture
+      User.find(UUID.fromString(id))(using session)
+        .thenApply(user => {
+          val application = new Application
+          application.user = user
+          application
+        })
     }
 
   }

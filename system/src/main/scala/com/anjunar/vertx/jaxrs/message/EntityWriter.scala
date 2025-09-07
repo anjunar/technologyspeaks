@@ -19,6 +19,7 @@ import jakarta.inject.Inject
 import jakarta.validation.Validator
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
+import org.hibernate.reactive.stage.Stage
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
@@ -47,7 +48,7 @@ class EntityWriter extends MessageBodyWriter {
     }
   }
 
-  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef]): CompletionStage[String] = {
+  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef], session: Stage.Session): CompletionStage[String] = {
 
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
@@ -56,49 +57,54 @@ class EntityWriter extends MessageBodyWriter {
       case table: Table[AnyRef] =>
         val tableType = resolvedClass.typeArguments(0).raw.asInstanceOf[Class[AnyRef]]
         val entitySchemaDef = Table.schema(tableType, state.view)
-        val schemaBuilder = entitySchemaDef.build(entity.asInstanceOf[Table[AnyRef]], RequestContext(user, roles), state.view)
+        val schemaBuilder = entitySchemaDef.build(entity.asInstanceOf[Table[AnyRef]], RequestContext(user, roles), session, state.view)
         val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Table[AnyRef]]], RequestContext(user, roles), state.view)
-
-        table.rows.forEach(item => {
-          schemaBuilder.forInstance(item, item.getClass.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
+        
+        schemaBuilder.thenCompose(schemaBuilder => {
+          table.rows.forEach(item => {
+            schemaBuilder.forInstance(item, item.getClass.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
+              builder.withLinks((entity, context) => {
+                transitions
+                  .filter(state => (!state.isRef || state.ref == item.getClass) && state.rolesAllowed.exists(role => roles.contains(role)))
+                  .foreach(state => {
+                    context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
+                  })
+              })
+            })
+          })
+          schemaBuilder.forInstance(entity, resolvedClass.raw.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
             builder.withLinks((entity, context) => {
               transitions
-                .filter(state => (!state.isRef || state.ref == item.getClass) && state.rolesAllowed.exists(role => roles.contains(role)))
+                .filter(state => (!state.isRef || state.ref == classOf[Table[?]]) && state.rolesAllowed.exists(role => roles.contains(role)))
                 .foreach(state => {
                   context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
                 })
             })
           })
+          write2(entity, resolvedClass, schemaBuilder, schemaBuilderType, session)
         })
-        schemaBuilder.forInstance(entity, resolvedClass.raw.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
-          builder.withLinks((entity, context) => {
-            transitions
-              .filter(state => (!state.isRef || state.ref == classOf[Table[?]]) && state.rolesAllowed.exists(role => roles.contains(role)))
-              .foreach(state => {
-                context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
-              })
-          })
-        })
-        write2(entity, resolvedClass, schemaBuilder, schemaBuilderType)
       case _ =>
         val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[Any]].schema
-        val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), state.view)
+        val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), session, state.view)
         val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Any]], RequestContext(user, roles), state.view)
 
-        schemaBuilder.forInstance(entity, resolvedClass.raw.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
-          builder.withLinks((entity, context) => {
-            transitions
-              .filter(state => (!state.isRef || state.ref == resolvedClass.raw) && state.rolesAllowed.exists(role => roles.contains(role)))
-              .foreach(state => {
-                context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
-              })
+        schemaBuilder.thenCompose(schemaBuilder => {
+          schemaBuilder.forInstance(entity, resolvedClass.raw.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
+            builder.withLinks((entity, context) => {
+              transitions
+                .filter(state => (!state.isRef || state.ref == resolvedClass.raw) && state.rolesAllowed.exists(role => roles.contains(role)))
+                .foreach(state => {
+                  context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
+                })
+            })
           })
+          write2(entity, resolvedClass, schemaBuilder, schemaBuilderType, session)
         })
-        write2(entity, resolvedClass, schemaBuilder, schemaBuilderType)
+        
     }
   }
 
-  def write2(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: SchemaBuilder, schemaBuilderType: SchemaBuilder): CompletionStage[String] = {
+  def write2(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: SchemaBuilder, schemaBuilderType: SchemaBuilder, session : Stage.Session): CompletionStage[String] = {
     val jsonMapper = JsonMapper()
 
     val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, null)

@@ -81,15 +81,15 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
       .visibleWhen(NicknameRule)
     val emails = column[util.Set[EMail]]("emails")
       .forType(ctx => EMail.schema.buildType(classOf[EMail], ctx))
-      .forInstance((emails, ctx) => emails.asScala.map(elem => EMail.schema.build(elem, ctx)).toSeq)
+      .forInstance((emails, ctx, session) => emails.asScala.map(elem => EMail.schema.build(elem, ctx, session)).toSeq)
       .visibleWhen(ManagedRule)
     val info = column[UserInfo]("info")
       .forType(ctx => UserInfo.schema.buildType(classOf[UserInfo], ctx))
-      .forInstance((userInfo, ctx) => Seq(UserInfo.schema.build(userInfo, ctx)))
+      .forInstance((userInfo, ctx, session) => Seq(UserInfo.schema.build(userInfo, ctx, session)))
       .visibleWhen(ManagedRule)
     val address = column[Address]("address")
       .forType(ctx => Address.schema.buildType(classOf[Address], ctx))
-      .forInstance((address, ctx) => Seq(Address.schema.build(address, ctx)))
+      .forInstance((address, ctx, session) => Seq(Address.schema.build(address, ctx, session)))
       .visibleWhen(ManagedRule)
   }
 

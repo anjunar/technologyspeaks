@@ -1,10 +1,13 @@
 package com.anjunar.vertx.engine
 
 import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
+import org.hibernate.reactive.stage.Stage
+
+import java.util.concurrent.CompletionStage
 
 case class PropDef[E, T](name: String,
                          var typeHandler: Option[RequestContext => SchemaBuilder] = None,
-                         var instanceHandler: Option[(T, RequestContext) => Seq[SchemaBuilder]] = None,
+                         var instanceHandler: Option[(T, RequestContext, Stage.Session) => Seq[CompletionStage[SchemaBuilder]]] = None,
                          var visibility: VisibilityRule[E] = DefaultRule[E](),
                          var views: Set[SchemaView] = Set(SchemaView.Full),
                          var links: Seq[Link[E]] = Seq[Link[E]]()) {
@@ -14,7 +17,7 @@ case class PropDef[E, T](name: String,
     this
   }
 
-  def forInstance(schema: (T, RequestContext) => Seq[SchemaBuilder]): PropDef[E, T] = {
+  def forInstance(schema: (T, RequestContext, Stage.Session) => Seq[CompletionStage[SchemaBuilder]]): PropDef[E, T] = {
     instanceHandler = Some(schema)
     this
   }

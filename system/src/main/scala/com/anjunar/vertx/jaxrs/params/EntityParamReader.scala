@@ -15,6 +15,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.{BeanParam, MatrixParam, PathParam, QueryParam}
+import org.hibernate.reactive.stage.Stage
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
@@ -43,7 +44,7 @@ class EntityParamReader extends ParamReader {
     }
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef, session: Stage.Session): CompletionStage[Any] = {
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
 
@@ -55,11 +56,13 @@ class EntityParamReader extends ParamReader {
           .thenCompose(entity => {
             val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[AnyRef]].schema
 
-            val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), state.view)
+            entitySchemaDef.build(entity, RequestContext(user, roles), session, state.view)
+              .thenCompose(schemaBuilder => {
+                val context = JsonContext(null, null, false, null, jsonMapper.registry, schemaBuilder, entityLoader)
 
-            val context = JsonContext(null, null, false, null, jsonMapper.registry, schemaBuilder, entityLoader)
+                jsonMapper.toJava(jsonObject, resolvedClass, context)
+              })
 
-            jsonMapper.toJava(jsonObject, resolvedClass, context)
           })
       })
 

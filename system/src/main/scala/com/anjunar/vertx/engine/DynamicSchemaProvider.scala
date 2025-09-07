@@ -1,6 +1,7 @@
 package com.anjunar.vertx.engine
 
 import com.anjunar.jaxrs.types.Table
+import org.hibernate.reactive.stage.Stage
 
 trait DynamicSchemaProvider {
 

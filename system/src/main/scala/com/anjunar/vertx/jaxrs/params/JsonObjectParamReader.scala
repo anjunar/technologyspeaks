@@ -8,6 +8,7 @@ import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.SessionHandler
+import org.hibernate.reactive.stage.Stage
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
@@ -19,6 +20,6 @@ class JsonObjectParamReader extends ParamReader {
     javaType.raw == classOf[JsonObject]
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef): CompletionStage[Any] = CompletableFuture.completedFuture(ctx.body().asJsonObject())
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, session: Stage.Session): CompletionStage[Any] = CompletableFuture.completedFuture(ctx.body().asJsonObject())
   
 }
