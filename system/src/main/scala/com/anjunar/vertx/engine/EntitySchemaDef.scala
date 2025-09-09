@@ -42,8 +42,8 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
 
     builder.forInstance(entity, entity.getClass.asInstanceOf[Class[E]], (builder: EntitySchemaBuilder[E]) => {
 
-      val visibilityFutures = props.map(p => p.name -> p.visibility.isVisible(entity, p.name, ctx).toCompletableFuture).toMap
-      val writeableFutures = props.map(p => p.name -> p.visibility.isWriteable(entity, p.name, ctx).toCompletableFuture).toMap
+      val visibilityFutures = props.map(p => p.name -> p.visibility.isVisible(entity, p.name, ctx, session).toCompletableFuture).toMap
+      val writeableFutures = props.map(p => p.name -> p.visibility.isWriteable(entity, p.name, ctx, session).toCompletableFuture).toMap
 
       CompletableFuture.allOf((visibilityFutures.values ++ writeableFutures.values).toSeq*)
         .thenAccept(_ => {
@@ -73,8 +73,8 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
                                   schemaFutures.foreach { sf =>
                                     sf.thenAccept(schema => {
                                       val mappingOpt = schema.instanceMapping.get(instance)
-                                      if (mappingOpt != null) {
-                                        childBuilder.mapping.addAll(mappingOpt.asInstanceOf[Map[String, PropertyBuilder[Any]]])
+                                      if (mappingOpt.isDefined) {
+                                        childBuilder.mapping.addAll(mappingOpt.get.mapping.asInstanceOf[mutable.Map[String, PropertyBuilder[Any]]])
                                       }
                                     })
                                   }
