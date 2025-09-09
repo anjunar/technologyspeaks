@@ -54,7 +54,6 @@ class Document extends AbstractEntity with OwnerProvider with EntityContext[Docu
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true, mappedBy = "document", targetEntity = classOf[Chunk])
   @NotAudited
-  @BeanProperty  
   val chunks: util.List[Chunk] = new util.ArrayList[Chunk]()
 
   @PropertyDescriptor(title = "HashTags", widget = "form-array")
@@ -73,6 +72,8 @@ class Document extends AbstractEntity with OwnerProvider with EntityContext[Docu
 
 object Document extends RepositoryContext[Document](classOf[Document]) with SchemaProvider[Document] {
 
-  val schema = EntitySchemaDef(classOf[Document])
+  val schema = new EntitySchemaDef(classOf[Document]) {
+
+  }
   
 }

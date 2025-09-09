@@ -53,13 +53,6 @@ class UserInfo extends AbstractEntity {
 
 object UserInfo extends RepositoryContext[UserInfo](classOf[UserInfo]) with SchemaProvider[UserInfo] {
 
-  object GlobalRule extends VisibilityRule[UserInfo] {
-    override def isVisible(entity: UserInfo, property: String, ctx: RequestContext): Boolean = true
-
-    override def isWriteable(entity: UserInfo, property: String, ctx: RequestContext): Boolean = {
-      ctx.currentUser.get("id") == entity.user.id.toString || ctx.roles.contains("Administrator")
-    }
-  }
-
   val schema = EntitySchemaDef(classOf[UserInfo])
+  
 }

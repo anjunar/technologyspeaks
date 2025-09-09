@@ -61,17 +61,17 @@ class User extends Identity with OwnerProvider with SecurityUser with EntityCont
 object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[User] {
 
   object NicknameRule extends VisibilityRule[User] {
-    override def isVisible(entity: User, property: String, ctx: RequestContext): Boolean = true
-    override def isWriteable(entity: User, property: String, ctx: RequestContext): Boolean = {
-      ctx.currentUser.get("id") == entity.id.toString || ctx.roles.contains("Administrator")
+    override def isVisible(entity: User, property: String, ctx: RequestContext): CompletionStage[Boolean] = CompletableFuture.completedFuture(true)
+    override def isWriteable(entity: User, property: String, ctx: RequestContext): CompletionStage[Boolean] = {
+      CompletableFuture.completedFuture(ctx.currentUser.get("id") == entity.id.toString || ctx.roles.contains("Administrator"))
     }
   }
 
   object ManagedRule extends VisibilityRule[User] {
-    override def isVisible(entity: User, property: String, ctx: RequestContext): Boolean = true
+    override def isVisible(entity: User, property: String, ctx: RequestContext): CompletionStage[Boolean] = CompletableFuture.completedFuture(true)
 
-    override def isWriteable(entity: User, property: String, ctx: RequestContext): Boolean = {
-      ctx.currentUser.get("id") == entity.id.toString || ctx.roles.contains("Administrator")
+    override def isWriteable(entity: User, property: String, ctx: RequestContext): CompletionStage[Boolean] = {
+      CompletableFuture.completedFuture(ctx.currentUser.get("id") == entity.id.toString || ctx.roles.contains("Administrator"))
     }
   }
 

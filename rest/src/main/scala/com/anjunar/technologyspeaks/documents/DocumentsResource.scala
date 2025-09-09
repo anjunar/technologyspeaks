@@ -15,20 +15,40 @@ import org.hibernate.reactive.stage.Stage
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 
-@ApplicationScoped
-@Path("documents")
-class DocumentsResource {
+object DocumentsResource {
 
-  @GET
-  @Produces(Array(MediaType.APPLICATION_JSON))
-  @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))  
-  def list(@Context ctx: RoutingContext, 
-           @Context session : Stage.Session, 
-           @BeanParam search : DocumentSearch): CompletionStage[Table[Document]] = {
-    session
-      .createQuery("from Document", classOf[Document])
-      .getResultList
-      .thenApply(documents => new Table[Document](documents, documents.size()))
+  @ApplicationScoped
+  @Path("documents/search")
+  class Search {
+
+    @Inject
+    var sessionFactory: Stage.SessionFactory = uninitialized
+
+    @GET
+    @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
+    def search(@Context ctx: RoutingContext, @BeanParam documentSearch: DocumentSearch): CompletableFuture[DocumentSearch] = {
+      CompletableFuture.completedFuture(documentSearch)
+    }
+
   }
-  
+
+  @ApplicationScoped
+  @Path("documents")
+  class List {
+
+    @GET
+    @Produces(Array(MediaType.APPLICATION_JSON))
+    @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
+    def list(@Context ctx: RoutingContext,
+             @Context session: Stage.Session,
+             @BeanParam search: DocumentSearch): CompletionStage[Table[Document]] = {
+      session
+        .createQuery("from Document", classOf[Document])
+        .getResultList
+        .thenApply(documents => new Table[Document](documents, documents.size()))
+    }
+
+  }
+
+
 }
