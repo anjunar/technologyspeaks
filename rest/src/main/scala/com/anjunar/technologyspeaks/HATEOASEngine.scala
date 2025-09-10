@@ -1,12 +1,14 @@
 package com.anjunar.technologyspeaks
 
 import com.anjunar.jaxrs.types.Table
+import com.anjunar.technologyspeaks.control.UsersResource
 import com.anjunar.technologyspeaks.document.Document
 import com.anjunar.technologyspeaks.documents.DocumentsResource
 import com.anjunar.technologyspeaks.documents.document.DocumentResource
 import com.anjunar.technologyspeaks.security.{LoginFinishResource, LoginOptionsResource, RegisterFinishResource, RegisterOptionsResource}
 import com.anjunar.vertx.fsm.{FSMBuilder, FSMEngine, StateDef}
 import jakarta.enterprise.context.ApplicationScoped
+import org.hibernate.boot.model.process.internal.UserTypeResolution
 
 @ApplicationScoped
 class HATEOASEngine extends FSMEngine {
@@ -49,6 +51,20 @@ class HATEOASEngine extends FSMEngine {
             ), registerFinish => Seq(loginOptions)
           )
         ))
+      
+      val userSearch = fsm.transition(
+        StateDef(
+          rel = "users",
+          name = "Search",
+          resource = classOf[UsersResource.Search]
+        ), userSearch => Seq(
+          fsm.transition(StateDef(
+            rel = "list",
+            name = "Search",
+            resource = classOf[UsersResource.List]
+          ), userList => Seq())
+        )
+      )
 
       val documentSearch = fsm.transition(
         StateDef(
@@ -99,7 +115,7 @@ class HATEOASEngine extends FSMEngine {
               )))
         })
 
-      Seq(loginOptions, registerOptions, documentSearch)
+      Seq(loginOptions, registerOptions, userSearch, documentSearch)
     }
   )
 

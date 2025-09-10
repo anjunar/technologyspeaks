@@ -1,4 +1,4 @@
-package com.anjunar.technologyspeaks.documents
+package com.anjunar.technologyspeaks.control
 
 import com.anjunar.jaxrs.types.Table
 import com.anjunar.technologyspeaks.document.{Document, DocumentSearch}
@@ -15,25 +15,25 @@ import org.hibernate.reactive.stage.Stage
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 
-object DocumentsResource {
+object UsersResource {
 
   @ApplicationScoped
-  @Path("documents/search")
+  @Path("control/users/search")
   class Search {
 
     @Inject
     var sessionFactory: Stage.SessionFactory = uninitialized
 
     @GET
-    @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
-    def search(@Context ctx: RoutingContext, @BeanParam documentSearch: DocumentSearch): CompletableFuture[DocumentSearch] = {
-      CompletableFuture.completedFuture(documentSearch)
+    @RolesAllowed(Array("User", "Administrator"))
+    def search(@Context ctx: RoutingContext, @BeanParam search: UserSearch): CompletableFuture[UserSearch] = {
+      CompletableFuture.completedFuture(search)
     }
 
   }
 
   @ApplicationScoped
-  @Path("documents")
+  @Path("control/users")
   class List {
 
     @Inject
@@ -41,14 +41,14 @@ object DocumentsResource {
 
     @GET
     @Produces(Array(MediaType.APPLICATION_JSON))
-    @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
+    @RolesAllowed(Array("User", "Administrator"))
     def list(@Context ctx: RoutingContext,
-             @BeanParam search: DocumentSearch): CompletionStage[Table[Document]] = {
+             @BeanParam search: UserSearch): CompletionStage[Table[User]] = {
       sessionFactory.withSession(session => {
         session
-          .createQuery("from Document", classOf[Document])
+          .createQuery("from User u join fetch u.emails", classOf[User])
           .getResultList
-          .thenApply(documents => new Table[Document](documents, documents.size()))
+          .thenApply(documents => new Table[User](documents, documents.size()))
       })
     }
 

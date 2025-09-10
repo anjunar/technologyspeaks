@@ -24,14 +24,6 @@ import scala.jdk.CollectionConverters.*
 @PostgresIndices(Array(
   new PostgresIndex(name = "user_idx_nickName", columnList = "nickName", using = "GIN")
 ))
-@NamedEntityGraph(
-  name = "User.full",
-  attributeNodes = Array(
-    new NamedAttributeNode("emails"),
-    new NamedAttributeNode("info"),
-    new NamedAttributeNode("address")
-  )
-)
 class User extends Identity with OwnerProvider with SecurityUser with EntityContext[User]  {
 
   @Size(min = 3, max = 80)
@@ -61,42 +53,42 @@ class User extends Identity with OwnerProvider with SecurityUser with EntityCont
 object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[User] {
 
   object NicknameRule extends VisibilityRule[User] {
-    override def isVisible(entity: User, property: String, ctx: RequestContext, session : Stage.Session): CompletionStage[Boolean] = CompletableFuture.completedFuture(true)
-    override def isWriteable(entity: User, property: String, ctx: RequestContext, session : Stage.Session): CompletionStage[Boolean] = {
+    override def isVisible(entity: User, property: String, ctx: RequestContext, factory : Stage.SessionFactory): CompletionStage[Boolean] = CompletableFuture.completedFuture(true)
+    override def isWriteable(entity: User, property: String, ctx: RequestContext, factory : Stage.SessionFactory): CompletionStage[Boolean] = {
       CompletableFuture.completedFuture(ctx.currentUser.get("id") == entity.id.toString || ctx.roles.contains("Administrator"))
     }
   }
 
   object ManagedRule extends VisibilityRule[User] {
 
-    override def isVisible(entity: User, property: String, ctx: RequestContext, session: Stage.Session): CompletionStage[Boolean] = {
+    override def isVisible(entity: User, property: String, ctx: RequestContext, factory : Stage.SessionFactory): CompletionStage[Boolean] = {
       if (entity.id.toString == ctx.currentUser.get("id") || ctx.roles.contains("Administrator")) {
         CompletableFuture.completedFuture(true)
       } else {
-        User.find(UUID.fromString(ctx.currentUser.get("id")))(using session)
-          .thenCompose(currentUser =>
-            User.View.findByUser(currentUser)(using session)
-              .thenCompose(view => {
-                val opt = view.properties.stream()
-                  .filter(p => p.value == property)
-                  .findFirst()
+        factory.withSession(implicit session => {
+          User.find(UUID.fromString(ctx.currentUser.get("id")))
+            .thenCompose(currentUser =>
+              User.View.findByUser(currentUser)
+                .thenCompose(view => {
+                  val opt = view.properties.stream()
+                    .filter(p => p.value == property)
+                    .findFirst()
 
-                if opt.isPresent then {
-                  val managedProperty = opt.get
-                  CompletableFuture.completedFuture(checkVisibility(managedProperty, ctx))
-                } else {
-                  val managedProperty = new ManagedProperty
-                  managedProperty.view = view
-                  managedProperty.value = property
+                  if opt.isPresent then {
+                    val managedProperty = opt.get
+                    CompletableFuture.completedFuture(checkVisibility(managedProperty, ctx))
+                  } else {
+                    val managedProperty = new ManagedProperty
+                    managedProperty.view = view
+                    managedProperty.value = property
 
-                  session.withTransaction(transaction => {
                     session.persist(managedProperty).thenApply(_ => {
                       checkVisibility(managedProperty, ctx)
                     })
-                  })
-                }
-              })
-          )
+                  }
+                })
+            )
+        })
       }
     }
 
@@ -111,7 +103,7 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
       visibleForAll || isInUsers || isInGroup
     }
 
-    override def isWriteable(entity: User, property: String, ctx: RequestContext, session : Stage.Session): CompletionStage[Boolean] = {
+    override def isWriteable(entity: User, property: String, ctx: RequestContext, factory : Stage.SessionFactory): CompletionStage[Boolean] = {
       CompletableFuture.completedFuture(ctx.currentUser.get("id") == entity.id.toString || ctx.roles.contains("Administrator"))
     }
   }
@@ -122,15 +114,15 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
       .visibleWhen(NicknameRule)
     val emails = column[util.Set[EMail]]("emails")
       .forType(ctx => EMail.schema.buildType(classOf[EMail], ctx))
-      .forInstance((emails, ctx, session) => emails.asScala.map(elem => EMail.schema.build(elem, ctx, session)).toSeq)
+      .forInstance((emails, ctx, factory) => emails.asScala.map(elem => EMail.schema.build(elem, ctx, factory)).toSeq)
       .visibleWhen(ManagedRule)
     val info = column[UserInfo]("info")
       .forType(ctx => UserInfo.schema.buildType(classOf[UserInfo], ctx))
-      .forInstance((userInfo, ctx, session) => Seq(UserInfo.schema.build(userInfo, ctx, session)))
+      .forInstance((userInfo, ctx, factory) => Seq(UserInfo.schema.build(userInfo, ctx, factory)))
       .visibleWhen(ManagedRule)
     val address = column[Address]("address")
       .forType(ctx => Address.schema.buildType(classOf[Address], ctx))
-      .forInstance((address, ctx, session) => Seq(Address.schema.build(address, ctx, session)))
+      .forInstance((address, ctx, factory) => Seq(Address.schema.build(address, ctx, factory)))
       .visibleWhen(ManagedRule)
   }
 

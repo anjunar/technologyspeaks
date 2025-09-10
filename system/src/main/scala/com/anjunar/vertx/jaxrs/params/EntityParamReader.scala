@@ -28,6 +28,9 @@ class EntityParamReader extends ParamReader {
   
   @Inject
   var entityLoader : JsonEntityLoader = uninitialized
+  
+  @Inject
+  var sessionFactory : Stage.SessionFactory = uninitialized  
 
   override def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean = {
     val blackList : Set[Class[? <: Annotation]] = Set(classOf[QueryParam], classOf[BeanParam], classOf[PathParam], classOf[MatrixParam], classOf[Context])
@@ -44,7 +47,7 @@ class EntityParamReader extends ParamReader {
     }
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef, session: Stage.Session): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.SessionFactory): CompletionStage[Any] = {
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
 
@@ -56,7 +59,7 @@ class EntityParamReader extends ParamReader {
           .thenCompose(entity => {
             val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[AnyRef]].schema
 
-            entitySchemaDef.build(entity, RequestContext(user, roles), session, state.view)
+            entitySchemaDef.build(entity, RequestContext(user, roles), factory, state.view)
               .thenCompose(schemaBuilder => {
                 val context = JsonContext(null, null, false, null, jsonMapper.registry, schemaBuilder, entityLoader)
 

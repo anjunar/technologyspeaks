@@ -38,7 +38,7 @@ class ResourceMethodInvoker {
               .filter(reader => reader.canRead(ctx, parameter.parameterType, parameter.annotations))
               .findFirst()
               .get()
-              .read(ctx, sessionHandler, parameter.parameterType, parameter.annotations, state, session)
+              .read(ctx, sessionHandler, parameter.parameterType, parameter.annotations, state, sessionFactory)
               .toCompletableFuture
           })
 
@@ -57,7 +57,7 @@ class ResourceMethodInvoker {
                   .findFirst()
                   .get()
 
-                bodyWriter.write(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions, session)
+                bodyWriter.write(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions, sessionFactory)
                   .thenApply(body => (bodyWriter.contentType, body))
                   .whenComplete((_,_) => {
                     session.close()

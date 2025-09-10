@@ -31,7 +31,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
   def build(
              entity: E,
              ctx: RequestContext,
-             session: Stage.Session,
+             sessionFactory: Stage.SessionFactory,
              view: SchemaView = Full
            ): CompletionStage[SchemaBuilder] = {
 
@@ -42,8 +42,8 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
 
     builder.forInstance(entity, entity.getClass.asInstanceOf[Class[E]], (builder: EntitySchemaBuilder[E]) => {
 
-      val visibilityFutures = props.map(p => p.name -> p.visibility.isVisible(entity, p.name, ctx, session).toCompletableFuture).toMap
-      val writeableFutures = props.map(p => p.name -> p.visibility.isWriteable(entity, p.name, ctx, session).toCompletableFuture).toMap
+      val visibilityFutures = props.map(p => p.name -> p.visibility.isVisible(entity, p.name, ctx, sessionFactory).toCompletableFuture).toMap
+      val writeableFutures = props.map(p => p.name -> p.visibility.isWriteable(entity, p.name, ctx, sessionFactory).toCompletableFuture).toMap
 
       CompletableFuture.allOf((visibilityFutures.values ++ writeableFutures.values).toSeq*)
         .thenAccept(_ => {
@@ -54,39 +54,36 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
               builder.property(property.name, propertyBuilder => {
                 val typeHandlerOpt = property.instanceHandler
                 if (typeHandlerOpt.isDefined) {
-                  val typeHandler = typeHandlerOpt.get.asInstanceOf[(Any, RequestContext, Stage.Session) => Seq[CompletionStage[SchemaBuilder]]]
+                  val typeHandler = typeHandlerOpt.get.asInstanceOf[(Any, RequestContext, Stage.SessionFactory) => Seq[CompletionStage[SchemaBuilder]]]
                   val model = DescriptionIntrospector.createWithType(entity.getClass)
                   val entityProperty = model.findProperty(property.name)
                   val value = entityProperty.get(entity.asInstanceOf[AnyRef])
 
                   value match {
                     case collection: util.Collection[?] =>
-                      val f = session.fetch(collection).thenComposeAsync(coll => {
-                        val schemaFutures = typeHandler(value, ctx, session)
-                        CompletableFuture.allOf(schemaFutures.map(_.toCompletableFuture) *)
-                          .thenAccept(_ => {
-                            coll.forEach { instance =>
-                              propertyBuilder.forInstance(
-                                instance,
-                                instance.getClass.asInstanceOf[Class[Any]],
-                                (childBuilder: EntitySchemaBuilder[Any]) => {
-                                  schemaFutures.foreach { sf =>
-                                    sf.thenAccept(schema => {
-                                      val mappingOpt = schema.instanceMapping.get(instance)
-                                      if (mappingOpt.isDefined) {
-                                        childBuilder.mapping.addAll(mappingOpt.get.mapping.asInstanceOf[mutable.Map[String, PropertyBuilder[Any]]])
-                                      }
-                                    })
-                                  }
+                      val schemaFutures = typeHandler(value, ctx, sessionFactory)
+                      CompletableFuture.allOf(schemaFutures.map(_.toCompletableFuture) *)
+                        .thenAccept(_ => {
+                          collection.forEach { instance =>
+                            propertyBuilder.forInstance(
+                              instance,
+                              instance.getClass.asInstanceOf[Class[Any]],
+                              (childBuilder: EntitySchemaBuilder[Any]) => {
+                                schemaFutures.foreach { sf =>
+                                  sf.thenAccept(schema => {
+                                    val mappingOpt = schema.instanceMapping.get(instance)
+                                    if (mappingOpt.isDefined) {
+                                      childBuilder.mapping.addAll(mappingOpt.get.mapping.asInstanceOf[mutable.Map[String, PropertyBuilder[Any]]])
+                                    }
+                                  })
                                 }
-                              )
-                            }
-                          })
-                      })
-                      futures += f.thenApply(_ => null)
+                              }
+                            )
+                          }
+                        })
 
                     case _ =>
-                      val schemaFutures = typeHandler(value, ctx, session)
+                      val schemaFutures = typeHandler(value, ctx, sessionFactory)
                       val f = CompletableFuture.allOf(schemaFutures.map(_.toCompletableFuture) *)
                         .thenAccept(_ => {
                           schemaFutures.foreach { sf =>

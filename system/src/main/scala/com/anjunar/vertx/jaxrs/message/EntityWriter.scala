@@ -33,6 +33,9 @@ class EntityWriter extends MessageBodyWriter {
   @Inject
   var validator : Validator = uninitialized
 
+  @Inject
+  var sessionFactory: Stage.SessionFactory = uninitialized
+
   override val contentType: String = MediaType.APPLICATION_JSON
 
   override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
@@ -48,7 +51,7 @@ class EntityWriter extends MessageBodyWriter {
     }
   }
 
-  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef], session: Stage.Session): CompletionStage[String] = {
+  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef], factory : Stage.SessionFactory): CompletionStage[String] = {
 
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
@@ -57,7 +60,7 @@ class EntityWriter extends MessageBodyWriter {
       case table: Table[AnyRef] =>
         val tableType = resolvedClass.typeArguments(0).raw.asInstanceOf[Class[AnyRef]]
         val entitySchemaDef = Table.schema(tableType, state.view)
-        val schemaBuilder = entitySchemaDef.build(entity.asInstanceOf[Table[AnyRef]], RequestContext(user, roles), session, state.view)
+        val schemaBuilder = entitySchemaDef.build(entity.asInstanceOf[Table[AnyRef]], RequestContext(user, roles), factory, state.view)
         val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Table[AnyRef]]], RequestContext(user, roles), state.view)
         
         schemaBuilder.thenCompose(schemaBuilder => {
@@ -81,11 +84,11 @@ class EntityWriter extends MessageBodyWriter {
                 })
             })
           })
-          write2(entity, resolvedClass, schemaBuilder, schemaBuilderType, session)
+          write2(entity, resolvedClass, schemaBuilder, schemaBuilderType, factory)
         })
       case _ =>
         val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[Any]].schema
-        val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), session, state.view)
+        val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), factory, state.view)
         val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Any]], RequestContext(user, roles), state.view)
 
         schemaBuilder.thenCompose(schemaBuilder => {
@@ -98,13 +101,13 @@ class EntityWriter extends MessageBodyWriter {
                 })
             })
           })
-          write2(entity, resolvedClass, schemaBuilder, schemaBuilderType, session)
+          write2(entity, resolvedClass, schemaBuilder, schemaBuilderType, factory)
         })
         
     }
   }
 
-  def write2(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: SchemaBuilder, schemaBuilderType: SchemaBuilder, session : Stage.Session): CompletionStage[String] = {
+  def write2(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: SchemaBuilder, schemaBuilderType: SchemaBuilder, session : Stage.SessionFactory): CompletionStage[String] = {
     val jsonMapper = JsonMapper()
 
     val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, null)

@@ -15,6 +15,6 @@ trait MessageBodyWriter {
 
   def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean
 
-  def write(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef], session: Stage.Session): CompletionStage[String]
+  def write(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef], factory : Stage.SessionFactory): CompletionStage[String]
 
 }

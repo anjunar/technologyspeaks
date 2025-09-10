@@ -20,6 +20,6 @@ class JsonObjectParamReader extends ParamReader {
     javaType.raw == classOf[JsonObject]
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, session: Stage.Session): CompletionStage[Any] = CompletableFuture.completedFuture(ctx.body().asJsonObject())
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.SessionFactory): CompletionStage[Any] = CompletableFuture.completedFuture(ctx.body().asJsonObject())
   
 }

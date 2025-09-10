@@ -56,10 +56,10 @@ class HibernateCredentialStore extends CredentialStore {
     }).toCompletableFuture
 
     CompletableFuture.allOf(roleAction, emailAction)
-      .thenCompose(_ => {
-        roleAction.thenCombine(emailAction, (role, eMail) => (role, eMail))
-      })
-      .thenCompose { case (role, eMail) =>
+      .thenCompose { _ =>
+        val role = roleAction.join()
+        val eMail = emailAction.join()
+
         sessionFactory.withTransaction(implicit session => {
           val targetEmailFuture =
             if (eMail == null) {
