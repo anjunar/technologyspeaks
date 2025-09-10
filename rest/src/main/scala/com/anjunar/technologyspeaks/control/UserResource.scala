@@ -1,6 +1,5 @@
-package com.anjunar.technologyspeaks.documents.document
+package com.anjunar.technologyspeaks.control
 
-import com.anjunar.technologyspeaks.document.Document
 import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.core.{MediaType, Response}
@@ -8,70 +7,70 @@ import jakarta.ws.rs.{Consumes, DELETE, GET, POST, PUT, Path, PathParam, Produce
 
 import java.util.concurrent.CompletableFuture
 
-object DocumentResource {
+object UserResource {
 
   @ApplicationScoped
-  @Path("documents/document")
+  @Path("control/users/user")
   class Create {
 
     @GET
     @Produces(Array(MediaType.APPLICATION_JSON))
     @RolesAllowed(Array("User", "Administrator"))
-    def create(): CompletableFuture[Document] = {
-      CompletableFuture.completedFuture(new Document)
+    def create(): CompletableFuture[User] = {
+      CompletableFuture.completedFuture(new User)
     }
 
   }
 
   @ApplicationScoped
-  @Path("documents/document/:id")
-  class Read  {
+  @Path("control/users/user/:id")
+  class Read {
 
     @GET
     @Produces(Array(MediaType.APPLICATION_JSON))
-    @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
-    def read(@PathParam("id") entity: Document): CompletableFuture[Document] = {
+    @RolesAllowed(Array("Guest", "User", "Administrator"))
+    def read(@PathParam("id") entity: User): CompletableFuture[User] = {
       CompletableFuture.completedFuture(entity)
     }
 
   }
 
   @ApplicationScoped
-  @Path("documents/document")
+  @Path("control/users/user")
   class Save {
 
     @POST
     @Consumes(Array(MediaType.APPLICATION_JSON))
     @Produces(Array(MediaType.APPLICATION_JSON))
     @RolesAllowed(Array("User", "Administrator"))
-    def save(entity: Document): CompletableFuture[Document] = {
+    def save(entity: User): CompletableFuture[User] = {
       CompletableFuture.completedFuture(entity)
     }
 
   }
 
   @ApplicationScoped
-  @Path("documents/document")
+  @Path("control/users/user")
   class Update {
 
     @PUT
     @Consumes(Array(MediaType.APPLICATION_JSON))
     @Produces(Array(MediaType.APPLICATION_JSON))
     @RolesAllowed(Array("User", "Administrator"))
-    def update(entity: Document): CompletableFuture[Document] = {
+    def update(entity: User): CompletableFuture[User] = {
       CompletableFuture.completedFuture(entity)
     }
 
   }
 
   @ApplicationScoped
-  @Path("documents/document/:id")
+  @Path("control/users/user/:id")
   class Delete {
 
     @DELETE
     @Produces(Array(MediaType.APPLICATION_JSON))
     @RolesAllowed(Array("User", "Administrator"))
-    def delete(@PathParam("id") entity: Document): CompletableFuture[Response] = {
+    def delete(@PathParam("id") entity: User): CompletableFuture[Response] = {
       CompletableFuture.completedFuture(Response.ok().build())
     }
 

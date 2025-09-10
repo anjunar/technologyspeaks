@@ -1,10 +1,9 @@
 package com.anjunar.technologyspeaks
 
 import com.anjunar.jaxrs.types.Table
-import com.anjunar.technologyspeaks.control.UsersResource
+import com.anjunar.technologyspeaks.control.{User, UserResource, UsersResource}
 import com.anjunar.technologyspeaks.document.Document
-import com.anjunar.technologyspeaks.documents.DocumentsResource
-import com.anjunar.technologyspeaks.documents.document.DocumentResource
+import com.anjunar.technologyspeaks.documents.{DocumentResource, DocumentsResource}
 import com.anjunar.technologyspeaks.security.{LoginFinishResource, LoginOptionsResource, RegisterFinishResource, RegisterOptionsResource}
 import com.anjunar.vertx.fsm.{FSMBuilder, FSMEngine, StateDef}
 import jakarta.enterprise.context.ApplicationScoped
@@ -75,14 +74,49 @@ class HATEOASEngine extends FSMEngine {
         rel = "users",
         name = "Users",
         resource = classOf[UsersResource.Search]
-      ), userSearch => Seq(
-        fsm.transition(StateDef(
-          rel = "list",
-          name = "Search",
-          resource = classOf[UsersResource.List]
-        ), userList => Seq())
-      )
-    )
+      ), search => {
+        val documentDelete = fsm.transition(
+          StateDef(
+            rel = "delete",
+            name = "Delete",
+            resource = classOf[UserResource.Delete]
+          ), delete => Seq(search))
+        Seq(
+          fsm.transition(
+            StateDef(
+              rel = "list",
+              name = "Users",
+              resource = classOf[UsersResource.List]
+            ), list => Seq(
+              fsm.transition(
+                StateDef(
+                  rel = "create",
+                  name = "Create",
+                  ref = classOf[Table[User]],
+                  resource = classOf[UserResource.Create]
+                ), create => Seq(
+                  fsm.transition(
+                    StateDef(
+                      rel = "save",
+                      name = "Save",
+                      resource = classOf[UserResource.Save]
+                    ), save => Seq(search, documentDelete))
+                )),
+              fsm.transition(
+                StateDef(
+                  rel = "read",
+                  name = "Read",
+                  ref = classOf[User],
+                  resource = classOf[UserResource.Read]
+                ), read => Seq(
+                  fsm.transition(
+                    StateDef(
+                      rel = "update",
+                      name = "Update",
+                      resource = classOf[UserResource.Update]
+                    ), update => Seq(search, documentDelete))))
+            )))
+      })
   }
 
   private def documentFlow = {

@@ -1,5 +1,6 @@
 package com.anjunar.jaxrs.json
 
+import com.anjunar.jaxrs.search.jpa.{JPASearch, JPAUtil}
 import com.anjunar.scala.mapper.annotations.DoNotLoad
 import com.anjunar.scala.mapper.intermediate.model.JsonObject
 import com.anjunar.scala.mapper.loader.JsonEntityLoader
@@ -28,14 +29,13 @@ class JsonJPAEntityLoader extends JsonEntityLoader {
     if (option.isDefined && aType.findAnnotation(classOf[Entity]) != null) {
       val entityClass = aType.raw.asInstanceOf[Class[AnyRef]]
       val uuid = UUID.fromString(option.get.value.toString)
-      sessionFactory.openSession.thenCompose(session => {
-        session.find(session.getEntityGraph(entityClass, "full"), uuid)
+      sessionFactory.withSession(session => {
+        session.find(entityClass, uuid)
           .thenApply(entity => {
-            session.close()
             if (entity == null) {
               newInstance(jsonObject, aType)
             } else {
-              entity
+              JPAUtil.fetchEntityRecursively(entity, entityClass, session)
             }
           })
       })

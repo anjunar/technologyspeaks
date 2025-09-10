@@ -29,40 +29,35 @@ class ResourceMethodInvoker {
   var sessionFactory : Stage.SessionFactory = uninitialized
 
   def invoke(ctx: RoutingContext, sessionHandler: SessionHandler, state: StateDef, transitions: Seq[StateDef], instance: AnyRef): CompletionStage[(String, String)] = {
+    val futures = state.method.parameters
+      .map(parameter => {
+        val paramReader = paramReaders.stream()
+          .filter(reader => reader.canRead(ctx, parameter.parameterType, parameter.annotations))
+          .findFirst()
+          .get()
+        
+        paramReader
+          .read(ctx, sessionHandler, parameter.parameterType, parameter.annotations, state, sessionFactory)
+          .toCompletableFuture
+      })
 
-    sessionFactory.openSession()
-      .thenCompose(session => {
-        val futures = state.method.parameters
-          .map(parameter => {
-            paramReaders.stream()
-              .filter(reader => reader.canRead(ctx, parameter.parameterType, parameter.annotations))
+    val compositeFuture =
+      if (futures.isEmpty) CompletableFuture.completedFuture[Void](null)
+      else CompletableFuture.allOf(futures *)
+
+    compositeFuture
+      .thenCompose(async => {
+        val parameters = futures.map(future => future.get())
+        state.method.invoke(instance, parameters *)
+          .asInstanceOf[CompletableFuture[AnyRef]]
+          .thenCompose(async => {
+            val bodyWriter = bodyWriters.stream()
+              .filter(writer => writer.canWrite(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions))
               .findFirst()
               .get()
-              .read(ctx, sessionHandler, parameter.parameterType, parameter.annotations, state, sessionFactory)
-              .toCompletableFuture
-          })
 
-        val compositeFuture =
-          if (futures.isEmpty) CompletableFuture.completedFuture[Void](null)
-          else CompletableFuture.allOf(futures *)
-
-        compositeFuture
-          .thenCompose(async => {
-            val parameters = futures.map(future => future.get())
-            state.method.invoke(instance, parameters *)
-              .asInstanceOf[CompletableFuture[AnyRef]]
-              .thenCompose(async => {
-                val bodyWriter = bodyWriters.stream()
-                  .filter(writer => writer.canWrite(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions))
-                  .findFirst()
-                  .get()
-
-                bodyWriter.write(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions, sessionFactory)
-                  .thenApply(body => (bodyWriter.contentType, body))
-                  .whenComplete((_,_) => {
-                    session.close()
-                  })
-              })
+            bodyWriter.write(async, state.method.returnType.typeArguments(0), state.method.annotations, ctx, state, transitions, sessionFactory)
+              .thenApply(body => (bodyWriter.contentType, body))
           })
       })
   }
