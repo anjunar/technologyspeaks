@@ -27,17 +27,10 @@ export default class NodeDescriptor {
     id? : boolean
 
     @Basic()
-    writeable? : boolean
-
-    @Basic()
     hidden? : boolean
 
     @Basic()
     step? : string
-
-    get readOnly() {
-        return ! this.writeable
-    }
 
     @Basic()
     links? : LinkContainerObject

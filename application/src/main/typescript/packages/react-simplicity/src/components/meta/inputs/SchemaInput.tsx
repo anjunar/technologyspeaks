@@ -72,7 +72,7 @@ function SchemaInput(properties: SchemaInput.Attributes) {
         if (contextSchema.hidden) {
             return false
         }
-        return disabled || contextSchema.readOnly;
+        return disabled || ! formContext.value.$instance[name].writeable
     }
 
     if (! contextSchema) {

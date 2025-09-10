@@ -27,6 +27,7 @@ import EditorFile from "../components/inputs/markdown/domain/EditorFile";
 import SortObject from "./container/SortObject";
 import TupleTableObject from "./container/TupleTableObject";
 import Change from "../components/inputs/markdown/domain/Change";
+import PropDescriptor from "./descriptors/PropDescriptor";
 
 export function init() {
 
@@ -43,6 +44,7 @@ export function init() {
     registerEntity(EnumDescriptor)
     registerEntity(NodeDescriptor)
     registerEntity(ObjectDescriptor)
+    registerEntity(PropDescriptor)
 
     registerEntity(NotBlankValidator)
     registerEntity(NotNullValidator)

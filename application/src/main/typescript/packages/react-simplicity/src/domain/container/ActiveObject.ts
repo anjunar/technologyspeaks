@@ -2,6 +2,11 @@ import Basic from "../../mapper/annotations/Basic";
 import LinkContainerObject from "./LinkContainerObject";
 import ObjectDescriptor from "../descriptors/ObjectDescriptor";
 import NodeDescriptor from "../descriptors/NodeDescriptor";
+import PropDescriptor from "../descriptors/PropDescriptor";
+
+interface PropertiesContainer {
+    [key: string]: PropDescriptor
+}
 
 export default abstract class ActiveObject {
 
@@ -21,5 +26,8 @@ export default abstract class ActiveObject {
 
     @Basic()
     $descriptors : ObjectDescriptor
+
+    @Basic()
+    $instance : PropertiesContainer
 
 }

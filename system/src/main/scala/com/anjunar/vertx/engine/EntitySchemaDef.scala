@@ -144,7 +144,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
 
 object EntitySchemaDef {
 
-  def apply[E](clazz : Class[E]) : EntitySchemaDef[E] = {
+  def apply[E](clazz : Class[E], rule : VisibilityRule[E] = DefaultRule[E]()) : EntitySchemaDef[E] = {
     val schemaDef = new EntitySchemaDef[E](clazz) {}
 
     val model = DescriptionIntrospector.createWithType(clazz)
@@ -162,12 +162,14 @@ object EntitySchemaDef {
           TypeResolver.companionInstance(collectionType) match {
             case typeSchema: SchemaProvider[Any] =>
               schemaDef.column(property.name)
+                .visibleWhen(rule)
                 .forType(ctx => typeSchema.schema.buildType(collectionType, ctx))
                 .forInstance((list: util.Collection[?], ctx, session) => {
                   list.asScala.map(item => typeSchema.schema.build(item, ctx, session)).toSeq
                 })
             case null =>
               schemaDef.column(property.name)
+                .visibleWhen(rule)
           }
 
         case _ =>
@@ -178,12 +180,14 @@ object EntitySchemaDef {
           TypeResolver.companionInstance(propertyType) match {
             case typeSchema: SchemaProvider[Any] =>
               schemaDef.column(property.name)
+                .visibleWhen(rule)
                 .forType(ctx => typeSchema.schema.buildType(propertyType, ctx))
                 .forInstance((list: Any, ctx, session) => {
                   Seq(typeSchema.schema.build(list, ctx, session))
                 })
             case null =>
               schemaDef.column(property.name)
+                .visibleWhen(rule)
           }
       }      
     })

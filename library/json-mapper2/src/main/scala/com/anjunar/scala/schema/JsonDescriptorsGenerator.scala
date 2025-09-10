@@ -49,7 +49,6 @@ object JsonDescriptorsGenerator {
           builder.widget,
           builder.id,
           builder.naming,
-          false,
           builder.hidden,
           clazz.getSimpleName,
           builder.step,
@@ -150,7 +149,6 @@ object JsonDescriptorsGenerator {
       schemaDefinition.widget,
       schemaDefinition.id,
       schemaDefinition.naming,
-      schemaDefinition.writeable,
       schemaDefinition.hidden,
       propertyType.getSimpleName,
       schemaDefinition.step,
@@ -178,7 +176,6 @@ object JsonDescriptorsGenerator {
       schemaDefinition.widget,
       schemaDefinition.id,
       schemaDefinition.naming,
-      schemaDefinition.writeable,
       schemaDefinition.hidden,
       property.propertyType.raw.getSimpleName,
       schemaDefinition.links.asJava,
@@ -195,7 +192,6 @@ object JsonDescriptorsGenerator {
     objectDescriptor.widget = schemaDefinition.widget
     objectDescriptor.id = schemaDefinition.id
     objectDescriptor.name = schemaDefinition.naming
-    objectDescriptor.writeable = schemaDefinition.writeable
     objectDescriptor.hidden = schemaDefinition.hidden
     objectDescriptor.links = schemaDefinition.links.asJava
     generateValidator(property, objectDescriptor)
@@ -215,7 +211,6 @@ object JsonDescriptorsGenerator {
     descriptor.widget = schemaDefinition.widget
     descriptor.id = schemaDefinition.id
     descriptor.name = schemaDefinition.naming
-    descriptor.writeable = schemaDefinition.writeable
     descriptor.hidden = schemaDefinition.hidden
     descriptor.links = schemaDefinition.links.asJava
     generateValidator(property, descriptor)

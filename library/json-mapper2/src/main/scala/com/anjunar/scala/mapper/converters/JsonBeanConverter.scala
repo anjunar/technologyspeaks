@@ -3,18 +3,17 @@ package com.anjunar.scala.mapper.converters
 import com.anjunar.scala.introspector.DescriptionIntrospector
 import com.anjunar.scala.mapper.annotations.{Converter, Filter, IgnoreFilter}
 import com.anjunar.scala.mapper.helper.JPAHelper.resolveMappings
-import com.anjunar.scala.mapper.intermediate.model.{JsonNode, JsonObject, JsonString}
+import com.anjunar.scala.mapper.intermediate.model.{JsonBoolean, JsonNode, JsonObject, JsonString}
 import com.anjunar.scala.mapper.{JsonContext, JsonConverterRegistry}
-import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, LinkContext, PrimitiveSchemaBuilder, SchemaBuilder}
+import com.anjunar.scala.schema.builder.{LinkContext, SchemaBuilder}
 import com.anjunar.scala.schema.model.{Link, NodeDescriptor}
-import com.anjunar.scala.universe.introspector.{AbstractProperty, BeanIntrospector}
+import com.anjunar.scala.universe.introspector.AbstractProperty
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.google.common.reflect.TypeToken
 import com.typesafe.scalalogging.Logger
-import jakarta.persistence.{ManyToMany, OneToMany, OneToOne, Tuple}
+import jakarta.persistence.Tuple
 import jakarta.validation.ConstraintViolation
-import net.bytebuddy.matcher.PrimitiveTypeMatcher
 import org.hibernate.Hibernate
 
 import java.util.concurrent.{CompletableFuture, CompletionStage}
@@ -97,6 +96,20 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
       if (option.isDefined) {
         val propertySchema = option.get
 
+        val propDescriptor = JsonObject(
+          mutable.LinkedHashMap(
+            "$type" -> JsonString("PropDescriptor"),
+            "visible" -> JsonBoolean(propertySchema.visible),
+            "writeable" -> JsonBoolean(propertySchema.writeable)
+          )
+        )
+
+        val instanceDescriptor = properties
+          .getOrElseUpdate("$instance", JsonObject(mutable.LinkedHashMap()))
+          .asInstanceOf[JsonObject]
+
+        instanceDescriptor.value.put(property.name, propDescriptor)
+
         if (propertySchema.secured) {
           if (propertySchema.visible) {
             proceed(instance, context, properties, property, propertySchema.schemaBuilder)
@@ -111,6 +124,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
       }
 
     }
+
 
     val registry = context.registry
 
@@ -143,7 +157,6 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
     case _ => addProperty(context, properties, property, converter, value, propertySchema)
 
   private def addProperty(context: JsonContext, properties: mutable.LinkedHashMap[String, JsonNode], property: AbstractProperty, converter: JsonAbstractConverter, value: Any, propertySchema: SchemaBuilder) = {
-
     val jpaConverter = property.findAnnotation(classOf[Converter])
 
     if (jpaConverter == null) {

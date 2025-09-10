@@ -1,9 +1,11 @@
 package com.anjunar.technologyspeaks.control
 
+import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
+import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.shared.AbstractEntity
-import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaProvider, SchemaView}
+import com.anjunar.vertx.engine.{EntitySchemaDef, OwnerRule, SchemaProvider, SchemaView}
 import jakarta.persistence.*
 import jakarta.validation.constraints.{Email, NotBlank}
 
@@ -13,7 +15,7 @@ import java.util.concurrent.CompletionStage
 import scala.compiletime.uninitialized
 
 @Entity
-class EMail extends AbstractEntity with EntityContext[EMail]{
+class EMail extends AbstractEntity with EntityContext[EMail] with OwnerProvider {
 
   @Email
   @NotBlank
@@ -31,11 +33,13 @@ class EMail extends AbstractEntity with EntityContext[EMail]{
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true, mappedBy = "email", targetEntity = classOf[Credential])
   val credentials: util.Set[Credential] = new util.HashSet[Credential]()
 
+  override def owner: SecurityUser = user
+
   override def toString = s"EMail($value)"
 }
 
 object EMail extends RepositoryContext[EMail](classOf[EMail]) with SchemaProvider[EMail] {
   
-  val schema = EntitySchemaDef(classOf[EMail])
+  val schema = EntitySchemaDef(classOf[EMail], OwnerRule[EMail]())
   
 }

@@ -16,6 +16,7 @@ import withPageable from "../../shared/Pageable";
 import Loader = withPageable.Loader;
 import Query = withPageable.Query;
 import Callback = withPageable.Callback;
+import {FormContext} from "../../inputs/form/Form";
 
 function namingMultiselect(option: any, schema: ObjectDescriptor) : string {
     return Reflect.ownKeys(option)
@@ -42,6 +43,8 @@ function namingMultiselect(option: any, schema: ObjectDescriptor) : string {
 function SchemaLazySelect(properties: SchemaLazySelect.Attributes) {
 
     const context = useContext(SchemaFormContext)
+
+    const formContext = useContext(FormContext)
 
     let contextSchema = context(properties.name)
 
@@ -95,7 +98,7 @@ function SchemaLazySelect(properties: SchemaLazySelect.Attributes) {
     return (
         <InputContainer name={name} placeholder={contextSchema.title} {...rest}>
             <LazySelect
-                disabled={disabled || contextSchema.readOnly}
+                disabled={disabled || ! formContext.value["$instance"][name].writeable}
                 name={name}
                 loader={loader}
                 getName={selectOption}

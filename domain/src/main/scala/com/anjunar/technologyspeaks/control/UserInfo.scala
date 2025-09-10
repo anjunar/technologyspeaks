@@ -1,10 +1,12 @@
 package com.anjunar.technologyspeaks.control
 
+import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.technologyspeaks.media.Media
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.jpa.{PostgresIndex, PostgresIndices, RepositoryContext}
-import com.anjunar.vertx.engine.{EntitySchemaDef, RequestContext, SchemaProvider, SchemaView, VisibilityRule}
+import com.anjunar.security.SecurityUser
+import com.anjunar.vertx.engine.{EntitySchemaDef, OwnerRule, RequestContext, SchemaProvider, SchemaView, VisibilityRule}
 import jakarta.persistence.*
 import jakarta.validation.constraints.{NotBlank, NotNull, Past, Size}
 import jakarta.ws.rs.FormParam
@@ -20,7 +22,7 @@ import scala.compiletime.uninitialized
   new PostgresIndex(name = "user_idx_firstName", columnList = "firstName", using = "GIN"),
   new PostgresIndex(name = "user_idx_lastName", columnList = "lastName", using = "GIN")
 ))
-class UserInfo extends AbstractEntity {
+class UserInfo extends AbstractEntity with OwnerProvider {
 
   @OneToOne(mappedBy = "info", targetEntity = classOf[User])
   var user : User = uninitialized
@@ -47,12 +49,14 @@ class UserInfo extends AbstractEntity {
   @Basic
   @FormParam("birthDate")
   var birthDate: LocalDate = uninitialized
-  
+
+  override def owner: SecurityUser = user
+
   override def toString = s"UserInfo($firstName, $lastName, $birthDate)"
 }
 
 object UserInfo extends RepositoryContext[UserInfo](classOf[UserInfo]) with SchemaProvider[UserInfo] {
 
-  val schema = EntitySchemaDef(classOf[UserInfo])
+  val schema = EntitySchemaDef(classOf[UserInfo], OwnerRule[UserInfo]())
   
 }
