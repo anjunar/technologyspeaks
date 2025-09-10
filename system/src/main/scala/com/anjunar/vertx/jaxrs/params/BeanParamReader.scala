@@ -19,6 +19,7 @@ import java.lang.reflect.Type
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
+import java.util
 
 @ApplicationScoped
 class BeanParamReader extends ParamReader {
@@ -40,9 +41,15 @@ class BeanParamReader extends ParamReader {
         .findFirst()
         .get()
         .read(ctx, sessionHandler, property.propertyType, property.annotations, state, factory)
-        .thenApply(async => {
-          property.set(instance, async)
-        })
+        .thenApply {
+          case collection: util.Collection[?] => 
+            val underlying = property.get(instance).asInstanceOf[util.Collection[Any]]
+            underlying.addAll(collection)
+            underlying
+          case async => 
+            property.set(instance, async)
+            async
+        }
         .toCompletableFuture
     })
 

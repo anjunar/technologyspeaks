@@ -22,7 +22,7 @@ class AbstractProperty(val name : String,
 
   def set(instance : AnyRef, value : Any) : Unit = {
     if (setter == null) {
-      throw new IllegalStateException("no Setter Method")
+      throw new IllegalStateException("no Setter Method " + toString)
     }
     setter.invoke(instance, value)
   }

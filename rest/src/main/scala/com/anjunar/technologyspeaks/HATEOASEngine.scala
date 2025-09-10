@@ -22,101 +22,117 @@ class HATEOASEngine extends FSMEngine {
       resource = classOf[ApplicationResource]
     ), application => {
 
-      val loginOptions = fsm.transition(
-        StateDef(
-          rel = "login",
-          name = "Login",
-          resource = classOf[LoginOptionsResource]
-        ), loginOptions => Seq(
-          fsm.transition(
-            StateDef(
-              rel = "login",
-              name = "Login",
-              resource = classOf[LoginFinishResource]
-            ), loginFinish => Seq(application)
-          )
-        ))
+      val loginOptions = loginFlow(application)
 
-      val registerOptions = fsm.transition(
-        StateDef(
-          rel = "register",
-          name = "Register",
-          resource = classOf[RegisterOptionsResource]
-        ), registerOptions => Seq(
-          fsm.transition(
-            StateDef(
-              rel = "register",
-              name = "Register",
-              resource = classOf[RegisterFinishResource]
-            ), registerFinish => Seq(loginOptions)
-          )
-        ))
-      
-      val userSearch = fsm.transition(
-        StateDef(
-          rel = "users",
-          name = "Search",
-          resource = classOf[UsersResource.Search]
-        ), userSearch => Seq(
-          fsm.transition(StateDef(
-            rel = "list",
-            name = "Search",
-            resource = classOf[UsersResource.List]
-          ), userList => Seq())
-        )
-      )
+      val registerOptions = registerFlow(loginOptions)
 
-      val documentSearch = fsm.transition(
-        StateDef(
-          rel = "documents",
-          name = "Search",
-          resource = classOf[DocumentsResource.Search]
-        ), documentSearch => {
-          val documentDelete = fsm.transition(
-            StateDef(
-              rel = "delete",
-              name = "Delete",
-              resource = classOf[DocumentResource.Delete]
-            ), document => Seq(documentSearch))
-          Seq(
-            fsm.transition(
-              StateDef(
-                rel = "list",
-                name = "Documents",
-                resource = classOf[DocumentsResource.List]
-              ), documentList => Seq(
-                fsm.transition(
-                  StateDef(
-                    rel = "create",
-                    name = "Create",
-                    ref = classOf[Table[Document]],
-                    resource = classOf[DocumentResource.Create]
-                  ), documentCreate => Seq(
-                    fsm.transition(
-                      StateDef(
-                        rel = "save",
-                        name = "Save",
-                        resource = classOf[DocumentResource.Save]
-                      ), documentSave => Seq(documentSearch, documentDelete))
-                  )),
-                fsm.transition(
-                  StateDef(
-                    rel = "read",
-                    name = "Read",
-                    ref = classOf[Document],
-                    resource = classOf[DocumentResource.Read]
-                  ), documentRead => Seq(
-                    fsm.transition(
-                      StateDef(
-                        rel = "update",
-                        name = "Update",
-                        resource = classOf[DocumentResource.Update]
-                      ), documentUpdate => Seq(documentSearch, documentDelete))))
-              )))
-        })
+      val userSearch = usersFlow
+
+      val documentSearch = documentFlow
 
       Seq(loginOptions, registerOptions, userSearch, documentSearch)
     }
   )
 
+  private def registerFlow(loginOptions: StateDef) = {
+    fsm.transition(
+      StateDef(
+        rel = "register",
+        name = "Register",
+        resource = classOf[RegisterOptionsResource]
+      ), registerOptions => Seq(
+        fsm.transition(
+          StateDef(
+            rel = "register",
+            name = "Register",
+            resource = classOf[RegisterFinishResource]
+          ), registerFinish => Seq(loginOptions)
+        )
+      ))
+  }
+
+  private def loginFlow(application: StateDef) = {
+    fsm.transition(
+      StateDef(
+        rel = "login",
+        name = "Login",
+        resource = classOf[LoginOptionsResource]
+      ), loginOptions => Seq(
+        fsm.transition(
+          StateDef(
+            rel = "login",
+            name = "Login",
+            resource = classOf[LoginFinishResource]
+          ), loginFinish => Seq(application)
+        )
+      ))
+  }
+
+
+  private def usersFlow = {
+    fsm.transition(
+      StateDef(
+        rel = "users",
+        name = "Users",
+        resource = classOf[UsersResource.Search]
+      ), userSearch => Seq(
+        fsm.transition(StateDef(
+          rel = "list",
+          name = "Search",
+          resource = classOf[UsersResource.List]
+        ), userList => Seq())
+      )
+    )
+  }
+
+  private def documentFlow = {
+    fsm.transition(
+      StateDef(
+        rel = "documents",
+        name = "Documents",
+        resource = classOf[DocumentsResource.Search]
+      ), documentSearch => {
+        val documentDelete = fsm.transition(
+          StateDef(
+            rel = "delete",
+            name = "Delete",
+            resource = classOf[DocumentResource.Delete]
+          ), document => Seq(documentSearch))
+        Seq(
+          fsm.transition(
+            StateDef(
+              rel = "list",
+              name = "Documents",
+              resource = classOf[DocumentsResource.List]
+            ), documentList => Seq(
+              fsm.transition(
+                StateDef(
+                  rel = "create",
+                  name = "Create",
+                  ref = classOf[Table[Document]],
+                  resource = classOf[DocumentResource.Create]
+                ), documentCreate => Seq(
+                  fsm.transition(
+                    StateDef(
+                      rel = "save",
+                      name = "Save",
+                      resource = classOf[DocumentResource.Save]
+                    ), documentSave => Seq(documentSearch, documentDelete))
+                )),
+              fsm.transition(
+                StateDef(
+                  rel = "read",
+                  name = "Read",
+                  ref = classOf[Document],
+                  resource = classOf[DocumentResource.Read]
+                ), documentRead => Seq(
+                  fsm.transition(
+                    StateDef(
+                      rel = "update",
+                      name = "Update",
+                      resource = classOf[DocumentResource.Update]
+                    ), documentUpdate => Seq(documentSearch, documentDelete))))
+            )))
+      })
+  }
 }

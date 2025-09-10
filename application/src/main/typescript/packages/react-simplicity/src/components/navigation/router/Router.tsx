@@ -130,10 +130,22 @@ function Router(properties: Router.Attributes) {
     const hydrated = useHydrated()
 
     const [state, setState] = useState<React.ReactElement<any>>(() => {
-        return data[depth][1]
+        if (data[depth]) {
+            return data[depth][1]
+        } else {
+            console.warn("No Component found for " + info.host + info.path + info.search)
+            return null
+        }
     })
 
-    const [childRoutes, setChildRoutes] = useState<Route[]>(data[depth][0].children)
+    const [childRoutes, setChildRoutes] = useState<Route[]>(() => {
+        if (data[depth]) {
+            return data[depth][0].children
+        } else {
+            console.warn("No child Routes found for " + info.host + info.path + info.search)
+            return []
+        }
+    })
 
     const scrollArea = useRef<HTMLDivElement>(null)
 

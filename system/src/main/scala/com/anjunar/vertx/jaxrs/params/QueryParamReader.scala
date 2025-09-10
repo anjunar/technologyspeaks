@@ -10,14 +10,15 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import jakarta.ws.rs.QueryParam
+import jakarta.ws.rs.{DefaultValue, QueryParam}
 import org.hibernate.reactive.stage.Stage
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
-import java.util.UUID
+import java.util.{Collections, UUID}
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.compiletime.uninitialized
+import java.util
 
 @ApplicationScoped
 class QueryParamReader extends ParamReader {
@@ -33,18 +34,35 @@ class QueryParamReader extends ParamReader {
     val value = ctx.queryParam(annotations.find(annotation => annotation.annotationType() == classOf[QueryParam]).get.asInstanceOf[QueryParam].value())
 
     if (value.isEmpty) {
-      CompletableFuture.completedFuture(null)
-    } else {
       javaType.raw match {
-        case clazz: Class[Any] if classOf[IdProvider].isAssignableFrom(clazz) =>
-          sessionFactory.withTransaction(session => {
-            session.find(clazz, UUID.fromString(value.getFirst))
-          }).toCompletableFuture
-        case clazz: Class[Any] if classOf[String].isAssignableFrom(clazz) =>
-          CompletableFuture.completedFuture(value.getFirst)
+        case clazz: Class[?] if classOf[util.List[?]].isAssignableFrom(clazz) => CompletableFuture.completedFuture(new util.ArrayList[Any]())
+        case clazz: Class[?] if classOf[util.Set[?]].isAssignableFrom(clazz) => CompletableFuture.completedFuture(new util.HashSet[Any]())
+        case _ =>
+          val option = annotations.find(annotation => annotation.annotationType() == classOf[DefaultValue])
+          if (option.isDefined) {
+            buildValue(javaType, option.get.asInstanceOf[DefaultValue].value())
+          } else {
+            CompletableFuture.completedFuture(null)
+          }
       }
+    } else {
+      val first = value.getFirst
+      buildValue(javaType, first)
     }
+  }
 
-
+  private def buildValue(javaType: ResolvedClass, first: String) = {
+    javaType.raw match {
+      case clazz: Class[Any] if classOf[IdProvider].isAssignableFrom(clazz) =>
+        sessionFactory.withSession(session => {
+          session.find(clazz, UUID.fromString(first))
+        }).toCompletableFuture
+      case clazz: Class[Any] if classOf[String].isAssignableFrom(clazz) =>
+        CompletableFuture.completedFuture(first)
+      case clazz: Class[Any] if classOf[Integer].isAssignableFrom(clazz) =>
+        CompletableFuture.completedFuture(first.toInt)
+      case clazz: Class[Any] if classOf[Long].isAssignableFrom(clazz) =>
+        CompletableFuture.completedFuture(first.toLong)
+    }
   }
 }

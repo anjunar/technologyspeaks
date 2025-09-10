@@ -8,22 +8,28 @@ import com.anjunar.scala.universe.TypeResolver
 import org.hibernate.reactive.stage.Stage
 
 import java.util
-import java.util.concurrent.{CompletionStage, CompletableFuture}
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.*
 import scala.jdk.FutureConverters.*
 
+import scala.quoted.*
+import java.lang.reflect
+
 abstract class EntitySchemaDef[E](val entityName: Class[E]) {
+
   val props = mutable.ListBuffer[PropDef[E, ?]]()
+  
+  val beanModel = DescriptionIntrospector.createWithType(entityName)
 
   def column[T](name: String, views: Set[SchemaView] = Set(SchemaView.Full)): PropDef[E, T] = {
-    val p = PropDef[E, T](name, views = views)
+    val p = PropDef[E, T](name, views = views, entity = beanModel)
     props += p
     p
   }
 
   def dynamicMap(name: String, attributeRule: AttributeVisibilityRule): PropDef[E, Map[String, Any]] = {
-    val p = PropDef[E, Map[String, Any]](name)
+    val p = PropDef[E, Map[String, Any]](name, entity = beanModel)
     props += p
     p
   }
@@ -160,7 +166,8 @@ object EntitySchemaDef {
                 .forInstance((list: util.Collection[?], ctx, session) => {
                   list.asScala.map(item => typeSchema.schema.build(item, ctx, session)).toSeq
                 })
-            case null => throw new IllegalStateException(collectionType.getName + " is not a SchemaProvider")
+            case null =>
+              schemaDef.column(property.name)
           }
 
         case _ =>
