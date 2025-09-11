@@ -1,6 +1,4 @@
-package com.anjunar.jpa;
-
-import jakarta.inject.Qualifier;
+package com.anjunar.jpa.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,5 +7,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Qualifier
-public @interface Save { }
+public @interface PostgresIndices {
+
+    PostgresIndex[] value();
+
+}

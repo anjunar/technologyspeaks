@@ -1,7 +1,8 @@
 package com.anjunar.technologyspeaks.shared.hashtag
 
+import com.anjunar.jpa.annotations.{PostgresIndex, PostgresIndices}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.jpa.{EntityContext, PostgresIndex, PostgresIndices, RepositoryContext}
+import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaProvider}
 import jakarta.persistence.{Basic, Column, Entity}

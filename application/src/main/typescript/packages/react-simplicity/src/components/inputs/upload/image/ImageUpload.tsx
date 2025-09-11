@@ -1,15 +1,18 @@
 import "./ImageUpload.css"
+import 'react-image-crop/dist/ReactCrop.css'
 import React, {CSSProperties, useDeferredValue, useLayoutEffect, useMemo, useRef, useState} from "react"
-import Caption from "./caption/Caption"
 import Media from "./Media";
 import Thumbnail from "./Thumbnail";
 import {useInput} from "../../../../hooks/UseInputHook";
+import ReactCrop, { type Crop } from 'react-image-crop'
 
 function ImageUpload(properties: ImageUpload.Attributes) {
 
     const {useCrop = false, name = "default", value, onChange, disabled, placeholder, standalone, ...rest} = properties
 
     const [model, state, setState] = useInput(name, value, standalone, "image-upload");
+
+    const [crop, setCrop] = useState<Crop>()
 
     const [position, setPosition] = useState({
         x: 0,
@@ -162,31 +165,19 @@ function ImageUpload(properties: ImageUpload.Attributes) {
         doCropping()
     }, [positionDeferred])
 
-    function size() {
-        if (imgRef.current) {
-            if (imgRef.current.naturalWidth < imgRef.current.naturalHeight) {
-                return imgRef.current.width
-            } else {
-                return imgRef.current.height
-            }
-        } else {
-            return 100
-        }
-    }
-
     return (
         <div>
         <div className={"image-upload"} {...rest} onClick={onClick}>
             {state?.data?.length > 0 && !disabled ? (
                 <div>
                     {useCrop ? (
-                        <Caption
-                            state={state}
-                            imageRef={imgRef}
-                            style={{width: size() + "px", height: size() + "px"}}
-                            onMove={(event: any) => setPosition({...event})}
-                            onClick={(event: any) => event.stopPropagation()}
-                        />
+                        <ReactCrop crop={crop} onChange={c => setCrop(c)}>
+                            <img
+                                ref={imgRef}
+                                src={encodeBase64(state.contentType, state.data)}
+                                onLoadedData={() => doCropping()}
+                            />
+                        </ReactCrop>
                     ) : ""}
                 </div>
 
@@ -195,15 +186,6 @@ function ImageUpload(properties: ImageUpload.Attributes) {
                     <div>{placeholder}</div>
                 </div>
             )}
-            {
-                state && (
-                    <img
-                        ref={imgRef}
-                        src={encodeBase64(state.contentType, state.data)}
-                        onLoadedData={() => doCropping()}
-                    />
-                )
-            }
             <input
                 ref={inputRef}
                 type={"file"}

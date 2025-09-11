@@ -1,8 +1,9 @@
 package com.anjunar.technologyspeaks.document
 
+import com.anjunar.jpa.annotations.{PostgresIndex, PostgresIndices}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.technologyspeaks.control.User
-import com.anjunar.jpa.{EntityContext, PostgresIndex, PostgresIndices}
+import com.anjunar.jpa.EntityContext
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import jakarta.persistence.{Basic, Column, Entity, Lob, ManyToOne, Transient}
 import org.hibernate.`type`.SqlTypes

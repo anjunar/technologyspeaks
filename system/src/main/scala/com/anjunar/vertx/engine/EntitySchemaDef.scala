@@ -22,7 +22,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
   
   val beanModel = DescriptionIntrospector.createWithType(entityName)
 
-  def column[T](name: String, views: Set[SchemaView] = Set(SchemaView.Full)): PropDef[E, T] = {
+  def column[T](name: String, views: Set[String] = Set("full")): PropDef[E, T] = {
     val p = PropDef[E, T](name, views = views, entity = beanModel)
     props += p
     p
@@ -38,7 +38,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
              entity: E,
              ctx: RequestContext,
              sessionFactory: Stage.SessionFactory,
-             view: SchemaView = Full
+             view: String = "full"
            ): CompletionStage[SchemaBuilder] = {
 
     val builder = new SchemaBuilder()
@@ -117,7 +117,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
     CompletableFuture.allOf(futures.map(_.toCompletableFuture).toSeq *).thenApply(_ => builder)
   }
 
-  def buildType(entityType: Class[E], ctx: RequestContext, view: SchemaView = Full): SchemaBuilder = {
+  def buildType(entityType: Class[E], ctx: RequestContext, view: String = "full"): SchemaBuilder = {
     val builder = new SchemaBuilder()
 
     builder
@@ -144,7 +144,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
 
 object EntitySchemaDef {
 
-  def apply[E](clazz : Class[E], rule : VisibilityRule[E] = DefaultRule[E]()) : EntitySchemaDef[E] = {
+  def apply[E](clazz : Class[E], rule : VisibilityRule[E] = DefaultRule[E](), view : String = "full") : EntitySchemaDef[E] = {
     val schemaDef = new EntitySchemaDef[E](clazz) {}
 
     val model = DescriptionIntrospector.createWithType(clazz)
@@ -161,14 +161,14 @@ object EntitySchemaDef {
 
           TypeResolver.companionInstance(collectionType) match {
             case typeSchema: SchemaProvider[Any] =>
-              schemaDef.column(property.name)
+              schemaDef.column(property.name, views = Set(view))
                 .visibleWhen(rule)
-                .forType(ctx => typeSchema.schema.buildType(collectionType, ctx))
+                .forType(ctx => typeSchema.schema.buildType(collectionType, ctx, view))
                 .forInstance((list: util.Collection[?], ctx, session) => {
-                  list.asScala.map(item => typeSchema.schema.build(item, ctx, session)).toSeq
+                  list.asScala.map(item => typeSchema.schema.build(item, ctx, session, view)).toSeq
                 })
             case null =>
-              schemaDef.column(property.name)
+              schemaDef.column(property.name, views = Set(view))
                 .visibleWhen(rule)
           }
 
@@ -179,14 +179,14 @@ object EntitySchemaDef {
 
           TypeResolver.companionInstance(propertyType) match {
             case typeSchema: SchemaProvider[Any] =>
-              schemaDef.column(property.name)
+              schemaDef.column(property.name, views = Set(view))
                 .visibleWhen(rule)
-                .forType(ctx => typeSchema.schema.buildType(propertyType, ctx))
+                .forType(ctx => typeSchema.schema.buildType(propertyType, ctx, view))
                 .forInstance((list: Any, ctx, session) => {
-                  Seq(typeSchema.schema.build(list, ctx, session))
+                  Seq(typeSchema.schema.build(list, ctx, session, view))
                 })
             case null =>
-              schemaDef.column(property.name)
+              schemaDef.column(property.name, views = Set(view))
                 .visibleWhen(rule)
           }
       }      

@@ -1,5 +1,6 @@
 package com.anjunar.jpa
 
+import com.anjunar.jpa.annotations.PostgresIndices
 import com.typesafe.scalalogging.Logger
 import jakarta.persistence.Table
 import org.hibernate.boot.Metadata
@@ -99,6 +100,7 @@ class PostgresIndexIntegrator extends Integrator {
                 }
                 .toCompletableFuture
 
+/*
             val dialects = new util.HashSet[String]()
             dialects.add("org.hibernate.dialect.PostgreSQLDialect")
             metadata.getDatabase.addAuxiliaryDatabaseObject(
@@ -110,6 +112,7 @@ class PostgresIndexIntegrator extends Integrator {
                 false
               )
             )
+*/
 
             future
           }

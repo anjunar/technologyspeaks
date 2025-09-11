@@ -25,9 +25,11 @@ function Button(properties: Button.Attributes) {
             return false
         }
 
+/*
         if (isServer) {
             return false
         }
+*/
 
         switch (type) {
             case "submit" :
@@ -81,7 +83,7 @@ namespace Button {
                     Object.values(container || {})
                         .filter(link => link.method !== "GET" && link.rel !== "validate")
                         .map(link => (
-                            <Button style={{flex: 1}} key={link.rel} name={link.rel} type={type(link)}
+                            <Button key={link.rel} name={link.rel} type={type(link)}
                                     force={link.method === "DELETE" || force || link.linkType === "action"}>
                                 {link.title}
                             </Button>

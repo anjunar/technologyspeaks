@@ -15,7 +15,7 @@ class ChromeRoute extends Handler[RoutingContext]{
 
   override def handle(event: RoutingContext): Unit = {
 
-    val cwd = Paths.get("./src/main/typescript/packages").toAbsolutePath.toString
+    val cwd = Paths.get("./src/main/javascript/workspace/projects").toAbsolutePath.toString
     
     event.response().end(JsonObject.of(
       "workspace", JsonObject.of(

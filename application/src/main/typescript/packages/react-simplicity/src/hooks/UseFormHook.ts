@@ -17,13 +17,5 @@ export function useForm<T>(object: T | (() => T)): T {
         return objectMembrane(entity, callbacks)
     })
 
-    useEffect(() => {
-
-        if (state.$resolve !== entity) {
-            setState(entity)
-        }
-
-    }, [entity]);
-
     return state
 }

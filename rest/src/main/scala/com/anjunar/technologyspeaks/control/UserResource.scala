@@ -1,8 +1,10 @@
 package com.anjunar.technologyspeaks.control
 
+import com.anjunar.jpa.EntityGraph
+import io.vertx.ext.web.RoutingContext
 import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.ws.rs.core.{MediaType, Response}
+import jakarta.ws.rs.core.{Context, MediaType, Response}
 import jakarta.ws.rs.{Consumes, DELETE, GET, POST, PUT, Path, PathParam, Produces}
 
 import java.util.concurrent.CompletableFuture
@@ -29,8 +31,8 @@ object UserResource {
     @GET
     @Produces(Array(MediaType.APPLICATION_JSON))
     @RolesAllowed(Array("Guest", "User", "Administrator"))
-    def read(@PathParam("id") entity: User): CompletableFuture[User] = {
-      CompletableFuture.completedFuture(entity)
+    def read(@Context credential : Credential, @PathParam("id") entity: User): CompletableFuture[User] = {
+      CompletableFuture.completedFuture(EntityGraph.complete(entity, classOf[User], credential.user))
     }
 
   }

@@ -2,13 +2,13 @@ package com.anjunar.technologyspeaks.timeline
 
 import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.jpa.RepositoryContext
+import com.anjunar.jpa.annotations.Save
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.control.User
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.technologyspeaks.shared.editor.{Editor, Root}
 import jakarta.persistence.{CascadeType, Entity, ManyToOne, OneToOne}
-import com.anjunar.jpa.{Save}
 
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized

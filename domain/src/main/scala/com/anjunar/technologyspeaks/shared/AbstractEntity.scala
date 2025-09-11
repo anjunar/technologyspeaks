@@ -23,11 +23,9 @@ abstract class AbstractEntity extends IdProvider {
   @Version
   var version: lang.Integer = uninitialized
 
-  @PropertyDescriptor(title = "Created")
   @Basic
   var created: LocalDateTime = uninitialized
 
-  @PropertyDescriptor(title = "Modified")
   @Basic
   var modified: LocalDateTime = uninitialized
   

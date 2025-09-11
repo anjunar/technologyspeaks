@@ -18,6 +18,7 @@ class HATEOASEngine extends FSMEngine {
     StateDef(
       rel = "application",
       name = "Application",
+      view = "application",
       resource = classOf[ApplicationResource]
     ), application => {
 
@@ -73,12 +74,14 @@ class HATEOASEngine extends FSMEngine {
       StateDef(
         rel = "users",
         name = "Users",
+        view = "table",
         resource = classOf[UsersResource.Search]
       ), search => {
         val documentDelete = fsm.transition(
           StateDef(
             rel = "delete",
             name = "Delete",
+            view = "form",
             resource = classOf[UserResource.Delete]
           ), delete => Seq(search))
         Seq(
@@ -86,12 +89,14 @@ class HATEOASEngine extends FSMEngine {
             StateDef(
               rel = "list",
               name = "Users",
+              view = "table",
               resource = classOf[UsersResource.List]
             ), list => Seq(
               fsm.transition(
                 StateDef(
                   rel = "create",
                   name = "Create",
+                  view = "form",
                   ref = classOf[Table[User]],
                   resource = classOf[UserResource.Create]
                 ), create => Seq(
@@ -99,6 +104,7 @@ class HATEOASEngine extends FSMEngine {
                     StateDef(
                       rel = "save",
                       name = "Save",
+                      view = "form",
                       resource = classOf[UserResource.Save]
                     ), save => Seq(search, documentDelete))
                 )),
@@ -106,6 +112,7 @@ class HATEOASEngine extends FSMEngine {
                 StateDef(
                   rel = "read",
                   name = "Read",
+                  view = "form",
                   ref = classOf[User],
                   resource = classOf[UserResource.Read]
                 ), read => Seq(
@@ -113,6 +120,7 @@ class HATEOASEngine extends FSMEngine {
                     StateDef(
                       rel = "update",
                       name = "Update",
+                      view = "form",
                       resource = classOf[UserResource.Update]
                     ), update => Seq(search, documentDelete))))
             )))

@@ -16,6 +16,6 @@ class Application {
 
 object Application extends SchemaProvider[Application] {
 
-  val schema = EntitySchemaDef(classOf[Application], DefaultRule())
+  val schema = EntitySchemaDef(classOf[Application], DefaultRule(), "application")
   
 }

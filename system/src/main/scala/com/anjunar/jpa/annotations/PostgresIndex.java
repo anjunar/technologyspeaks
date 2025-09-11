@@ -1,4 +1,4 @@
-package com.anjunar.jpa;
+package com.anjunar.jpa.annotations;
 
 import java.lang.annotation.*;
 

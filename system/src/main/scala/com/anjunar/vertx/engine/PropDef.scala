@@ -14,7 +14,7 @@ case class PropDef[E, T](name: String,
                          var typeHandler: Option[RequestContext => SchemaBuilder] = None,
                          var instanceHandler: Option[(T, RequestContext, Stage.SessionFactory) => Seq[CompletionStage[SchemaBuilder]]] = None,
                          var visibility: VisibilityRule[E] = DefaultRule[E](),
-                         var views: Set[SchemaView] = Set(SchemaView.Full),
+                         var views: Set[String] = Set("Full"),
                          var links: Seq[Link[E]] = Seq[Link[E]]()) {
   
   val propType = entity.findProperty(name)
@@ -34,7 +34,7 @@ case class PropDef[E, T](name: String,
     this
   }
 
-  def inViews(vs: SchemaView*): PropDef[E, T] = {
+  def inViews(vs: String*): PropDef[E, T] = {
     views = vs.toSet
     this
   }

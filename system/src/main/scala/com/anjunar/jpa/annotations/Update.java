@@ -1,4 +1,4 @@
-package com.anjunar.jpa;
+package com.anjunar.jpa.annotations;
 
 import jakarta.inject.Qualifier;
 

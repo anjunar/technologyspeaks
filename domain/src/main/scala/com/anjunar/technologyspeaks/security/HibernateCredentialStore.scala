@@ -1,19 +1,15 @@
 package com.anjunar.technologyspeaks.security
 
-import com.anjunar.futures.Futures
+import com.anjunar.technologyspeaks.control
 import com.anjunar.technologyspeaks.control.{CredentialWebAuthn, EMail, Role}
+import com.anjunar.vertx.webauthn.WebAuthnCredentialRecord.RequiredPersistedData
 import com.anjunar.vertx.webauthn.{CredentialStore, WebAuthnCredentialRecord}
+import com.typesafe.scalalogging.Logger
 import com.webauthn4j.credential.CredentialRecord
-import com.webauthn4j.data.RegistrationData
 import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.ext.auth.User
 import jakarta.enterprise.context.ApplicationScoped
-import com.anjunar.technologyspeaks.control
-import com.anjunar.vertx.webauthn.WebAuthnCredentialRecord.RequiredPersistedData
-import com.typesafe.scalalogging.Logger
-import io.vertx.core.{CompositeFuture, Future}
 import jakarta.inject.Inject
-import jakarta.persistence.NoResultException
 import org.hibernate.reactive.stage.Stage
 
 import java.util
@@ -26,7 +22,7 @@ class HibernateCredentialStore extends CredentialStore {
   val log = Logger[HibernateCredentialStore]
 
   @Inject
-  var sessionFactory : Stage.SessionFactory = uninitialized
+  var sessionFactory: Stage.SessionFactory = uninitialized
 
   override def credentialId(record: CredentialRecord): String = record.asInstanceOf[WebAuthnCredentialRecord].getCredentialID
 
@@ -91,7 +87,7 @@ class HibernateCredentialStore extends CredentialStore {
 
 
   }
-  
+
   override def loadByUsername(username: String): CompletionStage[util.List[? <: CredentialRecord]] = {
     sessionFactory.withTransaction(implicit session => {
       CredentialWebAuthn.findByEmail(username)

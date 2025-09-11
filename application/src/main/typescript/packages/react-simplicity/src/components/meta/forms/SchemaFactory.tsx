@@ -93,24 +93,24 @@ function SchemaFactory(properties: SchemaFactory.Attributes) {
         }
         case "image":
             return (
-                <SchemaImage style={{width: "100px", height: "100px"}} disabled={schema.readOnly} name={name} {...rest}/>
+                <SchemaImage style={{width: "100px", height: "100px"}} disabled={! formContext.value["$instance"][name].writable} name={name} {...rest}/>
             )
         case "select":
             return (
-                <SchemaSelect disabled={schema.readOnly || disabled} name={name} {...rest}/>
+                <SchemaSelect disabled={! formContext.value["$instance"][name].writable || disabled} name={name} {...rest}/>
             )
         case "lazy-multi-select":
             return (
-                <SchemaLazySelect validators={validators} disabled={schema.readOnly || disabled} name={name} {...rest}
+                <SchemaLazySelect validators={validators} disabled={! formContext.value["$instance"][name].writable || disabled} name={name} {...rest}
                                   multiSelect={true}/>
             )
         case "lazy-select":
             return (
-                <SchemaLazySelect disabled={schema.readOnly || disabled} name={name} validators={validators} {...rest}/>
+                <SchemaLazySelect disabled={! formContext.value["$instance"][name].writable || disabled} name={name} validators={validators} {...rest}/>
             )
         default:
             return (
-                <SchemaInput disabled={schema.readOnly || disabled} name={name} validators={validators} {...rest}/>
+                <SchemaInput disabled={! formContext.value["$instance"][name].writable || disabled} name={name} validators={validators} {...rest}/>
             )
     }
 }

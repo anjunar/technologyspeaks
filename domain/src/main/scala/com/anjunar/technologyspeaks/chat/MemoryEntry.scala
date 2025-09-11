@@ -2,7 +2,7 @@ package com.anjunar.technologyspeaks.chat
 
 import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
-import com.anjunar.jpa.{PostgresIndex, PostgresIndices}
+import com.anjunar.jpa.annotations.{PostgresIndex, PostgresIndices}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import io.smallrye.mutiny.Uni
 import jakarta.persistence.{Basic, Column, Entity, Lob}

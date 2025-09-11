@@ -1,10 +1,11 @@
 package com.anjunar.technologyspeaks.control
 
 import com.anjunar.jaxrs.types.OwnerProvider
+import com.anjunar.jpa.annotations.{PostgresIndex, PostgresIndices}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.technologyspeaks.media.Media
 import com.anjunar.technologyspeaks.shared.AbstractEntity
-import com.anjunar.jpa.{PostgresIndex, PostgresIndices, RepositoryContext}
+import com.anjunar.jpa.RepositoryContext
 import com.anjunar.security.SecurityUser
 import com.anjunar.vertx.engine.{EntitySchemaDef, OwnerRule, RequestContext, SchemaProvider, SchemaView, VisibilityRule}
 import jakarta.persistence.*

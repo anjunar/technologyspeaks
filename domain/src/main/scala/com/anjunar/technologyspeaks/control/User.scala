@@ -1,7 +1,8 @@
 package com.anjunar.technologyspeaks.control
 
 import com.anjunar.jaxrs.types.OwnerProvider
-import com.anjunar.jpa.{EntityContext, PostgresIndex, PostgresIndices, RepositoryContext}
+import com.anjunar.jpa.annotations.{PostgresIndex, PostgresIndices}
+import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.document.Document
@@ -53,18 +54,18 @@ class User extends Identity with OwnerProvider with SecurityUser with EntityCont
 object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[User] with ViewContext {
 
   val schema = new EntitySchemaDef[User](classOf[User]) {
-    val id = column[UUID]("id", views = Set(SchemaView.Full, SchemaView.Compact))
-    val nickName = column[String]("nickName", views = Set(SchemaView.Full, SchemaView.Compact))
+    val id = column[UUID]("id", views = Set("full", "application", "form", "table"))
+    val nickName = column[String]("nickName", views = Set("full", "application", "form", "table"))
       .visibleWhen(OwnerRule())
     val emails = column[util.Set[EMail]]("emails")
       .forType(ctx => EMail.schema.buildType(classOf[EMail], ctx))
       .forInstance((emails, ctx, factory) => emails.asScala.map(elem => EMail.schema.build(elem, ctx, factory)).toSeq)
       .visibleWhen(ManagedRule(classOf[User]))
-    val info = column[UserInfo]("info")
+    val info = column[UserInfo]("info", views = Set("full", "application", "form", "table"))
       .forType(ctx => UserInfo.schema.buildType(classOf[UserInfo], ctx))
       .forInstance((userInfo, ctx, factory) => Seq(UserInfo.schema.build(userInfo, ctx, factory)))
       .visibleWhen(ManagedRule(classOf[User]))
-    val address = column[Address]("address")
+    val address = column[Address]("address", views = Set("full", "form"))
       .forType(ctx => Address.schema.buildType(classOf[Address], ctx))
       .forInstance((address, ctx, factory) => Seq(Address.schema.build(address, ctx, factory)))
       .visibleWhen(ManagedRule(classOf[User]))

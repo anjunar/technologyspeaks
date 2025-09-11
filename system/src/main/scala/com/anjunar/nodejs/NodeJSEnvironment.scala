@@ -18,8 +18,8 @@ class NodeJSEnvironment {
   var webpackProcess : Process = uninitialized
 
   def startContainer(): Unit = {
-    ssrProcess = new ProcessBuilder("npm.cmd", "start")
-      .directory(new File("./src/main/typescript/packages/technology-speaks"))
+    ssrProcess = new ProcessBuilder("npm.cmd", "run", "serve:ssr:production")
+      .directory(new File("./src/main/javascript/workspace"))
       .redirectError(ProcessBuilder.Redirect.INHERIT)
       .start()
 

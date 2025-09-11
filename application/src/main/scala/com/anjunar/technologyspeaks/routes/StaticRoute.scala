@@ -7,15 +7,20 @@ import io.vertx.ext.web.handler.StaticHandler
 import jakarta.enterprise.context.ApplicationScoped
 
 @ApplicationScoped
-@Route(path = "/static/*")
+@Route(path = "/*")
 class StaticRoute extends Handler[RoutingContext] {
 
   override def handle(event: RoutingContext): Unit = {
+    
+    if (event.normalizedPath() == "/") {
+      event.next()
+    } else {
+      val staticHandler = StaticHandler.create("src/main/javascript/workspace/dist/technology-speaks/browser")
+        .setCachingEnabled(true)
 
-    val staticHandler = StaticHandler.create("src/main/typescript/packages/technology-speaks/dist/client")
-      .setCachingEnabled(true)
+      staticHandler.handle(event)
+    }
 
-    staticHandler.handle(event)
 
   }
 }

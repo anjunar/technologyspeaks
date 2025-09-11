@@ -1,4 +1,4 @@
-package com.anjunar.jpa;
+package com.anjunar.jpa.annotations;
 
 import jakarta.inject.Qualifier;
 
@@ -10,4 +10,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
-public @interface Delete { }
+public @interface Save { }

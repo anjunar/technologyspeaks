@@ -11,7 +11,7 @@ import java.lang.reflect.Type
 
 case class StateDef(rel : String,
                     name : String,
-                    view: SchemaView = Full,
+                    view: String = "full",
                     ref: Class[?] = classOf[Void],
                     resource: Class[?]) {
   

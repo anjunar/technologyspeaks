@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.security
 
+import com.anjunar.technologyspeaks.control.CredentialWebAuthn
 import com.anjunar.vertx.webauthn.CredentialStore
 import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.client.Origin
@@ -60,16 +61,21 @@ class LoginFinishResource extends WebAuthnService {
                   .thenCompose { _ =>
                     sessionFactory
                       .withTransaction(session => {
-                        session.createMutationQuery("update CredentialWebAuthn c set c.counter = : counter where c.credentialId = : credentialId")
-                          .setParameter("counter", authenticationData.getAuthenticatorData.getSignCount)
+                        session.createQuery("from CredentialWebAuthn c join fetch c.roles r join fetch c.email e join fetch e.user where c.credentialId = : credentialId", classOf[CredentialWebAuthn])
                           .setParameter("credentialId", credentialId)
-                          .executeUpdate()
+                          .getSingleResult
+                          .thenApply(entity => {
+                            entity.counter = authenticationData.getAuthenticatorData.getSignCount
+                            entity
+                          })
                       })
                       .thenCompose(entity => {
                         store.loadUser(credentialId)
                           .thenApply(user => {
                             session.setUser(ctx, user)
-
+                            
+                            ctx.session().put("credential", entity)
+                            
                             new JsonObject()
                               .put("status", "success")
                               .put("user", user.principal())

@@ -32,8 +32,7 @@ lazy val jsonMapper2 = (project in file("library/json-mapper2"))
       "com.fasterxml.jackson.core" % "jackson-annotations" % "2.19.2",
       "org.apache.commons" % "commons-lang3" % "3.18.0",
       "org.apache.commons" % "commons-text" % "1.14.0",
-      "commons-fileupload" % "commons-fileupload" % "1.6.0",
-      "org.hibernate.reactive" % "hibernate-reactive-core" % "4.1.0.Final"
+      "commons-fileupload" % "commons-fileupload" % "1.6.0"
     )
   )
 

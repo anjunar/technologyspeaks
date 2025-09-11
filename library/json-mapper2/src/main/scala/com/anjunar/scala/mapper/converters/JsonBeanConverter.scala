@@ -14,7 +14,6 @@ import com.google.common.reflect.TypeToken
 import com.typesafe.scalalogging.Logger
 import jakarta.persistence.Tuple
 import jakarta.validation.ConstraintViolation
-import org.hibernate.Hibernate
 
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import java.{lang, util}
@@ -56,7 +55,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
 
     val jsonTypeInfo = aType.findAnnotation(classOf[JsonTypeInfo])
 
-    properties.put(if jsonTypeInfo == null then "$type" else jsonTypeInfo.property(), JsonString(Hibernate.unproxy(instance).getClass.getSimpleName))
+    properties.put(if jsonTypeInfo == null then "$type" else jsonTypeInfo.property(), JsonString(instance.getClass.getSimpleName))
     val jsonObject = JsonObject(properties)
 
     val links = new mutable.LinkedHashMap[String, JsonNode]

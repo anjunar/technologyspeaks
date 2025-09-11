@@ -4,12 +4,15 @@ import {SchemaFormContext} from "../forms/SchemaForm"
 import {configureValidators, Validator} from "../../shared/Model";
 import InputContainer from "../../inputs/container/InputContainer";
 import EnumDescriptor from "../../../domain/descriptors/EnumDescriptor";
+import {FormContext} from "../../inputs/form/Form";
 
 function SchemaSelect(properties: SchemaSelect.Attributes) {
 
     const {name, disabled, validators, ...rest} = properties
 
     const context = useContext(SchemaFormContext)
+
+    const formContext = useContext(FormContext)
 
     const schema = context(name) as EnumDescriptor
 
@@ -19,7 +22,7 @@ function SchemaSelect(properties: SchemaSelect.Attributes) {
 
     return (
         <InputContainer placeholder={schema.title}>
-            <Select name={name} disabled={disabled || schema.readOnly} {...rest} {...configureValidators(schema)} validators={validators}>
+            <Select name={name} disabled={disabled || ! formContext.value["$instance"][name].writable} {...rest} {...configureValidators(schema)} validators={validators}>
                 {schema.enums.map(item => (
                     <Select.Option key={item}>{item}</Select.Option>
                 ))}

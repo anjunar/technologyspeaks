@@ -1,6 +1,6 @@
 package com.anjunar.technologyspeaks.shared.i18n
 
-import com.anjunar.jpa.{Pair, RepositoryContext}
+import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import jakarta.persistence.{Basic, Column, Entity}
