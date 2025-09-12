@@ -2,6 +2,7 @@ import { WebSocketServer } from 'ws';
 import { renderApplication } from '@angular/platform-server';
 import bootstrap from './main.server';
 import detectPort from 'detect-port';
+import {REQUEST, ServerRequest} from "shared";
 
 let port = 4001;
 
@@ -11,11 +12,14 @@ detectPort(port).then(_port => {
 
     wss.on('connection', ws => {
       ws.on('message', async (msg) => {
-        const data = JSON.parse(msg.toString());
+        const data : ServerRequest = JSON.parse(msg.toString());
         try {
           const html = await renderApplication(bootstrap, {
             document: data.document,
-            url : data.url,
+            url : data.path,
+            platformProviders : [
+                { provide : REQUEST, useValue : data }
+            ]
           });
           ws.send(JSON.stringify({ success: true, html }));
         } catch (err : any) {
@@ -26,6 +30,6 @@ detectPort(port).then(_port => {
 
     console.log('SSR WebSocket Server running on ws://localhost:4001');
   } else {
-    console.log(`Port ${port} schon belegt. WS-Server nicht gestartet.`);
+    console.log(`Port ${port} not free. WS-Server not started.`);
   }
 });
