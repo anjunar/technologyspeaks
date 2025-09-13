@@ -1,16 +1,10 @@
 import {Component, ViewEncapsulation} from '@angular/core';
 
 @Component({
-  selector: 'lib-shared',
+  selector: 'as-toolbar',
   imports: [],
-  template: `
-    <p>
-      shared works!111
-    </p>
-  `,
-  styles: ``,
+  templateUrl: './as-toolbar.html',
+  styleUrl: './as-toolbar.css',
   encapsulation : ViewEncapsulation.None
 })
-export class Shared {
-
-}
+export class AsToolbar {}

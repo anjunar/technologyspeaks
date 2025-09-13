@@ -1,0 +1,6 @@
+as-toolbar {
+    display: flex;
+    justify-content: space-between;
+    height: 32px;
+    background-color: var(--color-background-secondary);
+}

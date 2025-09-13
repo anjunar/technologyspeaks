@@ -1,10 +1,10 @@
 import {Component, signal, ViewEncapsulation} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
-import {Shared} from 'shared';
+import {AsToolbar} from 'shared';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Shared],
+  imports: [RouterOutlet, AsToolbar],
   templateUrl: './app.html',
   styleUrl: './app.css',
   encapsulation : ViewEncapsulation.None

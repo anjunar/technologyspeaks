@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Shared } from './shared';
+import { AsToolbar } from './as-toolbar';
 
-describe('Shared', () => {
-  let component: Shared;
-  let fixture: ComponentFixture<Shared>;
+describe('AsToolbar', () => {
+  let component: AsToolbar;
+  let fixture: ComponentFixture<AsToolbar>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Shared]
+      imports: [AsToolbar]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Shared);
+    fixture = TestBed.createComponent(AsToolbar);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
