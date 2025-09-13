@@ -6,7 +6,7 @@ import Role from "./domain/control/Role";
 import Address from "./domain/control/Address";
 import GeoPoint from "./domain/control/GeoPoint";
 import Application from "./domain/Application";
-import {registerEntity} from "react-ui-simplicity";
+import {registerEntity} from "shared";
 import EMail from "./domain/control/EMail";
 import Login from "./domain/security/Login";
 import Credential from "./domain/control/Credential";

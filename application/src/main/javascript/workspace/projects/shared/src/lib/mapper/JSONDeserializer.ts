@@ -2,7 +2,7 @@ import {findClass, findConverter, findProperties} from "./Registry";
 import ActiveObject from "../domain/container/ActiveObject";
 import JSONSerializer from "./JSONSerializer";
 
-export default function JSONDeserializer<T>(object: any, buildObjectGraph : boolean): T {
+export default function JSONDeserializer<T>(object: any, buildObjectGraph : boolean = false): T {
     if (object instanceof Object) {
         let type = object.$type
 

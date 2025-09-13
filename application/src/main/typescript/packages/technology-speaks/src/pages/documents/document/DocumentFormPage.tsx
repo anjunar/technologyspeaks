@@ -12,7 +12,7 @@ import {
     SchemaInput,
     useForm,
     Window
-} from "react-ui-simplicity";
+} from "shared";
 import {process} from "../../Root";
 import {createPortal} from "react-dom";
 import navigate = Router.navigate;

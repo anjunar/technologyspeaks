@@ -1,5 +1,5 @@
 import React from "react"
-import {Button, FormModel, JSONSerializer, Router, SchemaForm, SchemaInput, useForm} from "react-ui-simplicity";
+import {Button, FormModel, JSONSerializer, Router, SchemaForm, SchemaInput, useForm} from "shared";
 import navigate = Router.navigate;
 import Credential from "../../domain/control/Credential";
 import {process} from "../Root"

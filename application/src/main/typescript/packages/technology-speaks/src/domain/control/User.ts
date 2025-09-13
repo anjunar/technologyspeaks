@@ -2,7 +2,7 @@ import Identity from "./Identity";
 import UserInfo from "./UserInfo";
 import Role from "./Role";
 import Address from "./Address";
-import {Basic, Entity} from "react-ui-simplicity";
+import {Basic, Entity} from "shared";
 import EMail from "./EMail";
 
 @Entity("User")

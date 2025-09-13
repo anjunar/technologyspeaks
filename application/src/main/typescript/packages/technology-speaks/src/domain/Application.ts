@@ -1,5 +1,5 @@
 import User from "./control/User";
-import {ActiveObject, Basic, Entity} from "react-ui-simplicity";
+import {ActiveObject, Basic, Entity} from "shared";
 
 @Entity("Application")
 export default class Application extends ActiveObject {

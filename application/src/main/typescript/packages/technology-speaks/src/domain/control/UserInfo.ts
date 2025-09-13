@@ -1,5 +1,5 @@
 import {LocalDate} from "@js-joda/core";
-import {AbstractEntity, Basic, Entity, Media} from "react-ui-simplicity";
+import {AbstractEntity, Basic, Entity, Media} from "shared";
 
 @Entity("UserInfo")
 export default class UserInfo extends AbstractEntity {

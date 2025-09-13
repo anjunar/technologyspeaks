@@ -1,7 +1,7 @@
 (require as any).extensions[".css"] = () => {};
 import WebSocket, { WebSocketServer } from 'ws';
 import { renderToString } from "react-dom/server";
-import { resolveComponentList, resolveRoute } from "react-ui-simplicity";
+import { resolveComponentList, resolveRoute } from "shared";
 import { routes } from "./routes";
 import React from "react";
 import { App } from "./App";

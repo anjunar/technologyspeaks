@@ -1,5 +1,5 @@
 import React from "react"
-import {AbstractSearch, ActiveObject, Button, FormSchemaFactory, SchemaForm, useForm} from "react-ui-simplicity";
+import {AbstractSearch, ActiveObject, Button, FormSchemaFactory, SchemaForm, useForm} from "shared";
 
 function Search(properties: Search.Attributes) {
 

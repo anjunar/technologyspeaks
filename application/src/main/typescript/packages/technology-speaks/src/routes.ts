@@ -1,4 +1,4 @@
-import {mapForm, mapTable, Router} from "react-ui-simplicity";
+import {mapForm, mapTable, Router} from "shared";
 import Root from "./pages/Root";
 import FormPage from "./pages/navigator/FormPage";
 import TablePage from "./pages/navigator/TablePage";

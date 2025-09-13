@@ -1,7 +1,7 @@
 import "./UserSearchPage.css"
 import React from 'react';
 import User from "../../../../domain/control/User";
-import {LinkContainerObject, ObjectDescriptor} from "react-ui-simplicity";
+import {LinkContainerObject, ObjectDescriptor} from "shared";
 
 const encodeBase64 = (type: string, data: string) => {
     if (data) {

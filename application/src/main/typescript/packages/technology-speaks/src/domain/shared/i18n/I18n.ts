@@ -1,4 +1,4 @@
-import {AbstractEntity, Basic, Entity} from "react-ui-simplicity";
+import {AbstractEntity, Basic, Entity} from "shared";
 import Translation from "./Translation";
 
 @Entity("I18n")

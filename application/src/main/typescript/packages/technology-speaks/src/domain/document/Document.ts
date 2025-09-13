@@ -1,6 +1,6 @@
-import {AbstractEntity, Basic, Entity, MarkDownEditor, RootNode} from "react-ui-simplicity";
+import {AbstractEntity, Basic, Entity, MarkDownEditor, RootNode} from "shared";
 import User from "../control/User";
-import {EditorModel} from "react-ui-simplicity";
+import {EditorModel} from "shared";
 import HashTag from "../shared/HashTag";
 
 @Entity("Document")

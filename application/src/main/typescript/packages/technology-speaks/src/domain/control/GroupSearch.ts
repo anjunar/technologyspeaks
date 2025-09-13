@@ -1,4 +1,4 @@
-import {AbstractSearch, Basic, Entity} from "react-ui-simplicity";
+import {AbstractSearch, Basic, Entity} from "shared";
 
 @Entity("GroupSearch")
 export default class GroupSearch extends AbstractSearch {

@@ -3,6 +3,7 @@ import LinkContainerObject from "./LinkContainerObject";
 import ObjectDescriptor from "../descriptors/ObjectDescriptor";
 import NodeDescriptor from "../descriptors/NodeDescriptor";
 import PropDescriptor from "../descriptors/PropDescriptor";
+import LinkObject from "./LinkObject";
 
 interface PropertiesContainer {
     [key: string]: PropDescriptor

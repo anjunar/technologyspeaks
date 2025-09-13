@@ -2,13 +2,8 @@
   "name": "workspace",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:production": "nodemon --inspect dist/technology-speaks/server/server.mjs",
-    "serve:ssr:development": "ts-node-dev --inspect --respawn --transpile-only -r tsconfig-paths/register projects/technology-speaks/src/server.ts"
+    "start": "ng build technology-speaks --watch --configuration development",
+    "serve": "nodemon --inspect dist/technology-speaks/server/server.mjs"
   },
   "prettier": {
     "printWidth": 100,
@@ -32,6 +27,7 @@
     "@angular/platform-server": "^20.3.0",
     "@angular/router": "^20.3.0",
     "@angular/ssr": "^20.3.1",
+    "@github/webauthn-json": "^2.1.1",
     "@js-joda/core": "^5.6.5",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",

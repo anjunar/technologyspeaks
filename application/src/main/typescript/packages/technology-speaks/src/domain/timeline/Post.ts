@@ -1,4 +1,4 @@
-import {AbstractEntity, Basic, EditorModel, Entity} from "react-ui-simplicity";
+import {AbstractEntity, Basic, EditorModel, Entity} from "shared";
 import User from "../control/User";
 
 @Entity("Post")

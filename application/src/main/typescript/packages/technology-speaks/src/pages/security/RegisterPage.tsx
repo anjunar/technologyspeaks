@@ -11,7 +11,7 @@ import {
     SchemaForm,
     SchemaInput,
     useForm
-} from "react-ui-simplicity";
+} from "shared";
 import Login from "../../domain/security/Login";
 import navigate = Router.navigate;
 

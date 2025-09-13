@@ -1,6 +1,6 @@
 import "./TablePage.css"
 import React, {useMemo, useState} from "react"
-import {AbstractEntity, AbstractSearch, ActiveObject, DateDuration, JSONSerializer, Link, LinkContainerObject, mapTable, match, Router, SchemaTable} from "react-ui-simplicity";
+import {AbstractEntity, AbstractSearch, ActiveObject, DateDuration, JSONSerializer, Link, LinkContainerObject, mapTable, match, Router, SchemaTable} from "shared";
 import {process} from "../Root"
 import Search from "./Search";
 import Loader = SchemaTable.Loader;

@@ -1,4 +1,4 @@
-import {ActiveObject, Basic, Entity} from "react-ui-simplicity";
+import {ActiveObject, Basic, Entity} from "shared";
 
 @Entity("Confirmation")
 export default class Confirmation extends ActiveObject {

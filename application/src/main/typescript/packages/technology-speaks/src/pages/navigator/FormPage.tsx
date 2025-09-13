@@ -10,7 +10,7 @@ import {
     Router,
     SchemaForm,
     useForm
-} from "react-ui-simplicity";
+} from "shared";
 import * as webauthnJson from "@github/webauthn-json";
 import SecuredProperty from "../../components/security/SecuredProperty";
 import {v4} from "uuid";

@@ -1,0 +1,15 @@
+as-drawer {
+    display: block;
+    background-color: var(--color-background-tertiary);
+    height: 100%;
+    width: 300px;
+}
+
+@media only screen and (max-width: 1440px) {
+    as-drawer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 50;
+    }
+}

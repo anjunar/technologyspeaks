@@ -1,7 +1,7 @@
 import "./DocumentViewPage.css"
 import React from "react"
 import Document from "../../../domain/document/Document";
-import {Form, Link, MarkDownView, Router} from "react-ui-simplicity";
+import {Form, Link, MarkDownView, Router} from "shared";
 import navigate = Router.navigate;
 import onLink = Link.onLink;
 import link from "react-ui-simplicity/src/components/navigation/link/Link";

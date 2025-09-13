@@ -1,0 +1,14 @@
+as-input-container {
+    display: block;
+
+    .placeholder {
+        height: 8px;
+    }
+
+    .errors {
+        display: flex;
+        gap: 5px;
+        height: 8px;
+        color: var(--color-error);
+    }
+}

@@ -1,4 +1,4 @@
-import {Basic, Entity, AbstractEntity} from "react-ui-simplicity";
+import {Basic, Entity, AbstractEntity} from "shared";
 import User from "./User";
 
 @Entity("Group")

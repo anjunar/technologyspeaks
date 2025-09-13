@@ -1,5 +1,5 @@
 import React, {useState} from "react"
-import {Link, mapForm, NodeDescriptor, useForm, useServer, Window} from "react-ui-simplicity";
+import {Link, mapForm, NodeDescriptor, useForm, useServer, Window} from "shared";
 import {createPortal} from "react-dom";
 import ManagedProperty from "../../domain/shared/ManagedProperty";
 import SecuredPropertyForm from "./SecuredPropertyForm";

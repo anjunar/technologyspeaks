@@ -1,4 +1,4 @@
-import {ActiveObject, Basic, Entity} from "react-ui-simplicity";
+import {ActiveObject, Basic, Entity} from "shared";
 
 @Entity("Translation")
 export default class Translation extends ActiveObject {

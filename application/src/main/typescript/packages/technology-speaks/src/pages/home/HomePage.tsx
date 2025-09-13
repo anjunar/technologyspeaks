@@ -1,7 +1,7 @@
 import "./HomePage.css"
 import React from "react"
 import DocumentSearch from "../../domain/document/DocumentSearch";
-import {AutoSuggest, Button, Form, FormModel, Link, mapTable, Router, SchemaForm, useForm} from "react-ui-simplicity";
+import {AutoSuggest, Button, Form, FormModel, Link, mapTable, Router, SchemaForm, useForm} from "shared";
 import HashTag from "../../domain/shared/HashTag";
 import {process} from "../Root"
 import navigate = Router.navigate;

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link, mapTable, Router, Table} from "react-ui-simplicity";
+import {Link, mapTable, Router, Table} from "shared";
 import Revision from "../../../../domain/document/Revision";
 import SchemaTable from "react-ui-simplicity/src/components/meta/table/SchemaTable";
 import {process} from "../../../Root";

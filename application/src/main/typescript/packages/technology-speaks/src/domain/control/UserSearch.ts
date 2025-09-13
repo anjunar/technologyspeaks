@@ -1,4 +1,4 @@
-import {AbstractSearch, Basic, Entity} from "react-ui-simplicity";
+import {AbstractSearch, Basic, Entity} from "shared";
 import {LocalDate} from "@js-joda/core";
 
 @Entity("UserSearch")

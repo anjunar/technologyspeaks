@@ -1,4 +1,4 @@
-import {AbstractSearch, Basic, Entity} from "react-ui-simplicity";
+import {AbstractSearch, Basic, Entity} from "shared";
 import User from "../control/User";
 
 @Entity("PostSearch")

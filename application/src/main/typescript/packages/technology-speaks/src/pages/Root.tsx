@@ -1,7 +1,7 @@
 import "./Root.css"
 
 import React, {useContext, useEffect, useState} from "react"
-import {Drawer, Link, Router, ToolBar, useMatchMedia, Viewport} from "react-ui-simplicity";
+import {Drawer, Link, Router, ToolBar, useMatchMedia, Viewport} from "shared";
 import Application from "../domain/Application";
 import {SystemContext} from "react-ui-simplicity/src/System";
 import navigate = Router.navigate;

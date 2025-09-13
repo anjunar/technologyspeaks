@@ -3,7 +3,7 @@ import {hydrateRoot} from 'react-dom/client';
 import {App} from './App';
 import {
     resolveComponentList, resolveRoute,
-} from "react-ui-simplicity";
+} from "shared";
 import {routes} from "./routes";
 import {RequestInformation} from "./request";
 

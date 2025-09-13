@@ -1,5 +1,5 @@
-import {Basic, Entity} from "react-ui-simplicity";
-import {AbstractSearch} from "react-ui-simplicity";
+import {Basic, Entity} from "shared";
+import {AbstractSearch} from "shared";
 import Document from "./Document";
 
 @Entity("RevisionSearch")

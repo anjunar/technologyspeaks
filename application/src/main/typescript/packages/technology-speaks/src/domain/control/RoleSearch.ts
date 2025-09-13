@@ -1,4 +1,4 @@
-import {AbstractSearch, Basic, Entity} from "react-ui-simplicity";
+import {AbstractSearch, Basic, Entity} from "shared";
 
 @Entity("RoleSearch")
 export default class RoleSearch extends AbstractSearch {

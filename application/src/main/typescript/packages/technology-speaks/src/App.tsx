@@ -1,6 +1,6 @@
 import './App.css';
 import React, {useEffect, useState} from 'react';
-import {Router, System} from "react-ui-simplicity";
+import {Router, System} from "shared";
 import {init} from "./Persistence"
 import {routes} from "./routes";
 import {RequestInformation} from "./request";

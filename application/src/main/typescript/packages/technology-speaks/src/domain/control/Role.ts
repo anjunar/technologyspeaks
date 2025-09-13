@@ -1,4 +1,4 @@
-import {Basic, Entity, AbstractEntity} from "react-ui-simplicity";
+import {Basic, Entity, AbstractEntity} from "shared";
 
 @Entity("Role")
 export default class Role extends AbstractEntity {

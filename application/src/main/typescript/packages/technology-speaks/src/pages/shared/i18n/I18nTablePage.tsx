@@ -10,7 +10,7 @@ import {
     SchemaInput,
     SchemaTable, TableObject,
     useForm
-} from "react-ui-simplicity";
+} from "shared";
 import {process} from "../../Root";
 import I18n from "../../../domain/shared/i18n/I18n";
 import navigate = Router.navigate;

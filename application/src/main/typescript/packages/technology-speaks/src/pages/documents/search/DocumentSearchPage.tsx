@@ -13,7 +13,7 @@ import {
     SchemaForm,
     SchemaInput,
     useForm
-} from "react-ui-simplicity";
+} from "shared";
 import {process} from "../../Root";
 import Document from "../../../domain/document/Document";
 import DocumentSearch from "../../../domain/document/DocumentSearch";

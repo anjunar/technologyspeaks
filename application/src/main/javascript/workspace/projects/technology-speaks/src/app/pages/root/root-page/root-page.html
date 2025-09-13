@@ -1,0 +1,18 @@
+<as-toolbar>
+    <div ngProjectAs="left">
+        <button type="button" class="material-icons" (click)="open.set(! open())">menu</button>
+    </div>
+    <div ngProjectAs="right">2</div>
+</as-toolbar>
+<as-drawer-container [open]="open()">
+    <as-drawer>
+        @for (link of links(); track link.rel) {
+            <li>
+                <a [routerLink]="link.url">{{ link.title }}</a>
+            </li>
+        }
+    </as-drawer>
+    <as-drawer-content>
+        <router-outlet/>
+    </as-drawer-content>
+</as-drawer-container>

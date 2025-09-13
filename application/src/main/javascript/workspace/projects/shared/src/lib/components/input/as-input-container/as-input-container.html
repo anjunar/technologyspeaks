@@ -1,0 +1,11 @@
+<div class="placeholder">
+    <span>{{placeholder()}}</span>
+</div>
+<ng-content/>
+<hr/>
+<div class="errors">
+    @for (error of errors(); track $index) {
+        <span>{{error}}</span>
+    }
+</div>
+

@@ -1,4 +1,4 @@
-import {AbstractEntity, Basic, Entity} from "react-ui-simplicity";
+import {AbstractEntity, Basic, Entity} from "shared";
 import Group from "../control/Group";
 
 @Entity("ManagedProperty")

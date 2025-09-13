@@ -1,7 +1,7 @@
 import "./UserFormPage.css"
 import React from 'react';
 import User from "../../../../domain/control/User";
-import {JsFlag, SchemaFormTemplate, SchemaImage, SchemaInput, SchemaSubForm} from "react-ui-simplicity";
+import {JsFlag, SchemaFormTemplate, SchemaImage, SchemaInput, SchemaSubForm} from "shared";
 import SecuredProperty from "../../../../components/security/SecuredProperty";
 
 export function UserFormPage(properties: UserFormPage.Attributes) {

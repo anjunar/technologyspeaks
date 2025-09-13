@@ -1,4 +1,4 @@
-import {Basic, Entity, AbstractEntity} from "react-ui-simplicity";
+import {Basic, Entity, AbstractEntity} from "shared";
 
 @Entity("Identity")
 export default class Identity extends AbstractEntity {

@@ -28,7 +28,7 @@ yarn add react-ui-simplicity
 
 ```tsx
 import React, {useEffect, useState} from "react";
-import {ActiveObject, Button, Form, FormModel, Input, InputContainer, SubForm, useForm, Window, HighLight} from "react-ui-simplicity";
+import {ActiveObject, Button, Form, FormModel, Input, InputContainer, SubForm, useForm, Window, HighLight} from "shared";
 
 function FormsPage() {
 

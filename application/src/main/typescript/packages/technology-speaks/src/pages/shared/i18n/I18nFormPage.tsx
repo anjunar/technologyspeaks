@@ -9,7 +9,7 @@ import {
     SchemaImage,
     SchemaInput,
     useForm
-} from "react-ui-simplicity";
+} from "shared";
 import SubForm from "react-ui-simplicity/src/components/inputs/form/SubForm";
 import Translation from "../../../domain/shared/i18n/Translation";
 import {v4} from "uuid";
