@@ -1,62 +1,77 @@
 html {
-  height: 100%;
-  width: 100vw;
+    height: 100%;
+    width: 100vw;
 }
 
 body {
-  margin: 0;
-  height: 100%;
+    margin: 0;
+    height: 100%;
 }
 
 fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
 }
 
 hr {
-  border: none;
-  height: 1px;
-  background-color: var(--color-text);
+    border: none;
+    height: 1px;
+    margin: 0;
+    background-color: var(--color-text);
 }
 
 table {
-  border-collapse: collapse;
-  border-spacing: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
-button {
-  border: 0;
-  font-size: 16px;
-  color: inherit;
 
-  &.active {
-    color: var(--color-selected);
-  }
+button {
+    border: 0;
+    font-size: 16px;
+    color: inherit;
+
+    &.active {
+        color: var(--color-selected);
+    }
 }
 
 input {
-  padding: 0;
+    padding: 0;
+    border: 0;
+    outline: none;
+    background-color: inherit;
+    color: var(--color-text);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--color-background-primary) inset !important;
+    -webkit-text-fill-color: var(--color-text) !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 select, textarea {
-  outline: 0;
-  resize: none;
-  border: 0;
+    outline: 0;
+    resize: none;
+    border: 0;
 }
 
 ul {
-  padding-left: 20px;
+    padding-left: 20px;
 }
 
 p {
-  margin: 8px 0;
+    margin: 8px 0;
 }
 
 pre {
-  white-space: pre-wrap;
+    white-space: pre-wrap;
 }
 
 * {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(100, 100, 100, 0.5) transparent;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 100, 100, 0.5) transparent;
 }

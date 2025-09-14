@@ -1,9 +1,11 @@
-<div>
+<div class="container">
     <h1>Login</h1>
     <form (ngSubmit)="onSubmit()">
         <as-input-container placeholder="Email">
             <input type="text" name="email" [(ngModel)]="email">
         </as-input-container>
-        <button type="submit">Login</button>
+        <div class="button">
+            <button type="submit">Login</button>
+        </div>
     </form>
 </div>

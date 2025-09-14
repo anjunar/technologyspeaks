@@ -3,6 +3,24 @@ as-input-container {
 
     .placeholder {
         height: 8px;
+        font-size: xx-small;
+
+        .focus {
+            color: var(--color-selected);
+        }
+
+        .dirty {
+            color: var(--color-warning);
+        }
+
+    }
+
+    hr.focus {
+        background-color: var(--color-selected);
+    }
+
+    hr.dirty {
+        background-color: var(--color-warning);
     }
 
     .errors {
@@ -10,5 +28,6 @@ as-input-container {
         gap: 5px;
         height: 8px;
         color: var(--color-error);
+        font-size: xx-small;
     }
 }

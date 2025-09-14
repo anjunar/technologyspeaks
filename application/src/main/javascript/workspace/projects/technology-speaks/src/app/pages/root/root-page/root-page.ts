@@ -4,7 +4,7 @@ import {ActivatedRoute, RouterLink, RouterOutlet} from "@angular/router";
 import Application from "../../../domain/Application";
 
 @Component({
-    selector: 'app-root-page',
+    selector: 'root-page',
     imports: [
         AsDrawer,
         AsDrawerContainer,

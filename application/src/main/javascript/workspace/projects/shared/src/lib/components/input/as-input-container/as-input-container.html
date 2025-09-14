@@ -1,8 +1,10 @@
 <div class="placeholder">
-    <span>{{placeholder()}}</span>
+    @if (isEmpty()) {
+        <span [class.focus]="focus()" [class.dirty]="dirty()">{{placeholder()}}</span>
+    }
 </div>
 <ng-content/>
-<hr/>
+<hr [class.focus]="focus()" [class.dirty]="dirty()"/>
 <div class="errors">
     @for (error of errors(); track $index) {
         <span>{{error}}</span>
