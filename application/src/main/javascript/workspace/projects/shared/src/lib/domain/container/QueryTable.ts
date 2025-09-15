@@ -1,11 +1,11 @@
 import Entity from "../../mapper/annotations/Entity";
 import Basic from "../../mapper/annotations/Basic";
-import type LinkContainerObject from "./LinkContainerObject";
+import type LinkContainer from "./LinkContainer";
 import ActiveObject from "./ActiveObject";
-import LinksObject from "./LinksObject";
+import Links from "./Links";
 
 @Entity("QueryTable")
-export default class QueryTableObject<S, R> extends ActiveObject implements LinksObject {
+export default class QueryTable<S, R> extends ActiveObject implements Links {
 
     override $type = "QueryTable"
 
@@ -16,7 +16,7 @@ export default class QueryTableObject<S, R> extends ActiveObject implements Link
     size : number
 
     @Basic()
-    links : LinkContainerObject
+    links : LinkContainer
 
     @Basic()
     search : S

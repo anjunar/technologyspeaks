@@ -3,7 +3,7 @@ import Basic from "../../mapper/annotations/Basic";
 import ActiveObject from "./ActiveObject";
 
 @Entity("Link")
-export default class LinkObject {
+export default class Link {
 
     $type = "Link"
 

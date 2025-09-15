@@ -23,7 +23,7 @@ class IndexRoute extends Handler[RoutingContext] {
     ctx.vertx().executeBlocking(() => {
 
       val htmlContent = Files.readString(
-        Paths.get("src/main/javascript/workspace/dist/technology-speaks/browser/index.html"),
+        Paths.get("src/main/javascript/workspace/dist/technology-speaks/browser/index.csr.html"),
         StandardCharsets.UTF_8
       )
 

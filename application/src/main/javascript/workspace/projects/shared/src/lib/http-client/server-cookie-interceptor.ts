@@ -7,12 +7,16 @@ export const serverCookieInterceptor: HttpInterceptorFn = (req, next) => {
     const platformId = inject(PLATFORM_ID);
 
     if (! isPlatformBrowser(platformId)) {
-        const request: ServerRequest = inject(REQUEST, {optional : true});
+        const request: ServerRequest = inject(REQUEST);
+
+        const cookieHeader = Object.entries(request.cookie)
+            .map(([key, value]) => `${key}=${value}`)
+            .join('; ');
 
         const modifiedReq = req.clone({
-            url : `${request ? request.protocol : "http"}://localhost${req.url}`,
+            url : `${request.protocol}://localhost${req.url}`,
             setHeaders: {
-                Cookie: request ? request.cookie["JSESSIONID"] : ""
+                Cookie: cookieHeader
             }
         });
         return next(modifiedReq);

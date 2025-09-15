@@ -1,12 +1,12 @@
 import JSONDeserializer from "./JSONDeserializer";
 import ActiveObject from "../domain/container/ActiveObject";
-import LinkContainerObject from "../domain/container/LinkContainerObject";
-import TableObject from "../domain/container/TableObject";
+import LinkContainer from "../domain/container/LinkContainer";
+import Table from "../domain/container/Table";
 import {match} from "../pattern-match/PatternMatching";
 import {findSchemaProperties} from "./Registry";
 import ObjectDescriptor from "../domain/descriptors/ObjectDescriptor";
 import CollectionDescriptor from "../domain/descriptors/CollectionDescriptor";
-import QueryTableObject from "../domain/container/QueryTableObject";
+import QueryTable from "../domain/container/QueryTable";
 import {AbstractSearch} from "../domain/container";
 
 export function traverseObjectGraph(object : any, schema : ObjectDescriptor, buildObjectGraph : boolean = true) {
@@ -63,8 +63,8 @@ export function mapForm<T extends ActiveObject>(object : any, buildObjectGraph :
     return entity
 }
 
-export function mapTable<S extends AbstractSearch,T extends ActiveObject>(object : any, buildObjectGraph : boolean = false) : [T[], number, LinkContainerObject, ObjectDescriptor, S] {
-    let entity : QueryTableObject<S, T> = JSONDeserializer(object, buildObjectGraph);
+export function mapTable<S extends AbstractSearch,T extends ActiveObject>(object : any, buildObjectGraph : boolean = false) : [T[], number, LinkContainer, ObjectDescriptor, S] {
+    let entity : QueryTable<S, T> = JSONDeserializer(object, buildObjectGraph);
 
     traverseObjectGraph(entity, entity.$descriptors, buildObjectGraph)
 

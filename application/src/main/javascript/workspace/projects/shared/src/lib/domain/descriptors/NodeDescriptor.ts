@@ -1,5 +1,5 @@
 import Basic from "../../mapper/annotations/Basic";
-import type LinkContainerObject from "../container/LinkContainerObject";
+import type LinkContainer from "../container/LinkContainer";
 import MappedSuperclass from "../../mapper/annotations/MappedSuperclass";
 import ValidatorContainer from "./validators/ValidatorContainer";
 
@@ -33,7 +33,7 @@ export default class NodeDescriptor {
     step? : string
 
     @Basic()
-    links? : LinkContainerObject
+    links? : LinkContainer
 
     @Basic()
     validators? : ValidatorContainer

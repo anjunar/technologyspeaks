@@ -1,7 +1,7 @@
 import {registerConverter, registerEntity} from "../mapper";
-import LinkObject from "./container/LinkObject";
-import TableObject from "./container/TableObject";
-import RowObject from "./container/RowObject";
+import Link from "./container/Link";
+import Table from "./container/Table";
+import Row from "./container/Row";
 import DateConverter from "../mapper/converters/DateConverter";
 import LocalDateTimeConverter from "../mapper/converters/LocalDateTimeConverter";
 import LocalDateConverter from "../mapper/converters/LocalDateConverter";
@@ -19,19 +19,19 @@ import CollectionDescriptor from "./descriptors/CollectionDescriptor";
 import EnumDescriptor from "./descriptors/EnumDescriptor";
 import NodeDescriptor from "./descriptors/NodeDescriptor";
 import ObjectDescriptor from "./descriptors/ObjectDescriptor";
-import QueryTableObject from "./container/QueryTableObject";
-import SortObject from "./container/SortObject";
-import TupleTableObject from "./container/TupleTableObject";
+import QueryTable from "./container/QueryTable";
+import Sort from "./container/Sort";
+import TupleTable from "./container/TupleTable";
 import PropDescriptor from "./descriptors/PropDescriptor";
 
 export function init() {
 
-    registerEntity(TableObject)
-    registerEntity(TupleTableObject)
-    registerEntity(SortObject)
-    registerEntity(QueryTableObject)
-    registerEntity(RowObject)
-    registerEntity(LinkObject)
+    registerEntity(Table)
+    registerEntity(TupleTable)
+    registerEntity(Sort)
+    registerEntity(QueryTable)
+    registerEntity(Row)
+    registerEntity(Link)
 
     registerEntity(CollectionDescriptor)
     registerEntity(EnumDescriptor)

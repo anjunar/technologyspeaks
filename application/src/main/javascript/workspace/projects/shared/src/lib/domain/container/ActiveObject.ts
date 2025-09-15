@@ -1,9 +1,9 @@
 import Basic from "../../mapper/annotations/Basic";
-import LinkContainerObject from "./LinkContainerObject";
+import LinkContainer from "./LinkContainer";
 import ObjectDescriptor from "../descriptors/ObjectDescriptor";
 import NodeDescriptor from "../descriptors/NodeDescriptor";
 import PropDescriptor from "../descriptors/PropDescriptor";
-import LinkObject from "./LinkObject";
+import Link from "./Link";
 
 interface PropertiesContainer {
     [key: string]: PropDescriptor
@@ -14,7 +14,7 @@ export default abstract class ActiveObject {
     $data?: any
 
     @Basic()
-    $links? : LinkContainerObject
+    $links? : LinkContainer
 
     @Basic()
     $type: string

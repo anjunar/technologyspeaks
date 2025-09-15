@@ -2,7 +2,7 @@
     <h1>Login</h1>
     <form (ngSubmit)="onSubmit()">
         <as-input-container placeholder="Email">
-            <input type="text" name="email" [(ngModel)]="email">
+            <input type="email" email required name="email" [(ngModel)]="email">
         </as-input-container>
         <div class="button">
             <button type="submit">Login</button>

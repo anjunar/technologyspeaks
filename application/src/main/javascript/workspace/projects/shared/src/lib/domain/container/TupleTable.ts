@@ -1,11 +1,11 @@
 import Entity from "../../mapper/annotations/Entity";
 import Basic from "../../mapper/annotations/Basic";
-import type LinkContainerObject from "./LinkContainerObject";
+import type LinkContainer from "./LinkContainer";
 import ActiveObject from "./ActiveObject";
-import LinksObject from "./LinksObject";
+import Links from "./Links";
 
 @Entity("TupleTable")
-export default class TupleTableObject<R> extends ActiveObject implements LinksObject {
+export default class TupleTable<R> extends ActiveObject implements Links {
 
     override $type = "TupleTable"
 
@@ -16,6 +16,6 @@ export default class TupleTableObject<R> extends ActiveObject implements LinksOb
     size : number
 
     @Basic()
-    links : LinkContainerObject
+    links : LinkContainer
 
 }

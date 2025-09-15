@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {ActivatedRouteSnapshot, Routes} from '@angular/router';
 import {HomePage} from "./pages/root/home-page/home-page";
 import {LoginPage} from "./pages/security/login-page/login-page";
 import {RootPage} from "./pages/root/root-page/root-page";
@@ -7,6 +7,7 @@ import {inject} from "@angular/core";
 import {firstValueFrom} from "rxjs";
 import {JSONDeserializer} from "shared";
 import Application from "./domain/Application";
+import {UsersPage} from "./pages/control/users-page/users-page";
 
 export const routes: Routes = [
     {
@@ -20,12 +21,29 @@ export const routes: Routes = [
         },
         children : [
             {
-                path : "home",
+                path : "",
                 component : HomePage,
             },
             {
                 path : "security/login",
                 component : LoginPage
+            },
+            {
+                path : "control/users",
+                component : UsersPage,
+                resolve : {
+                    users : async (route: ActivatedRouteSnapshot) => {
+                        const http = inject(HttpClient);
+
+                        let index = route.paramMap.get("index") || 0;
+                        let limit = route.paramMap.get("limit") || 5;
+
+                        return JSONDeserializer(
+                            await firstValueFrom(http.get(`/service/control/users?index=${index}&limit=${limit}`)
+                            )
+                        )
+                    }
+                }
             }
         ]
     },

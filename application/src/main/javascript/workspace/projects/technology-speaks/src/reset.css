@@ -36,12 +36,43 @@ button {
     }
 }
 
+a {
+    color: var(--color-text);
+    text-decoration: none;
+
+    &:visited {
+        color: var(--color-text);
+        text-decoration: none;
+    }
+    &:active {
+        color: var(--color-text);
+        text-decoration: none;
+    }
+}
+
+ul {
+    list-style-type: none;
+}
+
 input {
     padding: 0;
     border: 0;
     outline: none;
     background-color: inherit;
     color: var(--color-text);
+
+    &.focus {
+        color: var(--color-selected);
+    }
+
+    &.dirty {
+        color: var(--color-warning);
+    }
+
+    &.ng-invalid {
+        color: var(--color-error);
+    }
+
 }
 
 input:-webkit-autofill,

@@ -1,13 +1,15 @@
-<div class="placeholder">
-    @if (isEmpty()) {
-        <span [class.focus]="focus()" [class.dirty]="dirty()">{{placeholder()}}</span>
-    }
-</div>
-<ng-content/>
-<hr [class.focus]="focus()" [class.dirty]="dirty()"/>
-<div class="errors">
-    @for (error of errors(); track $index) {
-        <span>{{error}}</span>
-    }
+<div >
+    <div class="placeholder">
+        @if (! isEmpty()) {
+            <span [class.focus]="focus()" [class.dirty]="dirty() && focus()" [class.error]="errors().length && focus()">{{placeholder()}}</span>
+        }
+    </div>
+    <ng-content/>
+    <hr [class.focus]="focus()" [class.dirty]="dirty() && focus()" [class.error]="errors().length && focus()"/>
+    <div class="errors">
+        @for (error of errors(); track $index) {
+            <span>{{error}}</span>
+        }
+    </div>
 </div>
 

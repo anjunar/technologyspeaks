@@ -3,7 +3,7 @@ import ActiveObject from "./ActiveObject";
 import Basic from "../../mapper/annotations/Basic";
 
 @Entity("Sort")
-export default class SortObject extends ActiveObject {
+export default class Sort extends ActiveObject {
 
     override $type = "Sort"
 

@@ -1,5 +1,5 @@
-import {Component, computed, inject, model, ViewEncapsulation} from '@angular/core';
-import {AsDrawer, AsDrawerContainer, AsDrawerContent, AsToolbar, LinkObject} from "shared";
+import {Component, computed, inject, input, model, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {AsDrawer, AsDrawerContainer, AsDrawerContent, AsToolbar, LinkContainerObject, LinkObject} from "shared";
 import {ActivatedRoute, RouterLink, RouterOutlet} from "@angular/router";
 import Application from "../../../domain/Application";
 
@@ -19,13 +19,10 @@ import Application from "../../../domain/Application";
 })
 export class RootPage {
 
-    route = inject(ActivatedRoute);
+    application = input.required<Application>();
 
-    open = model(true)
+    open = signal(true)
 
-    links = computed(() => {
-        let application = this.route.snapshot.data['application'] as Application;
-        return Object.values(application.$links)
-    });
+    links = computed(() => this.application().$links);
 
 }

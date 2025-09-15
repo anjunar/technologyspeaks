@@ -1,7 +1,8 @@
 import {
+    AfterContentChecked, AfterContentInit,
     Component,
     computed,
-    contentChild,
+    contentChild, effect,
     ElementRef, inject,
     input, OnInit, Renderer2,
     signal,
@@ -16,11 +17,13 @@ import {NgControl, ReactiveFormsModule} from "@angular/forms";
   styleUrl: './as-input-container.css',
   encapsulation : ViewEncapsulation.None
 })
-export class AsInputContainer implements OnInit {
+export class AsInputContainer {
 
     placeholder = input.required<string>()
 
     ngControl = contentChild(NgControl)
+
+    element = contentChild(NgControl, {read : ElementRef<HTMLInputElement>})
 
     focus = signal(false)
 
@@ -28,30 +31,53 @@ export class AsInputContainer implements OnInit {
 
     isEmpty = signal(true)
 
-    errors = computed(() => {
-        const e = this.ngControl().errors
-        if (!e) return []
+    errors = signal([])
 
-        const messages: string[] = []
-        if (e['required']) messages.push('Dieses Feld ist erforderlich.')
-        if (e['minlength']) messages.push(`Mindestlänge: ${e['minlength'].requiredLength}`)
-        if (e['maxlength']) messages.push(`Maximallänge: ${e['maxlength'].requiredLength}`)
-        return messages;
-    })
+    constructor() {
+        effect(() => {
+            let ngControl = this.ngControl();
+            const sub = ngControl.valueChanges.subscribe(value => {
+                this.isEmpty.set(!value);
+                this.dirty.set(ngControl.dirty);
 
-    renderer = inject(Renderer2)
+                const e = this.ngControl().errors
+                if (e && ngControl.dirty) {
+                    const messages: string[] = []
+                    if (e['required']) messages.push('A value is required')
+                    if (e['minlength']) messages.push(`Minimum length: ${e['minlength'].requiredLength}`)
+                    if (e['maxlength']) messages.push(`Maximum length: ${e['maxlength'].requiredLength}`)
+                    if (e['email']) messages.push(`no valid Email`)
+                    this.errors.set(messages)
+                } else {
+                    this.errors.set([])
+                }
+            });
 
-    ngOnInit() {
-        let element : HTMLInputElement = this.renderer.selectRootElement("input")
 
-        element.placeholder = this.placeholder()
-
-        element.addEventListener('focus', () => this.focus.set(true))
-        element.addEventListener('blur', () => this.focus.set(false))
-
-        this.ngControl().valueChanges.subscribe((value) => {
-            this.isEmpty.set(value)
-            this.dirty.set(this.ngControl().dirty)
+            return () => sub.unsubscribe();
         })
+
+        effect(() => {
+            const element : HTMLInputElement = this.element().nativeElement
+
+            element.placeholder = this.placeholder()
+
+            let focusListener = () => this.focus.set(true);
+            element.addEventListener('focus', focusListener)
+            let blurListener = () => this.focus.set(false);
+            element.addEventListener('blur', blurListener);
+
+            return () => {
+                element.removeEventListener('focus', focusListener)
+                element.removeEventListener('blur', blurListener)
+            }
+        });
+
+        effect(() => {
+            const element: HTMLInputElement = this.element().nativeElement;
+            element.classList.toggle('focus', this.focus());
+            element.classList.toggle('dirty', this.dirty() && this.focus());
+        });
     }
+
 }

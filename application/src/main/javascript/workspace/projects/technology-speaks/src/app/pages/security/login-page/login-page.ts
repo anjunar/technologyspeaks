@@ -45,11 +45,11 @@ export class LoginPage {
             if (link) {
                 let regex = /<([^>]+)>; rel="(.+)"/g
                 let exec = regex.exec(link);
-                this.router.navigateByUrl(exec[1])
+                window.location.href = exec[1]
             } else {
                 const params = new URLSearchParams(window.location.search)
                 let redirect = params.get("redirect");
-                this.router.navigateByUrl(redirect ? decodeURIComponent(redirect) : "/")
+                window.location.href = redirect ? decodeURIComponent(redirect) : "/"
             }
         } else {
             alert("Something went wrong")

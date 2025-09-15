@@ -132,17 +132,13 @@ button {
     }
 }
 
-.system {
-    height: 100%;
+.center {
     display: flex;
-    flex-direction: column;
-
-    .router {
-        flex : 1
-    }
+    align-items: center;
+    gap: 5px;
 }
 
-.center {
+.center-page {
     height: 100%;
     width: 100%;
     display: flex;
@@ -150,7 +146,7 @@ button {
     justify-content: center;
 }
 
-.center-horizontal {
+.center-horizontal-page {
     height: 100%;
     display: flex;
     justify-content: center;

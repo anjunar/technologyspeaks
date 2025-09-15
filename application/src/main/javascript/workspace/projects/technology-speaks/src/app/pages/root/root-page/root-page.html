@@ -6,11 +6,29 @@
 </as-toolbar>
 <as-drawer-container [open]="open()">
     <as-drawer>
-        @for (link of links(); track link.rel) {
-            <li>
-                <a [routerLink]="link.url">{{ link.title }}</a>
-            </li>
-        }
+        <ul>
+            @if (links()['login']; as link) {
+                <li>
+                    <a [routerLink]="link.url" class="center"><span class="material-icons">login</span> {{ link.title }}</a>
+                </li>
+            }
+            @if (links()['register']; as link) {
+                <li>
+                    <a [routerLink]="link.url" class="center"><span class="material-icons">app_registration</span> {{ link.title }}</a>
+                </li>
+            }
+            @if (links()['users']; as link) {
+                <li>
+                    <a [routerLink]="link.url" class="center"><span class="material-icons">groups</span> {{ link.title }}</a>
+                </li>
+            }
+            @if (links()['documents']; as link) {
+                <li>
+                    <a [routerLink]="link.url" class="center"><span class="material-icons">menu_book</span> {{ link.title }}</a>
+                </li>
+            }
+
+        </ul>
     </as-drawer>
     <as-drawer-content>
         <router-outlet/>
