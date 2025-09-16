@@ -1,6 +1,10 @@
 import {Directive, effect, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
 import {NG_VALUE_ACCESSOR, ValidationErrors} from "@angular/forms";
-import {AsControl} from "../../as-control";
+import {AsControl, AsControlForm, AsControlInput} from "../../as-control";
+import {ObjectDescriptor} from "../../../domain/descriptors";
+import PropDescriptor from "../../../domain/descriptors/PropDescriptor";
+import {AsInput} from "../as-input/as-input";
+import {PropertiesContainer} from "../../../domain/container/ActiveObject";
 
 @Directive({
     selector: 'form[asModel], fieldset',
@@ -11,16 +15,13 @@ import {AsControl} from "../../as-control";
             multi: true,
         },
         {
-            provide: AsControl,
+            provide: AsControlForm,
             useExisting: AsForm,
             multi: true
         }
     ]
 })
-export class AsForm extends AsControl implements OnInit, OnDestroy {
-
-    onChange: ((name : string, value: any) => void)[] = []
-    onTouched: (() => void)[] = []
+export class AsForm extends AsControlForm implements OnInit, OnDestroy {
 
     onChangeListener = (name : string, val: any) => {
         this.model()[name].set(val)
@@ -32,13 +33,14 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
 
     form = inject(AsForm, {skipSelf: true, optional: true})
 
-    el = inject(ElementRef<HTMLFormElement | HTMLFieldSetElement>).nativeElement
-
     controls: Map<string, AsControl> = new Map()
 
     ngOnInit(): void {
         if (this.form) {
             this.form.addControl(this.name(), this)
+        } else {
+            this.schema = this.model().$meta.descriptors
+            this.instance = this.model().$meta.instance
         }
     }
 
@@ -51,14 +53,26 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
     addControl(name: string, control: AsControl) {
         this.controls.set(name, control)
         let value = this.model()[name]();
-        control.writeDefaultValue(value)
         control.writeValue(value)
-        control.registerOnChange(this.onChangeListener)
+
+        if (control instanceof AsControlForm) {
+            control.schema = this.schema.properties[name] as ObjectDescriptor
+            control.instance = this.model().$meta.instance
+        }
+
+        if (control instanceof AsControlInput) {
+            control.registerOnChange(this.onChangeListener)
+            control.writeDefaultValue(value)
+            control.schema = this.schema.properties[name]
+            control.instance = this.model().$meta.instance[name]
+        }
     }
 
     removeControl(name : string) {
         let control = this.controls.get(name);
-        control.unRegisterOnChange(this.onChangeListener)
+        if (control instanceof AsControlInput) {
+            control.unRegisterOnChange(this.onChangeListener)
+        }
         this.controls.delete(name)
     }
 
@@ -68,26 +82,6 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
 
     writeValue(obj: any): void {
         this.model.set(obj)
-    }
-
-    writeDefaultValue(obj: any): void {
-    }
-
-    registerOnChange(fn: any): void {
-        this.onChange.push(fn)
-    }
-
-    unRegisterOnChange(fn: any): void {
-        let indexOf = this.onChange.indexOf(fn);
-        this.onChange.splice(indexOf, 1)
-    }
-
-    registerOnTouched(fn: any): void {
-        this.onTouched.push(fn)
-    }
-
-    setDisabledState?(isDisabled: boolean): void {
-        this.el.disabled = isDisabled
     }
 
     get dirty(): boolean {

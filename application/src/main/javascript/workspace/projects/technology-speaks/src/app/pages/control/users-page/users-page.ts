@@ -1,15 +1,16 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ViewEncapsulation} from '@angular/core';
 import User from "../../../domain/control/User";
 import {Table} from "shared";
 import {RouterLink} from "@angular/router";
 
 @Component({
-  selector: 'users-page',
+    selector: 'users-page',
     imports: [
         RouterLink
     ],
-  templateUrl: './users-page.html',
-  styleUrl: './users-page.css'
+    templateUrl: './users-page.html',
+    styleUrl: './users-page.css',
+    encapsulation: ViewEncapsulation.None
 })
 export class UsersPage {
 

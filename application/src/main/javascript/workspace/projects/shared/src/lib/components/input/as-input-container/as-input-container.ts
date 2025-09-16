@@ -8,12 +8,10 @@ import {
     signal,
     ViewEncapsulation
 } from '@angular/core';
-import {NgControl, ReactiveFormsModule} from "@angular/forms";
-import {AsControl} from "../../../directives/as-control";
+import {AsControlInput} from "../../../directives/as-control";
 
 @Component({
   selector: 'as-input-container',
-  imports: [ReactiveFormsModule],
   templateUrl: './as-input-container.html',
   styleUrl: './as-input-container.css',
   encapsulation : ViewEncapsulation.None
@@ -22,9 +20,9 @@ export class AsInputContainer {
 
     placeholder = input.required<string>()
 
-    control = contentChild(AsControl)
+    control = contentChild(AsControlInput)
 
-    element = contentChild(AsControl, {read : ElementRef<HTMLInputElement>})
+    element = contentChild(AsControlInput, {read : ElementRef<HTMLInputElement>})
 
     focus = signal(false)
 

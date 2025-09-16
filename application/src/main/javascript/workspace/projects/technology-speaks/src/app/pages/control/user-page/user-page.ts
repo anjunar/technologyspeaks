@@ -1,13 +1,13 @@
-import {Component, effect, model} from '@angular/core';
+import {Component, effect, model, ViewEncapsulation} from '@angular/core';
 import User from "../../../domain/control/User";
-import {JsonPipe} from "@angular/common";
 import {AsForm, AsInput, AsInputContainer} from "shared";
 
 @Component({
     selector: 'user-page',
-    imports: [JsonPipe, AsForm, AsInput, AsInputContainer],
+    imports: [AsForm, AsInput, AsInputContainer],
     templateUrl: './user-page.html',
-    styleUrl: './user-page.css'
+    styleUrl: './user-page.css',
+    encapsulation : ViewEncapsulation.None
 })
 export class UserPage {
 
