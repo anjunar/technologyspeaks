@@ -22,7 +22,7 @@ export class AsInputContainer {
 
     placeholder = input.required<string>()
 
-    asControl = contentChild(AsControl)
+    control = contentChild(AsControl)
 
     element = contentChild(AsControl, {read : ElementRef<HTMLInputElement>})
 
@@ -36,13 +36,13 @@ export class AsInputContainer {
 
     constructor() {
         effect(() => {
-            let ngControl = this.asControl();
-            ngControl.registerOnChange((value : any) => {
+            let asControl = this.control();
+            asControl.registerOnChange((name : string, value : any) => {
                 this.isEmpty.set(!value);
-                this.dirty.set(ngControl.dirty);
+                this.dirty.set(asControl.dirty);
 
-                const e = this.asControl().errors
-                if (e && ngControl.dirty) {
+                const e = this.control().errors
+                if (e && asControl.dirty) {
                     const messages: string[] = []
                     if (e['required']) messages.push('A value is required')
                     if (e['minlength']) messages.push(`Minimum length: ${e['minlength'].requiredLength}`)
@@ -53,6 +53,10 @@ export class AsInputContainer {
                     this.errors.set([])
                 }
             });
+
+            this.isEmpty.set(! asControl.value);
+            this.dirty.set(asControl.dirty);
+
         })
 
         effect(() => {

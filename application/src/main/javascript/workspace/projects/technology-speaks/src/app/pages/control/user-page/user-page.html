@@ -4,9 +4,15 @@
             <input name="nickName"/>
         </as-input-container>
         <fieldset name="info">
-            <input name="firstName"/>
-            <input name="lastName"/>
-            <input name="birthDate"/>
+            <as-input-container placeholder="Nickname">
+                <input name="firstName"/>
+            </as-input-container>
+            <as-input-container placeholder="Nickname">
+                <input name="lastName"/>
+            </as-input-container>
+            <as-input-container placeholder="Nickname">
+                <input name="birthDate"/>
+            </as-input-container>
         </fieldset>
     </form>
     {{ user().nickName() }}
