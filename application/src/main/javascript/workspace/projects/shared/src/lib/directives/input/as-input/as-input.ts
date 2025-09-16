@@ -22,7 +22,7 @@ export class AsInput extends NgControl implements ControlValueAccessor {
 
     form = inject(AsForm)
 
-    inputName = input.required<string>({alias : "name"})
+    inputName = input<string>("", {alias : "name"})
 
     constructor() {
         super();
@@ -57,4 +57,7 @@ export class AsInput extends NgControl implements ControlValueAccessor {
         this.writeValue(newValue)
     }
 
+    override valueAccessor: ControlValueAccessor = this
+
+    override name: string = this.inputName()
 }

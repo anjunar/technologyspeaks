@@ -61,5 +61,7 @@ export class AsForm extends NgControl implements ControlValueAccessor {
         this.writeValue(newValue)
     }
 
+    override valueAccessor: ControlValueAccessor = this
 
+    override name: string = this.formName()
 }

@@ -99,6 +99,12 @@ export default function JSONDeserializer<T>(object: any, buildObjectGraph : bool
                             } else {
                                 instance[name] = element
                             }
+                        } else {
+                            if (property.configuration?.signal) {
+                                instance[name] = signal("")
+                            } else {
+                                instance[name] = element
+                            }
                         }
                     }
                 }
