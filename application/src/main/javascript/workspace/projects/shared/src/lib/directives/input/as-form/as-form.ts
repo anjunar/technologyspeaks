@@ -1,5 +1,6 @@
-import {Directive, effect, ElementRef, inject, input, model} from '@angular/core';
-import {AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
+import {Directive, effect, ElementRef, forwardRef, inject, input, model} from '@angular/core';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors} from "@angular/forms";
+import {AsControl} from "../../as-control";
 
 @Directive({
     selector: 'form[asModel], fieldset',
@@ -8,24 +9,27 @@ import {AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl} fro
             provide: NG_VALUE_ACCESSOR,
             useExisting: AsForm,
             multi: true,
+        },
+        {
+            provide: AsControl,
+            useExisting: forwardRef(() => AsForm)
         }
     ]
 })
-export class AsForm extends NgControl implements ControlValueAccessor {
+export class AsForm extends AsControl {
 
-    onChange: (value: any) => void = () => {};
-    onTouched: () => void = () => {};
-    control : AbstractControl
+    onChange: ((value: any) => void)[] = []
+    onTouched: (() => void)[] = []
 
-    asModel = model<any>({}, {alias : "asModel"})
+    asModel = model<any>({}, {alias: "asModel"})
 
-    formName = input<string>(null, {alias : "name"})
+    formName = input<string>(null, {alias: "name"})
 
     asForm = inject(AsForm, {skipSelf: true, optional: true})
 
     el = inject(ElementRef<HTMLFormElement | HTMLFieldSetElement>).nativeElement
 
-    controls: Map<string, NgControl & ControlValueAccessor> = new Map()
+    controls: Map<string, ControlValueAccessor> = new Map()
 
     constructor() {
         super();
@@ -36,7 +40,7 @@ export class AsForm extends NgControl implements ControlValueAccessor {
         });
     }
 
-    addControl(name: string, control: NgControl & ControlValueAccessor) {
+    addControl(name: string, control: ControlValueAccessor) {
         this.controls.set(name, control)
         control.writeValue(this.asModel()[name]())
         control.registerOnChange((val: any) => {
@@ -47,21 +51,25 @@ export class AsForm extends NgControl implements ControlValueAccessor {
     writeValue(obj: any): void {
         this.asModel.set(obj)
     }
+
     registerOnChange(fn: any): void {
-        this.onChange = fn
+        this.onChange.push(fn)
     }
+
     registerOnTouched(fn: any): void {
-        this.onTouched = fn
+        this.onTouched.push(fn)
     }
+
     setDisabledState?(isDisabled: boolean): void {
         this.el.disabled = isDisabled
     }
 
-    viewToModelUpdate(newValue: any): void {
-        this.writeValue(newValue)
+    get dirty(): boolean {
+        return false;
     }
 
-    override valueAccessor: ControlValueAccessor = this
+    get errors(): ValidationErrors {
+        return undefined;
+    }
 
-    override name: string = this.formName()
 }

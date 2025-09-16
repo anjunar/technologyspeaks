@@ -9,6 +9,7 @@ import {
     ViewEncapsulation
 } from '@angular/core';
 import {NgControl, ReactiveFormsModule} from "@angular/forms";
+import {AsControl} from "../../../directives/as-control";
 
 @Component({
   selector: 'as-input-container',
@@ -21,9 +22,9 @@ export class AsInputContainer {
 
     placeholder = input.required<string>()
 
-    ngControl = contentChild(NgControl)
+    asControl = contentChild(AsControl)
 
-    element = contentChild(NgControl, {read : ElementRef<HTMLInputElement>})
+    element = contentChild(AsControl, {read : ElementRef<HTMLInputElement>})
 
     focus = signal(false)
 
@@ -35,12 +36,12 @@ export class AsInputContainer {
 
     constructor() {
         effect(() => {
-            let ngControl = this.ngControl();
-            const sub = ngControl.valueChanges.subscribe(value => {
+            let ngControl = this.asControl();
+            ngControl.registerOnChange((value : any) => {
                 this.isEmpty.set(!value);
                 this.dirty.set(ngControl.dirty);
 
-                const e = this.ngControl().errors
+                const e = this.asControl().errors
                 if (e && ngControl.dirty) {
                     const messages: string[] = []
                     if (e['required']) messages.push('A value is required')
@@ -52,9 +53,6 @@ export class AsInputContainer {
                     this.errors.set([])
                 }
             });
-
-
-            return () => sub.unsubscribe();
         })
 
         effect(() => {

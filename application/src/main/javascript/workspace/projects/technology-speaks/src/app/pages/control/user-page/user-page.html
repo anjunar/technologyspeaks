@@ -1,6 +1,8 @@
 <div>
     <form [(asModel)]="user">
-        <input name="nickName"/>
+        <as-input-container placeholder="Nickname">
+            <input name="nickName"/>
+        </as-input-container>
         <fieldset name="info">
             <input name="firstName"/>
             <input name="lastName"/>
