@@ -4,25 +4,26 @@ import Role from "./Role";
 import Address from "./Address";
 import {Basic, Entity} from "shared";
 import EMail from "./EMail";
+import {ModelSignal, Signal} from "@angular/core";
 
 @Entity("User")
 export default class User extends Identity {
 
     override $type = "User"
 
-    @Basic()
-    nickName : string
+    @Basic({signal : true})
+    nickName : Signal<string>
 
-    @Basic()
-    emails : EMail[] = []
+    @Basic({signal : true})
+    emails : Signal<EMail[]>
 
-    @Basic()
-    info : UserInfo
+    @Basic({signal : true})
+    info : Signal<UserInfo>
 
-    @Basic()
-    address : Address
+    @Basic({signal : true})
+    address : Signal<Address>
 
-    @Basic()
-    score : number
+    @Basic({signal : true})
+    score : Signal<number>
 
 }

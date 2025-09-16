@@ -3,8 +3,9 @@ import {provideRouter, withComponentInputBinding} from '@angular/router';
 
 import {routes} from './app.routes';
 import {provideClientHydration, withEventReplay} from '@angular/platform-browser';
-import {serverCookieInterceptor} from "shared";
+import {JodaDateTimeValueAccessor, JodaDateValueAccessor, serverCookieInterceptor} from "shared";
 import {provideHttpClient, withFetch, withInterceptors} from "@angular/common/http";
+import {NG_VALUE_ACCESSOR} from "@angular/forms";
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -15,6 +16,16 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(
             withInterceptors([serverCookieInterceptor]),
             withFetch()
-        )
+        ),
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useClass: JodaDateTimeValueAccessor,
+            multi: true
+        },
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useClass: JodaDateValueAccessor,
+            multi: true
+        }
     ]
 }

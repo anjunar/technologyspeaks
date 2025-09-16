@@ -4,31 +4,36 @@ import ObjectDescriptor from "../descriptors/ObjectDescriptor";
 import NodeDescriptor from "../descriptors/NodeDescriptor";
 import PropDescriptor from "../descriptors/PropDescriptor";
 import Link from "./Link";
+import {Entity} from "../../mapper";
+import {Signal} from "@angular/core";
 
-interface PropertiesContainer {
+@Entity("Meta")
+export class Meta {
+
+    @Basic()
+    descriptors : ObjectDescriptor
+
+    @Basic()
+    instance : PropertiesContainer
+
+    @Basic()
+    links : LinkContainer
+}
+
+export interface PropertiesContainer {
     [key: string]: PropDescriptor
 }
 
 export default abstract class ActiveObject {
 
-    $data?: any
-
     @Basic()
-    $links? : LinkContainer
+    $meta : Meta
 
     @Basic()
     $type: string
 
     $resolve : any
 
-    $meta?(value: string): NodeDescriptor
-
     $callbacks? : ((property : string, value : any) => void)[]
-
-    @Basic()
-    $descriptors : ObjectDescriptor
-
-    @Basic()
-    $instance : PropertiesContainer
 
 }

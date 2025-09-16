@@ -23,6 +23,7 @@ import QueryTable from "./container/QueryTable";
 import Sort from "./container/Sort";
 import TupleTable from "./container/TupleTable";
 import PropDescriptor from "./descriptors/PropDescriptor";
+import {Meta} from "./container/ActiveObject";
 
 export function init() {
 
@@ -38,6 +39,7 @@ export function init() {
     registerEntity(NodeDescriptor)
     registerEntity(ObjectDescriptor)
     registerEntity(PropDescriptor)
+    registerEntity(Meta)
 
     registerEntity(NotBlankValidator)
     registerEntity(NotNullValidator)

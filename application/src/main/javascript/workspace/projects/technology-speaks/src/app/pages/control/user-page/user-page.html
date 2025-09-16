@@ -1,0 +1,13 @@
+<div>
+    <form [(asModel)]="user">
+        <input name="nickName"/>
+        <fieldset name="info">
+            <input name="firstName"/>
+            <input name="lastName"/>
+            <input name="birthDate"/>
+        </fieldset>
+    </form>
+    {{ user().nickName() }}
+    {{ user().info().firstName() }}
+    {{ user().info().lastName() }}
+</div>

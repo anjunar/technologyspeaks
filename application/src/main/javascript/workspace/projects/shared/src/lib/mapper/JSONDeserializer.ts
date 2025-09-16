@@ -1,6 +1,7 @@
 import {findClass, findConverter, findProperties} from "./Registry";
 import ActiveObject from "../domain/container/ActiveObject";
 import JSONSerializer from "./JSONSerializer";
+import {signal} from "@angular/core";
 
 export default function JSONDeserializer<T>(object: any, buildObjectGraph : boolean = false): T {
     if (object instanceof Object) {
@@ -35,51 +36,73 @@ export default function JSONDeserializer<T>(object: any, buildObjectGraph : bool
                     }
                 }
             }
-
             if (element instanceof Array) {
-                if (instance[name] instanceof Array) {
-                    instance[name].push(...element.map(item => JSONDeserializer(item, buildObjectGraph)))
+                if (property.configuration?.signal) {
+                    instance[name] = signal(element.map(item => JSONDeserializer(item, buildObjectGraph)))
                 } else {
                     instance[name] = element.map(item => JSONDeserializer(item, buildObjectGraph))
                 }
             } else {
                 if (element instanceof Object) {
                     if (converter) {
-                        instance[name] = converter.fromJson(element)
+                        if (property.configuration?.signal) {
+                            instance[name] = signal(converter.fromJson(element))
+                        } else {
+                            instance[name] = converter.fromJson(element)
+                        }
                     } else {
                         if (element.$type) {
-                            instance[name] = JSONDeserializer(object[name], buildObjectGraph)
+                            if (property.configuration?.signal) {
+                                instance[name] = signal(JSONDeserializer(object[name], buildObjectGraph))
+                            } else {
+                                instance[name] = JSONDeserializer(object[name], buildObjectGraph)
+                            }
                         } else {
-                            instance[name] = Object.entries(element)
-                                .reduce((prev, [key, value]) => {
-                                    if (value instanceof Array) {
-                                        prev[key] = value.map(item => JSONDeserializer(item, buildObjectGraph))
-                                        return prev
-                                    } else {
-                                        prev[key] = JSONDeserializer(value, buildObjectGraph)
-                                        return prev
-                                    }
-                                }, {} as any)
+                            if (property.configuration?.signal) {
+                                instance[name] = signal(Object.entries(element)
+                                    .reduce((prev, [key, value]) => {
+                                        if (value instanceof Array) {
+                                            prev[key] = value.map(item => JSONDeserializer(item, buildObjectGraph))
+                                            return prev
+                                        } else {
+                                            prev[key] = JSONDeserializer(value, buildObjectGraph)
+                                            return prev
+                                        }
+                                    }, {} as any))
+                            } else {
+                                instance[name] = Object.entries(element)
+                                    .reduce((prev, [key, value]) => {
+                                        if (value instanceof Array) {
+                                            prev[key] = value.map(item => JSONDeserializer(item, buildObjectGraph))
+                                            return prev
+                                        } else {
+                                            prev[key] = JSONDeserializer(value, buildObjectGraph)
+                                            return prev
+                                        }
+                                    }, {} as any)
+                            }
+
                         }
                     }
                 } else {
                     let converter = findConverter(property.type);
                     if (converter) {
-                        instance[name] = converter.fromJson(object[name])
+                        if (property.configuration?.signal) {
+                            instance[name] = signal(converter.fromJson(object[name]))
+                        } else {
+                            instance[name] = converter.fromJson(object[name])
+                        }
                     } else {
                         if (element !== undefined) {
-                            instance[name] = element
+                            if (property.configuration?.signal) {
+                                instance[name] = signal(element)
+                            } else {
+                                instance[name] = element
+                            }
                         }
                     }
                 }
             }
-
-            let inSyncWith = property.configuration?.inSyncWith;
-            if (inSyncWith) {
-                let from = instance[inSyncWith.property]
-                instance[inSyncWith.property] = inSyncWith.to(instance)
-            }
-
         }
         return instance
     }

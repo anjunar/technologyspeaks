@@ -113,19 +113,6 @@ class SchemaBuilder(var table: Boolean = false, val parent: SchemaBuilder = null
     }
   }
 
-  def findTypeMapping2(aClass: Type): Map[String, PropertyBuilder[?]] = {
-    val mapping = typeMapping
-      .filter(entry => entry._1 == aClass)
-      .flatMap(entry => entry._2.mapping)
-      .toMap
-
-    if (mapping.isEmpty && parent != null) {
-      parent.findTypeMapping2(aClass)
-    } else {
-      mapping
-    }
-  }
-
   def findInstanceMapping(instance: AnyRef): Map[String, PropertyBuilder[?]] = {
     val propertyMapping = instanceMapping
       .filter(entry => entry._1 == instance)
@@ -139,30 +126,18 @@ class SchemaBuilder(var table: Boolean = false, val parent: SchemaBuilder = null
     }
   }
 
-  def findEntitySchemaDeepByClass(aClass: Type): Iterable[EntitySchemaBuilder[?]] = {
-    (if tupleMapping == null then List.empty else tupleMapping.schemaBuilder.findEntitySchemaDeepByClass(aClass)) ++
-    typeMapping.values.filter(builder => TypeToken.of(builder.aClass).isSubtypeOf(aClass)) ++
-      typeMapping
-      .values
-      .flatMap(builder => builder.mapping)
-      .flatMap(properties => properties._2.schemaBuilder.findEntitySchemaDeepByClass(aClass))
-      .filter(builder => TypeToken.of(builder.aClass).isSubtypeOf(aClass))
-  }
+  def findEntitySchemaDeepByInstance(instance: AnyRef): EntitySchemaBuilder[?] = {
+    instanceMapping.get(instance) match {
+      case Some(schema) =>
+        schema
+      case None =>
+        val nested = instanceMapping.values.iterator
+          .flatMap(_.mapping.values)
+          .map(_.schemaBuilder.findEntitySchemaDeepByInstance(instance))
+          .find(_ != null)
 
-  def findEntitySchemaDeepByInstance(instance: Any): Iterable[EntitySchemaBuilder[?]] = {
-    val builders: Iterable[SchemaBuilder] = findSchemaBuilderDeep
-
-    builders
-      .flatMap(schema => schema.instanceMapping
-        .filter((aClass, builder) => aClass == instance)
-        .map((aClass, builder) => builder)
-      )
-  }
-
-  private def findSchemaBuilderDeep: Iterable[SchemaBuilder] = {
-    Seq(this) ++ (if tupleMapping == null then List.empty else tupleMapping.schemaBuilder.findSchemaBuilderDeep) ++ typeMapping
-      .values
-      .flatMap(builder => builder.mapping.values.flatMap(property => property.schemaBuilder.findSchemaBuilderDeep))
+        nested.orNull
+    }
   }
 
   def findLinksByClass(aClass: Class[?]): mutable.Iterable[(Any, LinkContext) => Unit] = {

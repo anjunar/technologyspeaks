@@ -1,6 +1,6 @@
-import {Component, computed, inject, input, model, OnInit, signal, ViewEncapsulation} from '@angular/core';
-import {AsDrawer, AsDrawerContainer, AsDrawerContent, AsToolbar, LinkContainerObject, LinkObject} from "shared";
-import {ActivatedRoute, RouterLink, RouterOutlet} from "@angular/router";
+import {Component, computed, input, signal, ViewEncapsulation} from '@angular/core';
+import {AsDrawer, AsDrawerContainer, AsDrawerContent, AsToolbar} from "shared";
+import {RouterLink, RouterOutlet} from "@angular/router";
 import Application from "../../../domain/Application";
 
 @Component({
@@ -23,6 +23,6 @@ export class RootPage {
 
     open = signal(true)
 
-    links = computed(() => this.application().$links);
+    links = computed(() => this.application().$meta.links);
 
 }

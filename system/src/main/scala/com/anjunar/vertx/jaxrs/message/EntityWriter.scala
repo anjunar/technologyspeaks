@@ -1,7 +1,8 @@
 package com.anjunar.vertx.jaxrs.message
 
 import com.anjunar.jaxrs.types.Table
-import com.anjunar.scala.mapper.{JsonContext, JsonMapper}
+import com.anjunar.scala.mapper.intermediate.model
+import com.anjunar.scala.mapper.{IdProvider, JsonContext, JsonMapper}
 import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
 import com.anjunar.scala.schema.model.{Link, ObjectDescriptor}
 import com.anjunar.scala.schema.{JsonDescriptorsContext, JsonDescriptorsGenerator}
@@ -65,15 +66,16 @@ class EntityWriter extends MessageBodyWriter {
         
         schemaBuilder.thenCompose(schemaBuilder => {
           table.rows.forEach(item => {
-            schemaBuilder.forInstance(item, item.getClass.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
-              builder.withLinks((entity, context) => {
-                transitions
-                  .filter(state => (!state.isRef || state.ref == item.getClass) && state.rolesAllowed.exists(role => roles.contains(role)))
-                  .foreach(state => {
-                    context.addLink(state.rel, Link(state.path, state.httpMethod, state.rel, state.name))
-                  })
-              })
+            val builder = schemaBuilder.findEntitySchemaDeepByInstance(item)
+
+            builder.withLinks((entity, context) => {
+              transitions
+                .filter(state => (!state.isRef || state.ref == item.getClass) && state.rolesAllowed.exists(role => roles.contains(role)))
+                .foreach(state => {
+                  context.addLink(state.rel, Link(state.path.replace(":id", entity.asInstanceOf[IdProvider].id.toString), state.httpMethod, state.rel, state.name))
+                })
             })
+
           })
           schemaBuilder.forInstance(entity, resolvedClass.raw.asInstanceOf[Class[Any]], (builder: EntitySchemaBuilder[Any]) => {
             builder.withLinks((entity, context) => {
@@ -118,7 +120,7 @@ class EntityWriter extends MessageBodyWriter {
 
         jsonMapper.toJson(objectDescriptor, TypeResolver.resolve(classOf[ObjectDescriptor]), context)
           .thenCompose(descriptors => {
-            jsonObject.value.put("$descriptors", descriptors)
+            jsonObject.value("$meta").asInstanceOf[model.JsonObject].value.put("descriptors", descriptors)
 
             jsonMapper.toJsonObjectForJson(jsonObject)
           })

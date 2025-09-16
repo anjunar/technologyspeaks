@@ -4,20 +4,7 @@ import NodeDescriptor from "../../domain/descriptors/NodeDescriptor";
 
 function Basic(configuration? : Basic.Configuration) {
     return function (target : any, propertyKey: string) {
-        const type = Reflect.getMetadata("design:type", target, propertyKey);
-
-        let newConfiguration = null
-        if (configuration) {
-            newConfiguration = configuration.default = configuration.default || type;
-        } else {
-            if (type.length === 0) {
-                newConfiguration = {
-                    default : type
-                }
-            }
-        }
-
-        registerProperty(target.constructor, propertyKey, type, newConfiguration)
+        registerProperty(target.constructor, propertyKey, null, configuration)
     }
 }
 
@@ -29,6 +16,8 @@ namespace Basic {
         schema? : NodeDescriptor
 
         inSyncWith? : SyncWith
+
+        signal? : boolean
 
     }
 

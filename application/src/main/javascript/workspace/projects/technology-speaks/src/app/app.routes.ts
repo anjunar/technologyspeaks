@@ -8,6 +8,7 @@ import {firstValueFrom} from "rxjs";
 import {JSONDeserializer} from "shared";
 import Application from "./domain/Application";
 import {UsersPage} from "./pages/control/users-page/users-page";
+import {UserPage} from "./pages/control/user-page/user-page";
 
 export const routes: Routes = [
     {
@@ -29,7 +30,7 @@ export const routes: Routes = [
                 component : LoginPage
             },
             {
-                path : "control/users",
+                path : "control/users/search",
                 component : UsersPage,
                 resolve : {
                     users : async (route: ActivatedRouteSnapshot) => {
@@ -39,8 +40,22 @@ export const routes: Routes = [
                         let limit = route.paramMap.get("limit") || 5;
 
                         return JSONDeserializer(
-                            await firstValueFrom(http.get(`/service/control/users?index=${index}&limit=${limit}`)
-                            )
+                            await firstValueFrom(http.get(`/service/control/users?index=${index}&limit=${limit}`))
+                        )
+                    }
+                }
+            },
+            {
+                path : "control/users/user/:id",
+                component : UserPage,
+                resolve : {
+                    user : async (route: ActivatedRouteSnapshot) => {
+                        const http = inject(HttpClient);
+
+                        let id = route.paramMap.get("id")
+
+                        return JSONDeserializer(
+                            await firstValueFrom(http.get(`/service/control/users/user/${id}`))
                         )
                     }
                 }

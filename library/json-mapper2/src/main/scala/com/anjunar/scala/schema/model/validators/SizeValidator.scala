@@ -1,9 +1,9 @@
 package com.anjunar.scala.schema.model.validators
 
-import com.anjunar.scala.mapper.annotations.{PropertyDescriptor, IgnoreFilter}
+import com.anjunar.scala.mapper.annotations.{IgnoreFilter, PropertyDescriptor}
 
-import scala.beans.BeanProperty
+import scala.annotation.meta.field
 
 @IgnoreFilter
-case class SizeValidator(@PropertyDescriptor(title = "Minimum") min : Int,
-                         @PropertyDescriptor(title = "Maximum") max : Int) extends Validator 
+case class SizeValidator(@(PropertyDescriptor @field)(title = "Minimum") min: Int,
+                         @(PropertyDescriptor @field)(title = "Maximum") max: Int) extends Validator

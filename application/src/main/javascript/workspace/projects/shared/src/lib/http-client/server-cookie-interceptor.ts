@@ -2,6 +2,8 @@ import {HttpInterceptorFn} from '@angular/common/http';
 import {inject, PLATFORM_ID} from '@angular/core';
 import {REQUEST, ServerRequest} from "../request-token";
 import {isPlatformBrowser} from "@angular/common";
+import {Router} from "@angular/router";
+import {catchError, throwError} from "rxjs";
 
 export const serverCookieInterceptor: HttpInterceptorFn = (req, next) => {
     const platformId = inject(PLATFORM_ID);
@@ -22,5 +24,17 @@ export const serverCookieInterceptor: HttpInterceptorFn = (req, next) => {
         return next(modifiedReq);
     }
 
-    return next(req)
+    const router = inject(Router);
+
+    return next(req).pipe(
+        catchError((error) => {
+            if (error.status === 403) {
+                const currentUrl = router.url;
+                router.navigate(['/security/login'], {
+                    queryParams: { link: currentUrl }
+                });
+            }
+            return throwError(() => error);
+        })
+    );
 };

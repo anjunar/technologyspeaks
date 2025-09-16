@@ -58,8 +58,8 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
     properties.put(if jsonTypeInfo == null then "$type" else jsonTypeInfo.property(), JsonString(instance.getClass.getSimpleName))
     val jsonObject = JsonObject(properties)
 
-    val links = new mutable.LinkedHashMap[String, JsonNode]
-    properties.put("$links", JsonObject(links))
+    val meta = new mutable.LinkedHashMap[String, JsonNode]()
+    properties.put("$meta", JsonObject(meta))
 
     val resolvedType = TypeToken.of(aType.underlying).resolveType(instance.getClass).getType
 
@@ -103,8 +103,8 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
           )
         )
 
-        val instanceDescriptor = properties
-          .getOrElseUpdate("$instance", JsonObject(mutable.LinkedHashMap()))
+        val instanceDescriptor = meta
+          .getOrElseUpdate("instance", JsonObject(mutable.LinkedHashMap()))
           .asInstanceOf[JsonObject]
 
         instanceDescriptor.value.put(property.name, propDescriptor)
@@ -125,6 +125,9 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
     }
 
 
+    val links = new mutable.LinkedHashMap[String, JsonNode]
+    meta.put("links", JsonObject(links))
+
     val registry = context.registry
 
     val linkFactories = schema.findLinksByClass(TypeResolver.rawType(resolvedType)) ++ schema.findLinksByInstance(instance)
@@ -133,7 +136,8 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
       generateLinks(linkFactory, instance, context, links, registry)
     })
 
-    if links.isEmpty then properties.remove("$links")
+    if links.isEmpty then meta.remove("links")
+    if meta.isEmpty then properties.remove("$meta") else meta.put("$type", JsonString("Meta"))
 
     jsonObject
   }
@@ -196,10 +200,10 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
         .thenCompose(entity => {
           val schema = context.schema
 
-          var propertyMapping = schema.findTypeMapping2(aType.underlying)
+          var propertyMapping = schema.findTypeMapping(aType.underlying)
 
           if (propertyMapping.isEmpty) {
-            propertyMapping = schema.findTypeMapping2(beanModel.underlying.raw)
+            propertyMapping = schema.findTypeMapping(beanModel.underlying.raw)
           }
 
           if (!(aType <:< TypeResolver.resolve(classOf[NodeDescriptor]))) {

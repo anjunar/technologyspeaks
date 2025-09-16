@@ -1,20 +1,22 @@
 import {LocalDate} from "@js-joda/core";
 import {AbstractEntity, Basic, Entity} from "shared";
+import {Signal} from "@angular/core";
 
 @Entity("UserInfo")
 export default class UserInfo extends AbstractEntity {
 
     override $type = "UserInfo"
 
-    @Basic()
-    firstName : string
+    @Basic({signal : true})
+    firstName : Signal<string>
 
-    @Basic()
-    lastName : string
+    @Basic({signal : true})
+    lastName : Signal<string>
 
     @Basic({
-        default : LocalDate.now
+        default : LocalDate.now,
+        signal : true
     })
-    birthDate : LocalDate
+    birthDate : Signal<LocalDate>
 
 }
