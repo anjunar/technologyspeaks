@@ -1,8 +1,8 @@
 import {Directive, effect, ElementRef, inject, input, model} from '@angular/core';
-import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
+import {AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
 
 @Directive({
-    selector: 'form[asModel], fieldset[name]',
+    selector: 'form[asModel], fieldset',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -11,39 +11,41 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
         }
     ]
 })
-export class AsForm implements ControlValueAccessor {
+export class AsForm extends NgControl implements ControlValueAccessor {
 
     onChange: (value: any) => void = () => {};
     onTouched: () => void = () => {};
+    control : AbstractControl
 
-    value = model<any>({}, {alias : "asModel"})
+    asModel = model<any>({}, {alias : "asModel"})
 
-    name = input<string>()
+    formName = input<string>(null, {alias : "name"})
 
-    form = inject(AsForm, {skipSelf: true, optional: true})
+    asForm = inject(AsForm, {skipSelf: true, optional: true})
 
     el = inject(ElementRef<HTMLFormElement | HTMLFieldSetElement>).nativeElement
 
-    controls: Map<string, ControlValueAccessor> = new Map()
+    controls: Map<string, NgControl & ControlValueAccessor> = new Map()
 
     constructor() {
+        super();
         effect(() => {
-            if (this.form) {
-                this.form.addControl(this.name(), this)
+            if (this.asForm) {
+                this.asForm.addControl(this.formName(), this)
             }
         });
     }
 
-    addControl(name: string, control: ControlValueAccessor) {
+    addControl(name: string, control: NgControl & ControlValueAccessor) {
         this.controls.set(name, control)
-        control.writeValue(this.value()[name]())
+        control.writeValue(this.asModel()[name]())
         control.registerOnChange((val: any) => {
-            this.value()[name].set(val)
+            this.asModel()[name].set(val)
         })
     }
 
     writeValue(obj: any): void {
-        this.value.set(obj)
+        this.asModel.set(obj)
     }
     registerOnChange(fn: any): void {
         this.onChange = fn
@@ -53,6 +55,10 @@ export class AsForm implements ControlValueAccessor {
     }
     setDisabledState?(isDisabled: boolean): void {
         this.el.disabled = isDisabled
+    }
+
+    viewToModelUpdate(newValue: any): void {
+        this.writeValue(newValue)
     }
 
 

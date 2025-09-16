@@ -1,6 +1,6 @@
 import {Directive, effect, ElementRef, inject, input} from '@angular/core';
 import {AsForm} from "../as-form/as-form";
-import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
+import {AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
 
 @Directive({
     selector: 'input',
@@ -12,23 +12,25 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
         },
     ]
 })
-export class AsInput implements ControlValueAccessor {
+export class AsInput extends NgControl implements ControlValueAccessor {
 
     onChange: (value: any) => void = () => {};
     onTouched: () => void = () => {};
+    control : AbstractControl
 
     el = inject(ElementRef<HTMLInputElement>).nativeElement
 
     form = inject(AsForm)
 
-    name = input.required<string>()
+    inputName = input.required<string>({alias : "name"})
 
     constructor() {
+        super();
         this.el.addEventListener("input", () => this.onChange(this.el.value))
         this.el.addEventListener("blur", () => this.onTouched())
 
         effect(() => {
-            this.form.addControl(this.name(), this)
+            this.form.addControl(this.inputName(), this)
         })
     }
 
@@ -49,6 +51,10 @@ export class AsInput implements ControlValueAccessor {
         if (obj) {
             this.el.value = obj.toString()
         }
+    }
+
+    viewToModelUpdate(newValue: any): void {
+        this.writeValue(newValue)
     }
 
 }
