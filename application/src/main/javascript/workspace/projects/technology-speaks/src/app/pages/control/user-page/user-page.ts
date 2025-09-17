@@ -1,6 +1,7 @@
-import {Component, effect, model, ViewEncapsulation} from '@angular/core';
+import {Component, effect, inject, model, ViewEncapsulation} from '@angular/core';
 import User from "../../../domain/control/User";
-import {AsForm, AsInput, AsInputContainer} from "shared";
+import {AsForm, AsInput, AsInputContainer, AsWindow} from "shared";
+import {WindowManagerService} from "shared";
 
 @Component({
     selector: 'user-page',
@@ -11,11 +12,19 @@ import {AsForm, AsInput, AsInputContainer} from "shared";
 })
 export class UserPage {
 
+    windowService = inject(WindowManagerService)
+
     user = model<User>()
 
-    constructor() {
-        effect(() => {
-            console.log(this.user())
-        });
+    openWindow() {
+        this.windowService.open({
+            id : "test",
+            title : "test",
+            component : UserPage,
+            inputs : {
+                user : this.user()
+            }
+        })
     }
+
 }

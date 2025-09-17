@@ -1,0 +1,4 @@
+<ng-content></ng-content>
+@for (w of windows(); track w.id) {
+    <as-window [window]="w"></as-window>
+}

@@ -10,6 +10,11 @@ export * from './lib/components/layout/as-drawer/as-drawer-content/as-drawer-con
 
 export * from './lib/components/layout/as-toolbar/as-toolbar'
 
+export * from './lib/components/layout/as-view-port/as-view-port'
+
+export * from './lib/components/modal/as-window/as-window'
+export * from './lib/components/modal/as-window/service/window-manager-service'
+
 export * from './lib/directives/input/as-form/as-form'
 
 export * from './lib/directives/input/as-input/as-input'

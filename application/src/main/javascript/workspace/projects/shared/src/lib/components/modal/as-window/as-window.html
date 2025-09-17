@@ -1,0 +1,14 @@
+<div class="header" (mousedown)="dragElementMouseDown($event)">
+    <button type="button" class="material-icons" (click)="close()">close</button>
+</div>
+<ng-container *ngComponentOutlet="window().component; inputs: window().inputs"></ng-container>
+@if (resizable()) {
+    <div class="se" (mousedown)="seResizeMouseDown($event)"></div>
+    <div class="sw" (mousedown)="swResizeMouseDown($event)"></div>
+    <div class="nw" (mousedown)="nwResizeMouseDown($event)"></div>
+    <div class="ne" (mousedown)="neResizeMouseDown($event)"></div>
+    <div class="n" (mousedown)="nResizeMouseDown($event)"></div>
+    <div class="s" (mousedown)="sResizeMouseDown($event)"></div>
+    <div class="w" (mousedown)="wResizeMouseDown($event)"></div>
+    <div class="e" (mousedown)="eResizeMouseDown($event)"></div>
+}
