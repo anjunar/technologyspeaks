@@ -1,5 +1,5 @@
 import {Component, contentChild, effect, ElementRef, input, signal, ViewEncapsulation} from '@angular/core';
-import {AsControl} from "../../../directives/as-control";
+import {NgControl} from "@angular/forms";
 
 @Component({
     selector: 'as-input-container',
@@ -11,9 +11,9 @@ export class AsInputContainer {
 
     placeholder = input.required<string>()
 
-    control = contentChild(AsControl)
+    control = contentChild(NgControl)
 
-    element = contentChild(AsControl, {read: ElementRef<HTMLInputElement>})
+    element = contentChild(NgControl, {read: ElementRef<HTMLInputElement>})
 
     focus = signal(false)
 
@@ -26,7 +26,7 @@ export class AsInputContainer {
     constructor() {
         effect(() => {
             let asControl = this.control();
-            asControl.registerOnChange((name: string, value: any) => {
+            asControl.valueAccessor.registerOnChange((name: string, value: any) => {
                 this.isEmpty.set(!value);
                 this.dirty.set(asControl.dirty);
 

@@ -1,13 +1,10 @@
-import {ControlValueAccessor, ValidationErrors} from "@angular/forms";
-import {InputSignal} from "@angular/core";
+import {AbstractControl, ControlValueAccessor, NgControl} from "@angular/forms";
 
-export abstract class AsControl implements ControlValueAccessor {
+export abstract class AsControl extends NgControl implements ControlValueAccessor {
 
-    abstract set type(value : string)
+    override control: AbstractControl
 
-    abstract name : InputSignal<string>
-
-    abstract get value(): any
+    abstract set type(value: string)
 
     abstract writeValue(obj: any): void
 
@@ -21,10 +18,6 @@ export abstract class AsControl implements ControlValueAccessor {
 
     abstract setDisabledState?(isDisabled: boolean): void
 
-    abstract get dirty(): boolean
-
-    abstract get pristine(): boolean
-
-    abstract get errors(): ValidationErrors
+    override valueAccessor: ControlValueAccessor = this
 
 }

@@ -1,6 +1,6 @@
 import {Directive, ElementRef, inject, input, OnDestroy, OnInit} from '@angular/core';
 import {AsForm} from "../as-form/as-form";
-import {NG_VALUE_ACCESSOR, ValidationErrors} from "@angular/forms";
+import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControl} from "../../as-control";
 
 @Directive({
@@ -12,7 +12,7 @@ import {AsControl} from "../../as-control";
             multi: true
         },
         {
-            provide: AsControl,
+            provide: NgControl,
             useExisting: AsInput,
             multi: true
         }
@@ -27,11 +27,11 @@ export class AsInput extends AsControl implements OnInit, OnDestroy {
 
     form = inject(AsForm)
 
-    name = input<string>("", {alias: "name"})
+    inputName = input<string>("", {alias: "name"})
 
     constructor() {
         super()
-        this.el.addEventListener("input", () => this.onChange.forEach(callback => callback(this.name(), this.el.value)))
+        this.el.addEventListener("input", () => this.onChange.forEach(callback => callback(this.inputName(), this.el.value)))
         this.el.addEventListener("blur", () => this.onTouched.forEach(callback => callback()))
     }
 
@@ -40,11 +40,11 @@ export class AsInput extends AsControl implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.form.addControl(this.name(), this)
+        this.form.addControl(this.inputName(), this)
     }
 
     ngOnDestroy(): void {
-        this.form.removeControl(this.name())
+        this.form.removeControl(this.inputName())
     }
 
     registerOnChange(fn: any): void {
@@ -64,7 +64,7 @@ export class AsInput extends AsControl implements OnInit, OnDestroy {
         this.el.disabled = isDisabled
     }
 
-    get value(): any {
+    override get value(): any {
         return this.el.value
     }
 
@@ -84,16 +84,22 @@ export class AsInput extends AsControl implements OnInit, OnDestroy {
         }
     }
 
-    get pristine(): boolean {
+    override get pristine(): boolean {
         return this.el.value === this.el.defaultValue
     }
 
-    get dirty(): boolean {
+    override get dirty(): boolean {
         return !this.pristine
     }
 
-    get errors(): ValidationErrors {
+    override get errors(): ValidationErrors {
         return this.el.validity
     }
+
+    viewToModelUpdate(newValue: any): void {
+        this.writeValue(newValue)
+    }
+
+
 
 }

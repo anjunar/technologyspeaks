@@ -13,7 +13,6 @@ export class UserPage {
 
     user = model<User>()
 
-
     constructor() {
         effect(() => {
             console.log(this.user())

@@ -1,5 +1,5 @@
 import {Directive, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
-import {NG_VALUE_ACCESSOR, ValidationErrors} from "@angular/forms";
+import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControl} from "../../as-control";
 import {MetaSignal} from "../../../meta-signal/meta-signal";
 
@@ -12,7 +12,7 @@ import {MetaSignal} from "../../../meta-signal/meta-signal";
             multi: true,
         },
         {
-            provide: AsControl,
+            provide: NgControl,
             useExisting: AsForm,
             multi: true
         }
@@ -29,7 +29,7 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
 
     model = model<any>({}, {alias: "asModel"})
 
-    name = input<string>(null, {alias: "name"})
+    formName = input<string>(null, {alias: "name"})
 
     form = inject(AsForm, {skipSelf: true, optional: true})
 
@@ -41,13 +41,13 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         if (this.form) {
-            this.form.addControl(this.name(), this)
+            this.form.addControl(this.formName(), this)
         }
     }
 
     ngOnDestroy(): void {
         if (this.form) {
-            this.form.removeControl(this.name())
+            this.form.removeControl(this.formName())
         }
     }
 
@@ -65,7 +65,7 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
         this.controls.delete(name)
     }
 
-    get value(): any {
+    override get value(): any {
         return this.model()
     }
 
@@ -93,16 +93,20 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
         this.el.disabled = isDisabled
     }
 
-    get dirty(): boolean {
+    override get dirty(): boolean {
         return false;
     }
 
-    get pristine(): boolean {
+    override get pristine(): boolean {
         return false;
     }
 
-    get errors(): ValidationErrors {
+    override get errors(): ValidationErrors {
         return undefined;
+    }
+
+    viewToModelUpdate(newValue: any): void {
+        this.writeValue(newValue)
     }
 
 }
