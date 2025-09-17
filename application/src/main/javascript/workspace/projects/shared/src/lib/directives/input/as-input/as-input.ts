@@ -93,13 +93,20 @@ export class AsInput extends AsControl implements OnInit, OnDestroy {
     }
 
     override get errors(): ValidationErrors {
-        return this.el.validity
+        const e: ValidationErrors = {};
+        if (this.el.validity.valueMissing) e['required'] = true;
+        if (this.el.validity.tooShort) e['minlength'] = { requiredLength: this.el.minLength, actualLength: this.el.value.length };
+        if (this.el.validity.tooLong) e['maxlength'] = { requiredLength: this.el.maxLength, actualLength: this.el.value.length };
+        if (this.el.validity.typeMismatch) e['email'] = true;
+        return Object.keys(e).length ? e : null;
     }
 
     viewToModelUpdate(newValue: any): void {
         this.writeValue(newValue)
     }
 
-
+    override get path(): string[] | null {
+        return this.inputName() ? [this.inputName()] : null;
+    }
 
 }

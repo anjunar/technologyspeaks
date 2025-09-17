@@ -57,6 +57,7 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
         let value = metaSignal();
         control.writeValue(value)
         control.type = metaSignal.descriptor.widget
+        control.registerOnChange(this.onChangeListener)
     }
 
     removeControl(name : string) {
@@ -73,8 +74,7 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
         this.model.set(obj)
     }
 
-    writeDefaultValue(obj: any): void {
-    }
+    writeDefaultValue(obj: any): void {}
 
     registerOnChange(fn: any): void {
         this.onChange.push(fn)
@@ -94,19 +94,31 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
     }
 
     override get dirty(): boolean {
-        return false;
+        return Array.from(this.controls.values()).some(control => control.dirty)
     }
 
     override get pristine(): boolean {
-        return false;
-    }
-
-    override get errors(): ValidationErrors {
-        return undefined;
+        return ! this.dirty
     }
 
     viewToModelUpdate(newValue: any): void {
         this.writeValue(newValue)
+    }
+
+    override get errors(): ValidationErrors | null {
+        const merged: ValidationErrors = {};
+        this.controls.forEach((control, name) => {
+            if (control.errors) merged[name] = control.errors;
+        });
+        return Object.keys(merged).length ? merged : null;
+    }
+
+    override get touched(): boolean {
+        return this.controls.size > 0 && Array.from(this.controls.values()).some(c => (c as any).touched);
+    }
+
+    override get path(): string[] | null {
+        return this.formName() ? [this.formName()] : null;
     }
 
 }
