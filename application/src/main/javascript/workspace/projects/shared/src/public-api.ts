@@ -13,6 +13,7 @@ export * from './lib/components/layout/as-toolbar/as-toolbar'
 export * from './lib/directives/input/as-form/as-form'
 
 export * from './lib/directives/input/as-input/as-input'
+
 export * from './lib/directives/input/as-joda-date/joda-date-value-accessor'
 export * from './lib/directives/input/as-joda-date-time/joda-date-time-value-accessor'
 
@@ -26,7 +27,5 @@ export * from './lib/domain/container'
 export * from './lib/domain/Persistence'
 
 export * from './lib/mapper'
-
-export * from './lib/membrane'
 
 export * from './lib/pattern-match'

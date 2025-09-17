@@ -7,7 +7,7 @@ import {AsForm, AsInput, AsInputContainer} from "shared";
     imports: [AsForm, AsInput, AsInputContainer],
     templateUrl: './user-page.html',
     styleUrl: './user-page.css',
-    encapsulation : ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None
 })
 export class UserPage {
 

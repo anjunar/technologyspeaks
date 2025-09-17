@@ -1,44 +1,44 @@
-import JSONDeserializer from "./JSONDeserializer";
 import ActiveObject from "../domain/container/ActiveObject";
-import LinkContainer from "../domain/container/LinkContainer";
-import Table from "../domain/container/Table";
 import {match} from "../pattern-match/PatternMatching";
-import {findSchemaProperties} from "./Registry";
 import ObjectDescriptor from "../domain/descriptors/ObjectDescriptor";
 import CollectionDescriptor from "../domain/descriptors/CollectionDescriptor";
-import QueryTable from "../domain/container/QueryTable";
-import {AbstractSearch} from "../domain/container";
+import {NodeDescriptor} from "../domain/descriptors";
+import PropDescriptor from "../domain/descriptors/PropDescriptor";
 
-export function traverseObjectGraph(object : any, schema : ObjectDescriptor, buildObjectGraph : boolean = true) {
+export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: PropDescriptor) {
 
-    let schemaProperties = findSchemaProperties(object.constructor)
-
-    for (const schemaProperty of schemaProperties) {
-        schema.properties[schemaProperty.name] = JSONDeserializer(schemaProperty.configuration.schema, buildObjectGraph)
+    if (object instanceof Function) {
+        object.descriptor = schema
+        object.instance = prop
+        object = object()
     }
 
     Object.entries(object).filter(([key, value]) => value).forEach(([key, value]) => {
-        let node = schema.properties?.[key];
+        if (schema instanceof ObjectDescriptor) {
+            let node = schema.properties?.[key];
 
-        if (! node) {
-            let find = schema.oneOf?.find(one => one.type === object.$type);
-            if (find) {
-                node = find.properties[key]
-            } else {
-                if (value instanceof ActiveObject) {
-                    // delete object[key]
+            if (!node) {
+                let find = schema.oneOf?.find(one => one.type === object.$type);
+                if (find) {
+                    node = find.properties[key]
+                } else {
+                    if (value instanceof ActiveObject) {
+                        // delete object[key]
+                    }
                 }
             }
-        }
 
-        match(node)
-            .withObject(CollectionDescriptor, (array) => (value as any[]).forEach(row => {
-                if (row instanceof Object) {
-                    traverseObjectGraph(row, array.items as ObjectDescriptor, buildObjectGraph)
-                }
-            }))
-            .withObject(ObjectDescriptor, (jsonObject) => traverseObjectGraph(value, jsonObject, buildObjectGraph))
-            .nonExhaustive()
+            match(node)
+                .withObject(CollectionDescriptor, (array) => (value as any[]).forEach(row => {
+                    if (row instanceof Object) {
+                        traverseObjectGraph(row, array.items as ObjectDescriptor, object.$meta.instance[key])
+                    }
+                }))
+
+                .withObject(ObjectDescriptor, (jsonObject) => traverseObjectGraph(value, jsonObject, object.$meta.instance[key]))
+                .withObject(NodeDescriptor, (jsonObject) => traverseObjectGraph(value, jsonObject, object.$meta.instance[key]))
+                .nonExhaustive()
+        }
     })
 
 }

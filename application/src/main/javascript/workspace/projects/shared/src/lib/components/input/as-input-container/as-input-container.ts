@@ -1,28 +1,19 @@
-import {
-    AfterContentChecked, AfterContentInit,
-    Component,
-    computed,
-    contentChild, effect,
-    ElementRef, inject,
-    input, OnInit, Renderer2,
-    signal,
-    ViewEncapsulation
-} from '@angular/core';
-import {AsControlInput} from "../../../directives/as-control";
+import {Component, contentChild, effect, ElementRef, input, signal, ViewEncapsulation} from '@angular/core';
+import {AsControl} from "../../../directives/as-control";
 
 @Component({
-  selector: 'as-input-container',
-  templateUrl: './as-input-container.html',
-  styleUrl: './as-input-container.css',
-  encapsulation : ViewEncapsulation.None
+    selector: 'as-input-container',
+    templateUrl: './as-input-container.html',
+    styleUrl: './as-input-container.css',
+    encapsulation: ViewEncapsulation.None
 })
 export class AsInputContainer {
 
     placeholder = input.required<string>()
 
-    control = contentChild(AsControlInput)
+    control = contentChild(AsControl)
 
-    element = contentChild(AsControlInput, {read : ElementRef<HTMLInputElement>})
+    element = contentChild(AsControl, {read: ElementRef<HTMLInputElement>})
 
     focus = signal(false)
 
@@ -35,7 +26,7 @@ export class AsInputContainer {
     constructor() {
         effect(() => {
             let asControl = this.control();
-            asControl.registerOnChange((name : string, value : any) => {
+            asControl.registerOnChange((name: string, value: any) => {
                 this.isEmpty.set(!value);
                 this.dirty.set(asControl.dirty);
 
@@ -52,13 +43,13 @@ export class AsInputContainer {
                 }
             });
 
-            this.isEmpty.set(! asControl.value);
+            this.isEmpty.set(!asControl.value);
             this.dirty.set(asControl.dirty);
 
         })
 
         effect(() => {
-            const element : HTMLInputElement = this.element().nativeElement
+            const element: HTMLInputElement = this.element().nativeElement
 
             element.placeholder = this.placeholder()
 

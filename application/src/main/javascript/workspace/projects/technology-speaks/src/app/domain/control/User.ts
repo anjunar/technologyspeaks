@@ -5,6 +5,7 @@ import Address from "./Address";
 import {Basic, Entity} from "shared";
 import EMail from "./EMail";
 import {ModelSignal, Signal} from "@angular/core";
+import {MetaSignal} from "../../../../../shared/src/lib/meta-signal/meta-signal";
 
 @Entity("User")
 export default class User extends Identity {
@@ -12,18 +13,18 @@ export default class User extends Identity {
     override $type = "User"
 
     @Basic({signal : true})
-    nickName : Signal<string>
+    nickName : MetaSignal<string>
 
     @Basic({signal : true})
-    emails : Signal<EMail[]>
+    emails : MetaSignal<EMail[]>
 
     @Basic({signal : true})
-    info : Signal<UserInfo>
+    info : MetaSignal<UserInfo>
 
     @Basic({signal : true})
-    address : Signal<Address>
+    address : MetaSignal<Address>
 
     @Basic({signal : true})
-    score : Signal<number>
+    score : MetaSignal<number>
 
 }

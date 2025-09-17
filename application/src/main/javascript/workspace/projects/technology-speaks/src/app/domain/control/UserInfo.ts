@@ -1,6 +1,7 @@
 import {LocalDate} from "@js-joda/core";
 import {AbstractEntity, Basic, Entity} from "shared";
 import {Signal} from "@angular/core";
+import {MetaSignal} from "../../../../../shared/src/lib/meta-signal/meta-signal";
 
 @Entity("UserInfo")
 export default class UserInfo extends AbstractEntity {
@@ -8,15 +9,15 @@ export default class UserInfo extends AbstractEntity {
     override $type = "UserInfo"
 
     @Basic({signal : true})
-    firstName : Signal<string>
+    firstName : MetaSignal<string>
 
     @Basic({signal : true})
-    lastName : Signal<string>
+    lastName : MetaSignal<string>
 
     @Basic({
         default : LocalDate.now,
         signal : true
     })
-    birthDate : Signal<LocalDate>
+    birthDate : MetaSignal<LocalDate>
 
 }

@@ -29,11 +29,9 @@ export default abstract class ActiveObject {
     @Basic()
     $meta : Meta
 
+    $metaProperty : (name : string) => NodeDescriptor
+
     @Basic()
     $type: string
-
-    $resolve : any
-
-    $callbacks? : ((property : string, value : any) => void)[]
 
 }
