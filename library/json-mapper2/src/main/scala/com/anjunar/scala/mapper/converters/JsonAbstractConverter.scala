@@ -10,6 +10,6 @@ abstract class JsonAbstractConverter(val aClass : ResolvedClass) {
   
   def toJson(instance: Any, aType: ResolvedClass, context: JsonContext): JsonNode
   
-  def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any]
+  def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any]
   
 }

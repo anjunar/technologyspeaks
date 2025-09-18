@@ -11,6 +11,6 @@ class JsonByteConverter extends JsonAbstractConverter(TypeResolver.resolve(class
 
   override def toJson(instance: Any, aType: ResolvedClass, context: JsonContext): JsonNode = JsonString(Base64.getEncoder.encodeToString(instance.asInstanceOf[Array[Byte]]))
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = CompletableFuture.completedFuture(Base64.getDecoder.decode(jsonNode.value.asInstanceOf[String].getBytes))
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = CompletableFuture.completedFuture(Base64.getDecoder.decode(jsonNode.value.asInstanceOf[String].getBytes))
   
 }

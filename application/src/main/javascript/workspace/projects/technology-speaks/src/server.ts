@@ -8,7 +8,7 @@ let port = 4001;
 
 detectPort(port).then(_port => {
   if (port === _port) {
-    const wss = new WebSocketServer({ port: port });
+    const wss = new WebSocketServer({ port: port, maxPayload: 10 * 1024 * 1024, perMessageDeflate: false  });
 
     wss.on('connection', ws => {
       ws.on('message', async (msg) => {
@@ -21,9 +21,9 @@ detectPort(port).then(_port => {
                 { provide : REQUEST, useValue : data }
             ]
           });
-          ws.send(JSON.stringify({ success: true, html }));
+          ws.send(Buffer.from(JSON.stringify({ success: true, html })));
         } catch (err : any) {
-          ws.send(JSON.stringify({ success: false, error: err.message }));
+          ws.send(Buffer.from(JSON.stringify({ success: false, error: err.message })));
         }
       });
     });

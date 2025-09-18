@@ -11,6 +11,6 @@ class JsonBooleanConverter extends JsonAbstractConverter(TypeResolver.resolve(cl
 
   override def toJson(instance: Any, aType: ResolvedClass, context: JsonContext): JsonNode = JsonBoolean(instance.asInstanceOf[Boolean])
 
-  override def toJava(jsonObject: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = CompletableFuture.completedStage(jsonObject.value)
+  override def toJava(jsonObject: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = CompletableFuture.completedStage(jsonObject.value)
   
 }

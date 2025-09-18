@@ -12,7 +12,7 @@ export const appConfig: ApplicationConfig = {
         provideBrowserGlobalErrorListeners(),
         provideZonelessChangeDetection(),
         provideRouter(routes, withComponentInputBinding()),
-        provideClientHydration(withEventReplay()),
+        // provideClientHydration(withEventReplay()),
         provideHttpClient(
             withInterceptors([serverCookieInterceptor]),
             withFetch()

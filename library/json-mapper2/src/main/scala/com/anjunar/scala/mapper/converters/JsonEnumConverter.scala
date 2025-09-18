@@ -26,7 +26,7 @@ class JsonEnumConverter extends JsonAbstractConverter(TypeResolver.resolve(class
 
   }
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
     val resolvedMethod = aType
       .methods
       .find(member => Objects.nonNull(member.findDeclaredAnnotation(classOf[JsonCreator])))

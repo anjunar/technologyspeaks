@@ -28,5 +28,5 @@ class JsonMapConverter extends JsonAbstractConverter(TypeResolver.resolve(classO
     case _ => throw new IllegalStateException("No Collection")
 
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = ???
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = ???
 }

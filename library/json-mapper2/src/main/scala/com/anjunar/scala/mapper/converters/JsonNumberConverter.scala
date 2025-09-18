@@ -10,7 +10,7 @@ class JsonNumberConverter extends JsonAbstractConverter(TypeResolver.resolve(cla
   
   override def toJson(instance: Any, aType: ResolvedClass, context: JsonContext): JsonNode = JsonNumber(instance.toString)
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = aType.raw match
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = aType.raw match
     case bigDecimal if bigDecimal == classOf[java.math.BigDecimal] =>
       val constructor = bigDecimal.getConstructor(classOf[String])
       CompletableFuture.completedFuture(constructor.newInstance(jsonNode.value))

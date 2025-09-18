@@ -17,7 +17,7 @@ class JsonTemporalConverter extends JsonAbstractConverter(TypeResolver.resolve(c
     case localTime : LocalTime  => JsonString(localTime.truncatedTo(ChronoUnit.MINUTES).format(DateTimeFormatter.ISO_TIME))
     case _ => throw new IllegalStateException(s"Unhandled time object ${instance}")
   
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
     val method = aType.findDeclaredMethod("parse", classOf[CharSequence])
     CompletableFuture.completedFuture(method.invoke(null, jsonNode.value))
   }

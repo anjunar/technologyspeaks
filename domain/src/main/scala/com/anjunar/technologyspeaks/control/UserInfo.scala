@@ -41,7 +41,7 @@ class UserInfo extends AbstractEntity with OwnerProvider {
   var lastName : String = uninitialized
   
   @ManyToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[Media])
-  @PropertyDescriptor(title = "Picture", widget = "file")
+  @PropertyDescriptor(title = "Picture", widget = "file", writeable = true)
   @FormParam("image")
   var image : Media = uninitialized
   

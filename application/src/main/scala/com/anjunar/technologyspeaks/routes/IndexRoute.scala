@@ -3,7 +3,7 @@ package com.anjunar.technologyspeaks.routes
 import com.anjunar.vertx.annotations.Route
 import com.typesafe.scalalogging.Logger
 import io.vertx.core.buffer.Buffer
-import io.vertx.core.http.{WebSocketClient, WebSocketConnectOptions}
+import io.vertx.core.http.{WebSocketClient, WebSocketClientOptions, WebSocketConnectOptions}
 import io.vertx.core.json.JsonObject
 import io.vertx.core.{Future, Handler}
 import io.vertx.ext.web.RoutingContext
@@ -50,18 +50,24 @@ class IndexRoute extends Handler[RoutingContext] {
           cookieObj
         })
 
-      val client: WebSocketClient = ctx.vertx().createWebSocketClient()
+      val webSocketClientOptions = new WebSocketClientOptions()
+        .setMaxFrameSize(10 * 1024 * 1024)
+        .setMaxMessageSize(10 * 1024 * 1024)
+
+      val client: WebSocketClient = ctx.vertx().createWebSocketClient(webSocketClientOptions)
+
       val options = new WebSocketConnectOptions()
         .setHost("localhost")
         .setPort(4001)
         .setURI("/")
 
+
       client.connect(options).onSuccess { ws =>
 
         log.info("Connected to WebSocket server")
 
-        ws.textMessageHandler { message =>
-          val json = new JsonObject(message)
+        ws.binaryMessageHandler { buffer =>
+          val json = new JsonObject(buffer)
           if (json.getBoolean("success", false)) {
             ctx.response()
               .putHeader("Content-Type", "text/html")
@@ -84,7 +90,7 @@ class IndexRoute extends Handler[RoutingContext] {
           log.info("WebSocket connection closed")
         }
 
-        ws.writeTextMessage(requestInfo.encode())
+        ws.writeBinaryMessage(Buffer.buffer(requestInfo.encode()))
 
       }.onFailure { throwable =>
         log.error("Failed to connect to SSR server", throwable)

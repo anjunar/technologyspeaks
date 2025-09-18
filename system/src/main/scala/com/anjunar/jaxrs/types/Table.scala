@@ -24,7 +24,7 @@ object Table extends DynamicSchemaProvider {
       })
       .forInstance((list, ctx, factory) => {
         val schemaDef = TypeResolver.companionInstance(clazz).asInstanceOf[SchemaProvider[E]]
-        list.asScala.map(elem => schemaDef.schema.build(elem, ctx, factory, view)).toSeq
+        list.asScala.map(elem => schemaDef.schema.build(elem, clazz, ctx, factory, view)).toSeq
       })
     val size = column[Long]("size", views = Set(view))
   }

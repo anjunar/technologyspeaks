@@ -11,5 +11,5 @@ class JsonLocaleConverter extends JsonAbstractConverter(TypeResolver.resolve(cla
 
   override def toJson(instance: Any, aType: ResolvedClass, context: JsonContext): JsonNode = JsonString(instance.asInstanceOf[Locale].toLanguageTag)
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = CompletableFuture.completedFuture(Locale.forLanguageTag(jsonNode.value.asInstanceOf[String]))
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = CompletableFuture.completedFuture(Locale.forLanguageTag(jsonNode.value.asInstanceOf[String]))
 }

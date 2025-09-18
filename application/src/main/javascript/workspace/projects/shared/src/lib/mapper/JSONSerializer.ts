@@ -14,6 +14,11 @@ export default function JSONSerializer(entity: any) : any {
                 .filter(property => ! property.name.startsWith("$") || property.name === "$type")
                 .reduce((prev, current) => {
                 let object = entity[current.name];
+
+                if (object instanceof Function) {
+                    object = object()
+                }
+
                 if (object instanceof Array) {
                     prev[current.name] = object.map(item => JSONSerializer(item))
                 } else {

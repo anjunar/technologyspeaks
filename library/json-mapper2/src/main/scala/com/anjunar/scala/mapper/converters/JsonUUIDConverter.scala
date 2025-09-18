@@ -12,7 +12,7 @@ class JsonUUIDConverter extends JsonAbstractConverter(TypeResolver.resolve(class
   override def toJson(instance: Any, aType: ResolvedClass, context: JsonContext): JsonNode = instance match
     case uuid : UUID => JsonString(uuid.toString)
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
     CompletableFuture.completedFuture(UUID.fromString(jsonNode.value.asInstanceOf[String]))
   }
   

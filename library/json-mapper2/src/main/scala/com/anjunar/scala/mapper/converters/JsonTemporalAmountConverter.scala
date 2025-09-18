@@ -13,7 +13,7 @@ class JsonTemporalAmountConverter extends JsonAbstractConverter(TypeResolver.res
   override def toJson(instance: Any, aType: ResolvedClass, context: JsonContext): JsonNode = instance match
     case temporal : TemporalAmount => JsonString(temporal.toString)
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = {
     CompletableFuture.completedFuture(Duration.parse(jsonNode.value.toString))
   }
 }

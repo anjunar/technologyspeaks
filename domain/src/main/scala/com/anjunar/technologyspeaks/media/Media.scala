@@ -14,7 +14,7 @@ import scala.compiletime.uninitialized
 class Media extends Thumbnail {
 
   @OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[Thumbnail])
-  @PropertyDescriptor(title = "Thumbnail")
+  @PropertyDescriptor(title = "Thumbnail", writeable = true)
   var thumbnail: Thumbnail = uninitialized
 
 }

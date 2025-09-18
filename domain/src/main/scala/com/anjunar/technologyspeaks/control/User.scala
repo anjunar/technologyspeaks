@@ -59,15 +59,15 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
       .visibleWhen(OwnerRule())
     val emails = column[util.Set[EMail]]("emails")
       .forType(ctx => EMail.schema.buildType(classOf[EMail], ctx))
-      .forInstance((emails, ctx, factory) => emails.asScala.map(elem => EMail.schema.build(elem, ctx, factory)).toSeq)
+      .forInstance((emails, ctx, factory) => emails.asScala.map(elem => EMail.schema.build(elem, classOf[EMail], ctx, factory)).toSeq)
       .visibleWhen(ManagedRule(classOf[User]))
     val info = column[UserInfo]("info", views = Set("full", "application", "form", "table"))
       .forType(ctx => UserInfo.schema.buildType(classOf[UserInfo], ctx))
-      .forInstance((userInfo, ctx, factory) => Seq(UserInfo.schema.build(userInfo, ctx, factory)))
+      .forInstance((userInfo, ctx, factory) => Seq(UserInfo.schema.build(userInfo, classOf[UserInfo], ctx, factory)))
       .visibleWhen(ManagedRule(classOf[User]))
     val address = column[Address]("address", views = Set("full", "form"))
       .forType(ctx => Address.schema.buildType(classOf[Address], ctx))
-      .forInstance((address, ctx, factory) => Seq(Address.schema.build(address, ctx, factory)))
+      .forInstance((address, ctx, factory) => Seq(Address.schema.build(address, classOf[Address], ctx, factory)))
       .visibleWhen(ManagedRule(classOf[User]))
   }
 

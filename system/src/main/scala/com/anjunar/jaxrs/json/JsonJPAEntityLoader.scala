@@ -29,16 +29,23 @@ class JsonJPAEntityLoader extends JsonEntityLoader {
     if (option.isDefined && aType.findAnnotation(classOf[Entity]) != null) {
       val entityClass = aType.raw.asInstanceOf[Class[AnyRef]]
       val uuid = UUID.fromString(option.get.value.toString)
-      sessionFactory.withSession(session => {
+      sessionFactory.openSession().thenCompose(session => {
         session.find(entityClass, uuid)
-          .thenApply(entity => {
+          .thenCompose(entity => {
             if (entity == null) {
-              newInstance(jsonObject, aType)
+              CompletableFuture.completedFuture(newInstance(jsonObject, aType))
             } else {
               JPAUtil.fetchEntityRecursively(entity, entityClass, session)
+                .thenApply(_ => {
+                  entity
+                })
             }
           })
+          .whenComplete((_,_) => {
+            session.close()
+          })
       })
+
     } else {
       CompletableFuture.completedFuture(newInstance(jsonObject, aType))
     }

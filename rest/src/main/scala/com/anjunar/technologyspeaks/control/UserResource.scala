@@ -4,10 +4,13 @@ import com.anjunar.jpa.EntityGraph
 import io.vertx.ext.web.RoutingContext
 import jakarta.annotation.security.RolesAllowed
 import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
 import jakarta.ws.rs.core.{Context, MediaType, Response}
 import jakarta.ws.rs.{Consumes, DELETE, GET, POST, PUT, Path, PathParam, Produces}
+import org.hibernate.reactive.stage.Stage
 
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, CompletionStage}
+import scala.compiletime.uninitialized
 
 object UserResource {
 
@@ -54,15 +57,19 @@ object UserResource {
   @ApplicationScoped
   @Path("control/users/user")
   class Update {
+    
+    @Inject
+    var sessionFactory : Stage.SessionFactory = uninitialized
 
     @PUT
     @Consumes(Array(MediaType.APPLICATION_JSON))
     @Produces(Array(MediaType.APPLICATION_JSON))
     @RolesAllowed(Array("User", "Administrator"))
-    def update(entity: User): CompletableFuture[User] = {
-      CompletableFuture.completedFuture(entity)
+    def update(entity: User): CompletionStage[User] = {
+      sessionFactory.withTransaction(implicit session => {
+        session.merge(entity)
+      })
     }
-
   }
 
   @ApplicationScoped

@@ -1,6 +1,6 @@
 package com.anjunar.scala.mapper.converters
 
-import com.anjunar.scala.introspector.DescriptionIntrospector
+import com.anjunar.scala.introspector.{DescriptionIntrospector, DescriptorsModel}
 import com.anjunar.scala.mapper.annotations.{Converter, Filter, IgnoreFilter}
 import com.anjunar.scala.mapper.helper.JPAHelper.resolveMappings
 import com.anjunar.scala.mapper.intermediate.model.{JsonBoolean, JsonNode, JsonObject, JsonString}
@@ -186,7 +186,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
     }
   }
 
-  override def toJava(jsonNode: JsonNode, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = jsonNode match
+  override def toJava(jsonNode: JsonNode, instance: Any, aType: ResolvedClass, context: JsonContext): CompletionStage[Any] = jsonNode match
     case jsonObject: JsonObject =>
       val jsonSubTypes = aType.findDeclaredAnnotation(classOf[JsonSubTypes])
       val jsonTypeInfo = aType.findAnnotation(classOf[JsonTypeInfo])
@@ -196,93 +196,105 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
           jsonSubTypes.value().find(subType => subType.value().getSimpleName == jsonObject.value(if jsonTypeInfo == null then "$type" else jsonTypeInfo.property()).value).get.value()
         )
 
-      context.loader.load(jsonObject, beanModel.underlying)
-        .thenCompose(entity => {
-          val schema = context.schema
-
-          var propertyMapping = schema.findTypeMapping(aType.underlying)
-
-          if (propertyMapping.isEmpty) {
-            propertyMapping = schema.findTypeMapping(beanModel.underlying.raw)
-          }
-
-          if (!(aType <:< TypeResolver.resolve(classOf[NodeDescriptor]))) {
-            val nodeId = propertyMapping.get("id")
-
-            if (nodeId.isEmpty && beanModel.properties.exists(property => property.name == "id")) {
-              log.warn("No Id for: " + aType.raw.getName)
-            }
-          }
-
-          val ignoreFilter = aType.findDeclaredAnnotation(classOf[IgnoreFilter])
-
-          val futures = beanModel.properties
-            .filter(property => {
-              val option = propertyMapping.get(property.name)
-              (option.isDefined || ignoreFilter != null) && option.get.writeable
-            })
-            .map(property => {
-              val option = propertyMapping.get(property.name)
-
-              val registry = context.registry
-              val converter = registry.find(property.propertyType)
-              val currentNode = jsonObject.value.get(property.name)
-
-              val propertyValue: CompletionStage[Any] = if currentNode.isDefined then {
-                val jpaConverter = property.findAnnotation(classOf[Converter])
-
-                if (jpaConverter == null) {
-                  val newContext = JsonContext(context, property.name, context.noValidation, option.get.schemaBuilder, context)
-                  converter.toJava(currentNode.get, property.propertyType, newContext)
-                } else {
-                  val jpaConverterInstance = jpaConverter.value().getConstructor().newInstance()
-                  jpaConverterInstance.toJava(currentNode.get.value)
-                }
-
-              } else {
-                property.propertyType.raw match {
-                  case aClass: Class[?] if classOf[lang.Boolean].isAssignableFrom(aClass) => CompletableFuture.completedFuture(false)
-                  case aClass: Class[?] if classOf[util.Set[?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.HashSet[AnyRef]())
-                  case aClass: Class[?] if classOf[util.List[?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.ArrayList[AnyRef]())
-                  case aClass: Class[?] if classOf[util.Map[?, ?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.HashMap[AnyRef, AnyRef]())
-                  case _ => null
-                }
-              }
-
-              val violations: util.Set[ConstraintViolation[Any]] = if (context.noValidation) {
-                new util.HashSet[ConstraintViolation[Any]]()
-              } else {
-                context.validator.validateValue(beanModel.underlying.raw.asInstanceOf[Class[Any]], property.name, propertyValue)
-              }
-
-              if (violations.isEmpty) {
-                propertyValue
-                  .thenApply(propertyValue => {
-                    propertyValue match
-                      case collection: util.Collection[Any] =>
-                        val underlyingCollection = property.get(entity).asInstanceOf[util.Collection[Any]]
-                        underlyingCollection.clear()
-                        underlyingCollection.addAll(collection)
-                      case map: util.Map[Any, Any] =>
-                        val underlyingMap = property.get(entity).asInstanceOf[util.Map[Any, Any]]
-                        underlyingMap.clear()
-                        underlyingMap.putAll(map)
-                      case _ => property.set(entity, propertyValue)
-
-                    resolveMappings(entity, property, propertyValue)
-                    propertyValue
-                  })
-                  .toCompletableFuture
-              } else {
-                context.violations.addAll(violations)
-                CompletableFuture.completedFuture(null)
-              }
-            })
-
-          CompletableFuture.allOf(futures.toArray *)
-            .thenApply(_ => entity)
-        })
+      if (instance == null) {
+        context.loader.load(jsonObject, beanModel.underlying)
+          .thenCompose(entity => {
+            processEntity(aType, context, beanModel, entity, jsonObject)
+          })
+      } else {
+        processEntity(aType, context, beanModel, instance.asInstanceOf[AnyRef], jsonObject)
+      }
 
     case _ => throw new IllegalStateException("Not a json Object")
 
+  private def processEntity(aType: ResolvedClass, context: JsonContext, beanModel: DescriptorsModel, entity: AnyRef, jsonObject : JsonObject) : CompletionStage[Any] = {
+    val schema = context.schema
+
+    var propertyMapping = schema.findInstanceMapping(entity)
+
+    if (propertyMapping.isEmpty) {
+      propertyMapping = schema.findTypeMapping(aType.raw)
+    }
+
+    if (!(aType <:< TypeResolver.resolve(classOf[NodeDescriptor]))) {
+      val nodeId = propertyMapping.get("id")
+
+      if (nodeId.isEmpty && beanModel.properties.exists(property => property.name == "id")) {
+        log.warn("No Id for: " + aType.raw.getName)
+      }
+    }
+
+    val ignoreFilter = aType.findDeclaredAnnotation(classOf[IgnoreFilter])
+
+    val futures = beanModel.properties
+      .filter(property => {
+        val option = propertyMapping.get(property.name)
+
+        if (option.isDefined || ignoreFilter != null) {
+          val value = option.get
+          value.writeable
+        } else {
+          false
+        }
+      })
+      .map(property => {
+
+        val option = propertyMapping.get(property.name)
+
+        val registry = context.registry
+        val converter = registry.find(property.propertyType)
+        val currentNode = jsonObject.value.get(property.name)
+
+        val propertyValue: CompletionStage[Any] = if currentNode.isDefined then {
+          val jpaConverter = property.findAnnotation(classOf[Converter])
+
+          if (jpaConverter == null) {
+            val newContext = JsonContext(context, property.name, context.noValidation, option.get.schemaBuilder, context)
+            converter.toJava(currentNode.get, property.get(entity), property.propertyType, newContext)
+          } else {
+            val jpaConverterInstance = jpaConverter.value().getConstructor().newInstance()
+            jpaConverterInstance.toJava(currentNode.get.value)
+          }
+
+        } else {
+          property.propertyType.raw match {
+            case aClass: Class[?] if classOf[lang.Boolean].isAssignableFrom(aClass) => CompletableFuture.completedFuture(false)
+            case aClass: Class[?] if classOf[util.Set[?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.HashSet[AnyRef]())
+            case aClass: Class[?] if classOf[util.List[?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.ArrayList[AnyRef]())
+            case aClass: Class[?] if classOf[util.Map[?, ?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.HashMap[AnyRef, AnyRef]())
+            case _ => null
+          }
+        }
+
+        propertyValue.thenCompose(propertyValue => {
+          val violations: util.Set[ConstraintViolation[Any]] = if (context.noValidation) {
+            new util.HashSet[ConstraintViolation[Any]]()
+          } else {
+            context.validator.validateValue(beanModel.underlying.raw.asInstanceOf[Class[Any]], property.name, propertyValue)
+          }
+
+          if (violations.isEmpty) {
+            propertyValue match
+              case collection: util.Collection[Any] =>
+                val underlyingCollection = property.get(entity).asInstanceOf[util.Collection[Any]]
+                underlyingCollection.clear()
+                underlyingCollection.addAll(collection)
+              case map: util.Map[Any, Any] =>
+                val underlyingMap = property.get(entity).asInstanceOf[util.Map[Any, Any]]
+                underlyingMap.clear()
+                underlyingMap.putAll(map)
+              case _ => property.set(entity, propertyValue)
+
+            resolveMappings(entity, property, propertyValue)
+            CompletableFuture.completedFuture(propertyValue)
+          } else {
+            context.violations.addAll(violations)
+            CompletableFuture.completedFuture(null)
+          }
+        }).toCompletableFuture
+      })
+
+    CompletableFuture.allOf(futures.toSeq *)
+      .thenApply(_ => entity)
+  }
 }

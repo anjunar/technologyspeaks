@@ -28,9 +28,9 @@ class JsonMapper {
     })
   }
 
-  def toJava(jsonNode: JsonNode, aType : ResolvedClass, context: JsonContext): CompletionStage[AnyRef] = {
+  def toJava(jsonNode: JsonNode, instance : Any, aType : ResolvedClass, context: JsonContext): CompletionStage[AnyRef] = {
     val converter = registry.find(aType)
-    converter.toJava(jsonNode, aType, context).asInstanceOf[CompletionStage[AnyRef]]
+    converter.toJava(jsonNode, instance, aType, context).asInstanceOf[CompletionStage[AnyRef]]
   }
 
   def toJsonObjectForJava(value: String) : CompletionStage[JsonObject] = {

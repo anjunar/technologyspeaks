@@ -61,7 +61,7 @@ class EntityWriter extends MessageBodyWriter {
       case table: Table[AnyRef] =>
         val tableType = resolvedClass.typeArguments(0).raw.asInstanceOf[Class[AnyRef]]
         val entitySchemaDef = Table.schema(tableType, state.view)
-        val schemaBuilder = entitySchemaDef.build(entity.asInstanceOf[Table[AnyRef]], RequestContext(user, roles), factory, state.view)
+        val schemaBuilder = entitySchemaDef.build(entity.asInstanceOf[Table[AnyRef]], resolvedClass.raw.asInstanceOf[Class[Table[AnyRef]]], RequestContext(user, roles), factory, state.view)
         val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Table[AnyRef]]], RequestContext(user, roles), state.view)
         
         schemaBuilder.thenCompose(schemaBuilder => {
@@ -90,7 +90,7 @@ class EntityWriter extends MessageBodyWriter {
         })
       case _ =>
         val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[Any]].schema
-        val schemaBuilder = entitySchemaDef.build(entity, RequestContext(user, roles), factory, state.view)
+        val schemaBuilder = entitySchemaDef.build(entity, entity.getClass.asInstanceOf[Class[Any]], RequestContext(user, roles), factory, state.view)
         val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Any]], RequestContext(user, roles), state.view)
 
         schemaBuilder.thenCompose(schemaBuilder => {

@@ -24,6 +24,8 @@ export * from './lib/directives/input/as-input/as-input'
 export * from './lib/directives/input/as-joda-date/joda-date-value-accessor'
 export * from './lib/directives/input/as-joda-date-time/joda-date-time-value-accessor'
 
+export * from './lib/directives/input/as-submit/as-submit'
+
 export * from './lib/request-token'
 
 export * from './lib/http-client/server-cookie-interceptor'

@@ -8,4 +8,9 @@ user-page {
         display: flex;
         gap: 12px;
     }
+
+    .buttons {
+        display: flex;
+        justify-content: flex-end;
+    }
 }

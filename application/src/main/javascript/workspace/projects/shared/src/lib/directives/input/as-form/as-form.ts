@@ -1,5 +1,5 @@
 import {Directive, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
-import {ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControl, AsControlForm, AsControlValueAccessor} from "../../as-control";
 import {MetaSignal} from "../../../meta-signal/meta-signal";
 
@@ -20,10 +20,10 @@ import {MetaSignal} from "../../../meta-signal/meta-signal";
 })
 export class AsForm extends AsControlForm implements AsControlValueAccessor, OnInit, OnDestroy {
 
-    onChange: ((name : string, value: any) => void)[] = []
+    onChange: ((name: string, value: any) => void)[] = []
     onTouched: (() => void)[] = []
 
-    onChangeListener = (name : string, val: any) => {
+    onChangeListener = (name: string, val: any) => {
         this.model()[name].set(val)
     };
 
@@ -60,7 +60,7 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
         } else {
             this.controls.set(name, [control])
         }
-        let metaSignal : MetaSignal<any> = this.model()[name];
+        let metaSignal: MetaSignal<any> = this.model()[name];
         let value = metaSignal();
         let valueAccessor = control.valueAccessor;
         control.descriptor = metaSignal.descriptor
@@ -70,7 +70,7 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
         control.controlAdded()
     }
 
-    removeControl(name : string, control: AsControl) {
+    removeControl(name: string, control: AsControl) {
         let controls = this.controls.get(name);
         let indexOf = controls.indexOf(control);
         if (indexOf > -1) {
@@ -87,7 +87,8 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
         this.model.set(obj)
     }
 
-    writeDefaultValue(obj: any): void {}
+    writeDefaultValue(obj: any): void {
+    }
 
     registerOnChange(fn: any): void {
         this.onChange.push(fn)
@@ -111,7 +112,7 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
     }
 
     override get pristine(): boolean {
-        return ! this.dirty
+        return !this.dirty
     }
 
     viewToModelUpdate(newValue: any): void {

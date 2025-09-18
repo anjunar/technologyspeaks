@@ -1,6 +1,6 @@
 import {
     Component,
-    computed,
+    computed, effect,
     ElementRef,
     inject,
     input, model,
@@ -72,6 +72,14 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor, O
     default = signal<Media>(null)
 
     disabledImage = signal(false)
+
+    constructor() {
+        super();
+
+        effect(() => {
+            this.onChange.forEach(fn => fn(this.inputName(), this.image()));
+        });
+    }
 
     controlAdded(): void {
         this.placeholder = this.descriptor.title

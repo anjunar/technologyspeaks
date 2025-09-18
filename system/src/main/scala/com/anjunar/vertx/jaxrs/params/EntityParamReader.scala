@@ -13,6 +13,7 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.SessionHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import jakarta.validation.Validator
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.{BeanParam, MatrixParam, PathParam, QueryParam}
 import org.hibernate.reactive.stage.Stage
@@ -31,6 +32,9 @@ class EntityParamReader extends ParamReader {
   
   @Inject
   var sessionFactory : Stage.SessionFactory = uninitialized  
+  
+  @Inject
+  var validator : Validator = uninitialized
 
   override def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean = {
     val blackList : Set[Class[? <: Annotation]] = Set(classOf[QueryParam], classOf[BeanParam], classOf[PathParam], classOf[MatrixParam], classOf[Context])
@@ -59,11 +63,11 @@ class EntityParamReader extends ParamReader {
           .thenCompose(entity => {
             val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[AnyRef]].schema
 
-            entitySchemaDef.build(entity, RequestContext(user, roles), factory, state.view)
+            entitySchemaDef.build(entity, entity.getClass.asInstanceOf[Class[AnyRef]], RequestContext(user, roles), factory, state.view)
               .thenCompose(schemaBuilder => {
-                val context = JsonContext(null, null, false, null, jsonMapper.registry, schemaBuilder, entityLoader)
+                val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, entityLoader)
 
-                jsonMapper.toJava(jsonObject, resolvedClass, context)
+                jsonMapper.toJava(jsonObject, entity, resolvedClass, context)
               })
 
           })
