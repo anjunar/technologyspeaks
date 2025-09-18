@@ -2,6 +2,7 @@ import {LocalDate} from "@js-joda/core";
 import {AbstractEntity, Basic, Entity} from "shared";
 import {Signal} from "@angular/core";
 import {MetaSignal} from "../../../../../shared/src/lib/meta-signal/meta-signal";
+import Media from "../../../../../shared/src/lib/domain/types/Media";
 
 @Entity("UserInfo")
 export default class UserInfo extends AbstractEntity {
@@ -19,5 +20,8 @@ export default class UserInfo extends AbstractEntity {
         signal : true
     })
     birthDate : MetaSignal<LocalDate>
+
+    @Basic({signal : true})
+    image : MetaSignal<Media>
 
 }

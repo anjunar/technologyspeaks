@@ -1,22 +1,23 @@
-<div>
-    <form [(asModel)]="user">
-        <as-input-container placeholder="Nickname">
-            <input name="nickName" required/>
-        </as-input-container>
+<form [(asModel)]="user">
+    <div class="container">
         <fieldset name="info">
-            <as-input-container placeholder="Nickname">
-                <input name="firstName"/>
-            </as-input-container>
-            <as-input-container placeholder="Nickname">
-                <input name="lastName"/>
-            </as-input-container>
-            <as-input-container placeholder="Nickname">
-                <input name="birthDate"/>
-            </as-input-container>
+            <as-image style="width: 300px; height: 300px" name="image"/>
         </fieldset>
-    </form>
-    <button (click)="openWindow()">window</button>
-    {{ user().nickName() }}
-    {{ user().info().firstName() }}
-    {{ user().info().lastName() }}
-</div>
+        <div>
+            <as-input-container placeholder="Nickname">
+                <input name="nickName"/>
+            </as-input-container>
+            <fieldset name="info">
+                <as-input-container placeholder="Nickname">
+                    <input name="firstName"/>
+                </as-input-container>
+                <as-input-container placeholder="Nickname">
+                    <input name="lastName"/>
+                </as-input-container>
+                <as-input-container placeholder="Nickname">
+                    <input name="birthDate"/>
+                </as-input-container>
+            </fieldset>
+        </div>
+    </div>
+</form>

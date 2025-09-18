@@ -2,4 +2,10 @@ user-page {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
+
+    .container {
+        display: flex;
+        gap: 12px;
+    }
 }

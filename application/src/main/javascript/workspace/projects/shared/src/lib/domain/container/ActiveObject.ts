@@ -24,14 +24,16 @@ export interface PropertiesContainer {
     [key: string]: PropDescriptor
 }
 
+export type Constructor<T> = new (...args: any[]) => T;
+
 export default abstract class ActiveObject {
 
     @Basic()
     $meta : Meta
 
-    $metaProperty : (name : string) => NodeDescriptor
-
     @Basic()
     $type: string
+
+    $instance : <E>(ctor : Constructor<E>) => E
 
 }

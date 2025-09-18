@@ -1,0 +1,11 @@
+<image-cropper
+        style="width: calc(100% - 10px); height: calc(100% - 40px)"
+        [imageChangedEvent]="imageChangedEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="1"
+        [imageBase64]="parent().mediaUrl()"
+        format="png"
+        (imageCropped)="imageCropped($event)"
+        (imageLoaded)="imageLoaded($event)"
+></image-cropper>
+<input type="file" (change)="fileChangeEvent($event)"/>

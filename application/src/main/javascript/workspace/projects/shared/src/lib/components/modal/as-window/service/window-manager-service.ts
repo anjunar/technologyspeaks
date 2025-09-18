@@ -5,6 +5,10 @@ export interface WindowConfig {
     title: string;
     component: Type<unknown>;
     inputs?: Record<string, unknown>;
+    maximizable? : boolean;
+    resizeable? : boolean
+    draggable? : boolean
+    centered? : boolean
 }
 
 @Injectable({ providedIn: 'root' })

@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, input, ViewEncapsulation} from '@angular/core';
+import {Component, computed, ElementRef, inject, input, ViewEncapsulation} from '@angular/core';
 import {WindowConfig, WindowManagerService} from "./service/window-manager-service";
 import {NgComponentOutlet} from "@angular/common";
 
@@ -15,15 +15,30 @@ export class AsWindow {
 
     element = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>).nativeElement
 
-    resizable = input(true)
-
-    maximized = input(false)
-
-    draggable = input(true)
-
     window = input.required<WindowConfig>();
 
+    resizable = computed(() => this.window()?.resizeable || true)
+    maximized = computed(() => this.window()?.maximizable || false)
+    draggable = computed(() => this.window()?.draggable || true)
+    centered = computed(() => this.window()?.centered || true)
+
     manager = inject(WindowManagerService);
+
+    constructor() {
+        setTimeout(() => this.centerWindow(), 0);
+    }
+
+    private centerWindow() {
+        const parent = this.element.parentElement;
+        if (!parent) return;
+
+        const parentRect = parent.getBoundingClientRect();
+        const windowRect = this.element.getBoundingClientRect();
+
+        this.element.style.position = 'absolute';
+        this.element.style.left = `${((parentRect.width / 2) - (windowRect.width / 2))}px`;
+        this.element.style.top = `${((parentRect.height / 2) - (windowRect.height / 2))}px`;
+    }
 
     close() {
         this.manager.close(this.window().id);

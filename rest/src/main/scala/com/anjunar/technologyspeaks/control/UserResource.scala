@@ -31,8 +31,8 @@ object UserResource {
     @GET
     @Produces(Array(MediaType.APPLICATION_JSON))
     @RolesAllowed(Array("Guest", "User", "Administrator"))
-    def read(@Context credential : Credential, @PathParam("id") entity: User): CompletableFuture[User] = {
-      CompletableFuture.completedFuture(EntityGraph.complete(entity, classOf[User], credential.user))
+    def read(@PathParam("id") entity: User): CompletableFuture[User] = {
+      CompletableFuture.completedFuture(entity)
     }
 
   }

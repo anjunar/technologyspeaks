@@ -1,0 +1,7 @@
+as-image-process {
+    display: block;
+    width: 300px;
+    height: 200px;
+
+    --cropper-overlay-color : var(--color-background-primary);
+}

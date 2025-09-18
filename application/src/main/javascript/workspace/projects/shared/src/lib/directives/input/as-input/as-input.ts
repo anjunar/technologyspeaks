@@ -44,7 +44,7 @@ export class AsInput extends AsControl implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.form.removeControl(this.inputName())
+        this.form.removeControl(this.inputName(), this)
     }
 
     registerOnChange(fn: any): void {

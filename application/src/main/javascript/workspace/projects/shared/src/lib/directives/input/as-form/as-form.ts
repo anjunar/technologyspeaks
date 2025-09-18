@@ -35,7 +35,7 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
 
     el = inject(ElementRef<HTMLFormElement | HTMLFieldSetElement>).nativeElement
 
-    controls: Map<string, AsControl> = new Map()
+    controls: Map<string, AsControl[]> = new Map()
 
     set type(value: string) {}
 
@@ -47,12 +47,17 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         if (this.form) {
-            this.form.removeControl(this.formName())
+            this.form.removeControl(this.formName(), this)
         }
     }
 
     addControl(name: string, control: AsControl) {
-        this.controls.set(name, control)
+        let controls = this.controls.get(name);
+        if (controls) {
+            controls.push(control)
+        } else {
+            this.controls.set(name, [control])
+        }
         let metaSignal : MetaSignal<any> = this.model()[name];
         let value = metaSignal();
         control.writeValue(value)
@@ -60,10 +65,13 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
         control.registerOnChange(this.onChangeListener)
     }
 
-    removeControl(name : string) {
-        let control = this.controls.get(name);
-        control.unRegisterOnChange(this.onChangeListener)
-        this.controls.delete(name)
+    removeControl(name : string, control: AsControl) {
+        let controls = this.controls.get(name);
+        let indexOf = controls.indexOf(control);
+        if (indexOf > -1) {
+            controls[indexOf].unRegisterOnChange(this.onChangeListener)
+            controls.splice(indexOf, 1)
+        }
     }
 
     override get value(): any {
@@ -94,7 +102,7 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
     }
 
     override get dirty(): boolean {
-        return Array.from(this.controls.values()).some(control => control.dirty)
+        return Array.from(this.controls.values()).some(controls => controls.some(control => control.dirty))
     }
 
     override get pristine(): boolean {
@@ -107,8 +115,10 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
 
     override get errors(): ValidationErrors | null {
         const merged: ValidationErrors = {};
-        this.controls.forEach((control, name) => {
-            if (control.errors) merged[name] = control.errors;
+        this.controls.forEach((controls, name) => {
+            controls.forEach(control => {
+                if (control.errors) merged[name] = control.errors;
+            })
         });
         return Object.keys(merged).length ? merged : null;
     }

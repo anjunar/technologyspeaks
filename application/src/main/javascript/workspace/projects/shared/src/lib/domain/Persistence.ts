@@ -24,6 +24,8 @@ import Sort from "./container/Sort";
 import TupleTable from "./container/TupleTable";
 import PropDescriptor from "./descriptors/PropDescriptor";
 import {Meta} from "./container/ActiveObject";
+import Media from "./types/Media";
+import Thumbnail from "./types/Thumbnail";
 
 export function init() {
 
@@ -47,6 +49,9 @@ export function init() {
     registerEntity(EmailValidator)
     registerEntity(PastValidator)
     registerEntity(PatternValidator)
+
+    registerEntity(Media)
+    registerEntity(Thumbnail)
 
     registerConverter(Date, new DateConverter())
     registerConverter(LocalDateTime, new LocalDateTimeConverter())

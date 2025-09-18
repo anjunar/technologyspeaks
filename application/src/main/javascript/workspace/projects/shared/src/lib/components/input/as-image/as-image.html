@@ -1,0 +1,8 @@
+<div class="container" (click)="openWindow()">
+    @if (image()?.thumbnail()) {
+        <img [src]="thumbnailUrl()">
+    } @else {
+        <span>Click here...</span>
+    }
+</div>
+

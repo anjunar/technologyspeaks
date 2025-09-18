@@ -1,9 +1,12 @@
-import ActiveObject from "../domain/container/ActiveObject";
+import ActiveObject, {Constructor} from "../domain/container/ActiveObject";
 import {match} from "../pattern-match/PatternMatching";
 import ObjectDescriptor from "../domain/descriptors/ObjectDescriptor";
 import CollectionDescriptor from "../domain/descriptors/CollectionDescriptor";
 import {NodeDescriptor} from "../domain/descriptors";
 import PropDescriptor from "../domain/descriptors/PropDescriptor";
+import JSONDeserializer from "./JSONDeserializer";
+import JSONSerializer from "./JSONSerializer";
+import {findType} from "./Registry";
 
 export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: PropDescriptor) {
 
@@ -11,6 +14,17 @@ export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: P
         object.descriptor = schema
         object.instance = prop
         object = object()
+    }
+
+    if (object instanceof Object) {
+        object.$instance = <E>(ctor : Constructor<E>) : E => {
+            let type = findType(ctor);
+            let result = JSONDeserializer<E>({ $type : type });
+            let objectDescriptor = schema as ObjectDescriptor
+            let nodeDescriptor = Object.values(objectDescriptor.properties).find(node => node.$type === type);
+            traverseObjectGraph(result, nodeDescriptor, prop)
+            return result
+        }
     }
 
     Object.entries(object).filter(([key, value]) => value).forEach(([key, value]) => {
@@ -41,4 +55,17 @@ export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: P
         }
     })
 
+}
+
+export const Mapper = {
+    domain(object : any) : any {
+        let deserialized : any = JSONDeserializer(object);
+        if (deserialized.$meta) {
+            traverseObjectGraph(deserialized, deserialized.$meta.descriptors, deserialized.$meta.instance)
+        }
+        return deserialized
+    },
+    toJson(object : any) : any  {
+        return JSONSerializer(object)
+    }
 }

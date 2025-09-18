@@ -1,30 +1,16 @@
-import {Component, effect, inject, model, ViewEncapsulation} from '@angular/core';
+import {Component, model, ViewEncapsulation} from '@angular/core';
 import User from "../../../domain/control/User";
-import {AsForm, AsInput, AsInputContainer, AsWindow} from "shared";
-import {WindowManagerService} from "shared";
+import {AsForm, AsImage, AsInput, AsInputContainer} from "shared";
 
 @Component({
     selector: 'user-page',
-    imports: [AsForm, AsInput, AsInputContainer],
+    imports: [AsForm, AsInput, AsInputContainer, AsImage],
     templateUrl: './user-page.html',
     styleUrl: './user-page.css',
     encapsulation: ViewEncapsulation.None
 })
 export class UserPage {
 
-    windowService = inject(WindowManagerService)
-
     user = model<User>()
-
-    openWindow() {
-        this.windowService.open({
-            id : "test",
-            title : "test",
-            component : UserPage,
-            inputs : {
-                user : this.user()
-            }
-        })
-    }
 
 }
