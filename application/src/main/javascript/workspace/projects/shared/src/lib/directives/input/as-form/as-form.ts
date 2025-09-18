@@ -1,6 +1,6 @@
 import {Directive, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
-import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
-import {AsControl} from "../../as-control";
+import {ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {AsControl, AsControlForm, AsControlValueAccessor} from "../../as-control";
 import {MetaSignal} from "../../../meta-signal/meta-signal";
 
 @Directive({
@@ -18,7 +18,7 @@ import {MetaSignal} from "../../../meta-signal/meta-signal";
         }
     ]
 })
-export class AsForm extends AsControl implements OnInit, OnDestroy {
+export class AsForm extends AsControlForm implements AsControlValueAccessor, OnInit, OnDestroy {
 
     onChange: ((name : string, value: any) => void)[] = []
     onTouched: (() => void)[] = []
@@ -37,7 +37,9 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
 
     controls: Map<string, AsControl[]> = new Map()
 
-    set type(value: string) {}
+    controlAdded(): void {
+
+    }
 
     ngOnInit(): void {
         if (this.form) {
@@ -60,16 +62,19 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
         }
         let metaSignal : MetaSignal<any> = this.model()[name];
         let value = metaSignal();
-        control.writeValue(value)
-        control.type = metaSignal.descriptor.widget
-        control.registerOnChange(this.onChangeListener)
+        let valueAccessor = control.valueAccessor;
+        control.descriptor = metaSignal.descriptor
+        control.instance = metaSignal.instance
+        valueAccessor.writeValue(value)
+        valueAccessor.registerOnChange(this.onChangeListener)
+        control.controlAdded()
     }
 
     removeControl(name : string, control: AsControl) {
         let controls = this.controls.get(name);
         let indexOf = controls.indexOf(control);
         if (indexOf > -1) {
-            controls[indexOf].unRegisterOnChange(this.onChangeListener)
+            controls[indexOf].valueAccessor.unRegisterOnChange(this.onChangeListener)
             controls.splice(indexOf, 1)
         }
     }
@@ -131,4 +136,5 @@ export class AsForm extends AsControl implements OnInit, OnDestroy {
         return this.formName() ? [this.formName()] : null;
     }
 
+    override valueAccessor: AsControlValueAccessor = this
 }

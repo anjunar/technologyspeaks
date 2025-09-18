@@ -1,7 +1,7 @@
 import {Directive, ElementRef, inject, input, OnDestroy, OnInit} from '@angular/core';
 import {AsForm} from "../as-form/as-form";
 import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
-import {AsControl} from "../../as-control";
+import {AsControl, AsControlInput, AsControlValueAccessor} from "../../as-control";
 
 @Directive({
     selector: 'input',
@@ -18,7 +18,7 @@ import {AsControl} from "../../as-control";
         }
     ]
 })
-export class AsInput extends AsControl implements OnInit, OnDestroy {
+export class AsInput extends AsControlInput implements AsControlValueAccessor, OnInit, OnDestroy {
 
     onChange: ((name : string, value: any) => void)[] = []
     onTouched: (() => void)[] = []
@@ -35,8 +35,17 @@ export class AsInput extends AsControl implements OnInit, OnDestroy {
         this.el.addEventListener("blur", () => this.onTouched.forEach(callback => callback()))
     }
 
-    set type(value: string) {
-        this.el.type = value
+    get placeholder() {
+        return this.el.placeholder
+    }
+
+    set placeholder(value: string) {
+        this.el.placeholder = value
+    }
+
+    controlAdded(): void {
+        this.el.type = this.descriptor.widget
+        this.placeholder = this.descriptor.title
     }
 
     ngOnInit(): void {
@@ -109,4 +118,5 @@ export class AsInput extends AsControl implements OnInit, OnDestroy {
         return this.inputName() ? [this.inputName()] : null;
     }
 
+    override valueAccessor: AsControlValueAccessor = this
 }

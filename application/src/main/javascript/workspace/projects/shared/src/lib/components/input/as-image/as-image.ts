@@ -9,8 +9,8 @@ import {
     signal,
     ViewEncapsulation
 } from '@angular/core';
-import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
-import {AsControl} from "../../../directives/as-control";
+import {ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {AsControl, AsControlInput, AsControlValueAccessor} from "../../../directives/as-control";
 import {AsForm} from "../../../directives/input/as-form/as-form";
 import Media from "../../../domain/types/Media";
 import {Thumbnail, WindowManagerService} from "shared";
@@ -36,7 +36,7 @@ import {CropperPosition} from "ngx-image-cropper";
         }
     ]
 })
-export class AsImage extends AsControl implements OnInit, OnDestroy {
+export class AsImage extends AsControlInput implements AsControlValueAccessor, OnInit, OnDestroy {
 
     onChange: ((name : string, value: any) => void)[] = []
     onTouched: (() => void)[] = []
@@ -45,11 +45,13 @@ export class AsImage extends AsControl implements OnInit, OnDestroy {
 
     windowService = inject(WindowManagerService)
 
-    cropper = model<CropperPosition>({x1 : 0, x2 : 0, y1 : 100, y2 : 100})
+    cropper = signal<CropperPosition>({x1 : 0, x2 : 0, y1 : 100, y2 : 100})
 
     inputName = input<string>("", {alias: "name"})
 
     image = signal<Media>(null)
+
+    text = signal("Please click here...")
 
     thumbnailUrl = computed(() => {
         let media = this.image();
@@ -70,6 +72,18 @@ export class AsImage extends AsControl implements OnInit, OnDestroy {
     default = signal<Media>(null)
 
     disabledImage = signal(false)
+
+    controlAdded(): void {
+        this.placeholder = this.descriptor.title
+    }
+
+    get placeholder() {
+        return this.text()
+    }
+
+    set placeholder(value: string) {
+        this.text.set(value)
+    }
 
     openWindow() {
         this.windowService.open({
@@ -155,5 +169,7 @@ export class AsImage extends AsControl implements OnInit, OnDestroy {
     override get path(): string[] | null {
         return this.inputName() ? [this.inputName()] : null;
     }
+
+    override valueAccessor: AsControlValueAccessor = this
 
 }

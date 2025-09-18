@@ -1,5 +1,6 @@
 import {Component, contentChild, effect, ElementRef, input, signal, ViewEncapsulation} from '@angular/core';
 import {NgControl} from "@angular/forms";
+import {AsControlInput} from "../../../directives/as-control";
 
 @Component({
     selector: 'as-input-container',
@@ -9,7 +10,7 @@ import {NgControl} from "@angular/forms";
 })
 export class AsInputContainer {
 
-    placeholder = input.required<string>()
+    placeholder = signal<string>("")
 
     control = contentChild(NgControl)
 
@@ -43,6 +44,7 @@ export class AsInputContainer {
                 }
             });
 
+            this.placeholder.set((asControl as AsControlInput).placeholder)
             this.isEmpty.set(!asControl.value);
             this.dirty.set(asControl.dirty);
 

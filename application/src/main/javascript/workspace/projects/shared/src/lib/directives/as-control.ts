@@ -1,23 +1,35 @@
 import {AbstractControl, ControlValueAccessor, NgControl} from "@angular/forms";
+import {NodeDescriptor, ObjectDescriptor} from "shared";
+import PropDescriptor from "../domain/descriptors/PropDescriptor";
 
-export abstract class AsControl extends NgControl implements ControlValueAccessor {
+export interface AsControlValueAccessor extends ControlValueAccessor {
+
+    writeDefaultValue(obj: any): void
+
+    unRegisterOnChange(fn: any): void
+
+}
+
+export abstract class AsControl extends NgControl  {
+
+    instance : PropDescriptor
+
+    abstract descriptor : NodeDescriptor
+
+    abstract controlAdded() : void
 
     override control: AbstractControl
 
-    abstract set type(value: string)
+    abstract override valueAccessor: AsControlValueAccessor
 
-    abstract writeValue(obj: any): void
+}
 
-    abstract writeDefaultValue(obj: any): void
+export abstract class AsControlInput extends AsControl {
+    override descriptor : NodeDescriptor
+    abstract get placeholder() : string
+    abstract set placeholder(value : string)
+}
 
-    abstract registerOnTouched(fn: any): void
-
-    abstract registerOnChange(fn: any): void
-
-    abstract unRegisterOnChange(fn: any): void
-
-    abstract setDisabledState?(isDisabled: boolean): void
-
-    override valueAccessor: ControlValueAccessor = this
-
+export abstract class AsControlForm extends AsControl {
+    override descriptor : ObjectDescriptor
 }

@@ -2,7 +2,7 @@
     @if (image()?.thumbnail()) {
         <img [src]="thumbnailUrl()">
     } @else {
-        <span>Click here...</span>
+        <span>{{placeholder}}</span>
     }
 </div>
 

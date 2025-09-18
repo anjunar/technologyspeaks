@@ -1,24 +1,21 @@
-import GeoPoint from "./GeoPoint";
-import {Basic, Entity, AbstractEntity} from "shared";
+import {AbstractEntity, Basic, Entity} from "shared";
+import {MetaSignal} from "../../../../../shared/src/lib/meta-signal/meta-signal";
 
 @Entity("Address")
 export default class Address extends AbstractEntity {
 
     override $type = "Address"
 
-    @Basic()
-    street: string
+    @Basic({signal: true})
+    street: MetaSignal<string>
 
-    @Basic()
-    number: string
+    @Basic({signal: true})
+    number: MetaSignal<string>
 
-    @Basic()
-    zipCode: string
+    @Basic({signal: true})
+    zipCode: MetaSignal<string>
 
-    @Basic()
-    country: string
-
-    @Basic()
-    point : GeoPoint
+    @Basic({signal: true})
+    country: MetaSignal<string>
 
 }
