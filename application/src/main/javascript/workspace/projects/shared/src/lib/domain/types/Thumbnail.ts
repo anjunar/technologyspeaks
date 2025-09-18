@@ -18,7 +18,4 @@ export default class Thumbnail extends AbstractEntity {
     @Basic({signal: true})
     name: MetaSignal<string>
 
-    @Basic()
-    position: CropperPosition
-
 }

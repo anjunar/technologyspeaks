@@ -4,6 +4,7 @@
         [maintainAspectRatio]="true"
         [aspectRatio]="1"
         [imageBase64]="parent().mediaUrl()"
+        [(cropper)]="parent().cropper"
         format="png"
         (imageCropped)="imageCropped($event)"
         (imageLoaded)="imageLoaded($event)"

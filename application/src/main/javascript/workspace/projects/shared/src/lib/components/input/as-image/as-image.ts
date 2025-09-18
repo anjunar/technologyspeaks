@@ -15,6 +15,7 @@ import {AsForm} from "../../../directives/input/as-form/as-form";
 import Media from "../../../domain/types/Media";
 import {Thumbnail, WindowManagerService} from "shared";
 import {AsImageProcess} from "./as-image-process/as-image-process";
+import {CropperPosition} from "ngx-image-cropper";
 
 @Component({
     selector: 'as-image',
@@ -43,6 +44,8 @@ export class AsImage extends AsControl implements OnInit, OnDestroy {
     form = inject(AsForm)
 
     windowService = inject(WindowManagerService)
+
+    cropper = model<CropperPosition>({x1 : 0, x2 : 0, y1 : 100, y2 : 100})
 
     inputName = input<string>("", {alias: "name"})
 
