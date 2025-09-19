@@ -112,7 +112,7 @@ class HATEOASEngine extends FSMEngine {
                 StateDef(
                   rel = "read",
                   name = "Read",
-                  view = "form",
+                  view = "full",
                   ref = classOf[User],
                   resource = classOf[UserResource.Read]
                 ), read => Seq(

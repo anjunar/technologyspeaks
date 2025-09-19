@@ -1,10 +1,10 @@
 import {Component, model, ViewEncapsulation} from '@angular/core';
 import User from "../../../domain/control/User";
-import {AsForm, AsImage, AsInput, AsInputContainer, AsResponse, AsSubmit} from "shared";
+import {AsForm, AsFormArray, AsImage, AsInput, AsInputContainer, AsResponse, AsSubmit} from "shared";
 
 @Component({
     selector: 'user-page',
-    imports: [AsForm, AsInput, AsSubmit, AsInputContainer, AsImage],
+    imports: [AsForm, AsInput, AsSubmit, AsInputContainer, AsImage, AsFormArray],
     templateUrl: './user-page.html',
     styleUrl: './user-page.css',
     encapsulation: ViewEncapsulation.None

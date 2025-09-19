@@ -2,6 +2,8 @@
  * Public API Surface of shared
  */
 
+export * from './lib/components/input/as-form-array/as-form-array'
+
 export * from './lib/components/input/as-image/as-image'
 
 export * from './lib/components/input/as-input-container/as-input-container'

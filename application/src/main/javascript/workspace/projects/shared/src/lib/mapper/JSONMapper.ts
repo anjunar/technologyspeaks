@@ -26,7 +26,12 @@ export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: P
             return result
         }
 
-        Object.entries(object).filter(([key, value]) => value).forEach(([key, value]) => {
+        Object.entries(object).filter(([key, value]) => value).forEach(([key, value] : [key : string, value : any]) => {
+
+            if (value instanceof Function && key !== "$instance") {
+                value = value()
+            }
+
             if (schema instanceof ObjectDescriptor) {
                 let node = schema.properties?.[key];
 

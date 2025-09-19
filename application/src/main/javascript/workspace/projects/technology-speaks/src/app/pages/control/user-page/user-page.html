@@ -7,6 +7,15 @@
             <as-input-container>
                 <input name="nickName"/>
             </as-input-container>
+            <form-array name="emails">
+                <ng-template let-item let-index="index">
+                    <fieldset [asModel]="item" [index]="index">
+                        <as-input-container>
+                            <input name="value"/>
+                        </as-input-container>
+                    </fieldset>
+                </ng-template>
+            </form-array>
             <fieldset name="info">
                 <as-input-container>
                     <input name="firstName"/>
@@ -18,7 +27,6 @@
                     <input name="birthDate"/>
                 </as-input-container>
             </fieldset>
-            <br/>
             <fieldset name="address">
                 <as-input-container>
                     <input name="street"/>

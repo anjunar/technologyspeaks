@@ -3,6 +3,7 @@ import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControl, AsControlForm, AsControlValueAccessor, AsFormGroup} from "../../as-control";
 import {MetaSignal} from "../../../meta-signal/meta-signal";
 import {ObjectDescriptor} from "../../../domain/descriptors";
+import {AsFormArray} from "../../../components/input/as-form-array/as-form-array";
 
 @Directive({
     selector: 'form[asModel], fieldset',
@@ -27,11 +28,13 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
         }
     };
 
+    index = input(0)
+
     model = model<any>({}, {alias: "asModel"})
 
     formName = input<string>(null, {alias: "name"})
 
-    form = inject(AsForm, {skipSelf: true, optional: true})
+    form : AsForm | AsFormArray = inject(AsFormArray, {optional : true}) || inject(AsForm, {skipSelf: true, optional: true})
 
     el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
         .nativeElement
@@ -52,15 +55,21 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
 
     ngOnInit(): void {
         if (this.form) {
-            this.form.addControl(this.formName(), this)
-            this.descriptor = this.form.descriptor.properties[this.formName()] as ObjectDescriptor
+            if (this.form instanceof AsForm) {
+                this.form.addControl(this.formName(), this)
+            }
+
+            if (this.form instanceof AsFormArray) {
+                this.form.insertControl(this.index(), this)
+            }
+
         } else {
             this.descriptor = this.model().$meta.descriptors
         }
     }
 
     ngOnDestroy(): void {
-        if (this.form) {
+        if (this.form instanceof AsForm) {
             this.form.removeControl(this.formName(), this)
         }
     }

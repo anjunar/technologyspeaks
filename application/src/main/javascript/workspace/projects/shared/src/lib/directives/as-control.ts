@@ -2,13 +2,13 @@ import {
     AbstractControl,
     AbstractControlOptions,
     AsyncValidatorFn,
-    ControlValueAccessor,
+    ControlValueAccessor, FormArray,
     FormControl,
     FormGroup,
     NgControl,
     ValidatorFn
 } from "@angular/forms";
-import {AsForm, NodeDescriptor, ObjectDescriptor} from "shared";
+import {AsForm, CollectionDescriptor, NodeDescriptor, ObjectDescriptor} from "shared";
 import PropDescriptor from "../domain/descriptors/PropDescriptor";
 import {Directive, inject, input, OnDestroy, OnInit} from "@angular/core";
 
@@ -121,7 +121,15 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 }
 
 export abstract class AsControlForm extends AsControl {
+
     override control: FormGroup = new AsFormGroup({})
+
+    override descriptor: ObjectDescriptor
+}
+
+export abstract class AsControlArrayForm extends AsControl {
+
+    override control: FormArray = new FormArray([])
 
     override descriptor: ObjectDescriptor
 }
