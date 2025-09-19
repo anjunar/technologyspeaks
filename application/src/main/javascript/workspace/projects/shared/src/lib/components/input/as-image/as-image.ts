@@ -1,19 +1,9 @@
-import {
-    Component,
-    computed, effect,
-    ElementRef,
-    inject,
-    input, model,
-    OnDestroy,
-    OnInit,
-    signal,
-    ViewEncapsulation
-} from '@angular/core';
-import {ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
-import {AsControl, AsControlInput, AsControlValueAccessor} from "../../../directives/as-control";
+import {Component, computed, effect, inject, input, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {AsControlInput, AsControlValueAccessor} from "../../../directives/as-control";
 import {AsForm} from "../../../directives/input/as-form/as-form";
 import Media from "../../../domain/types/Media";
-import {Thumbnail, WindowManagerService} from "shared";
+import {WindowManagerService} from "shared";
 import {AsImageProcess} from "./as-image-process/as-image-process";
 import {CropperPosition} from "ngx-image-cropper";
 
@@ -38,14 +28,14 @@ import {CropperPosition} from "ngx-image-cropper";
 })
 export class AsImage extends AsControlInput implements AsControlValueAccessor, OnInit, OnDestroy {
 
-    onChange: ((name : string, value: any) => void)[] = []
+    onChange: ((name: string, value: any) => void)[] = []
     onTouched: (() => void)[] = []
 
     form = inject(AsForm)
 
     windowService = inject(WindowManagerService)
 
-    cropper = signal<CropperPosition>({x1 : 0, x2 : 0, y1 : 100, y2 : 100})
+    cropper = signal<CropperPosition>({x1: 0, x2: 0, y1: 100, y2: 100})
 
     inputName = input<string>("", {alias: "name"})
 
@@ -95,11 +85,11 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor, O
 
     openWindow() {
         this.windowService.open({
-            id : "image-processor",
-            title : "Image Processor",
-            component : AsImageProcess,
-            inputs : {
-                parent : this
+            id: "image-processor",
+            title: "Image Processor",
+            component: AsImageProcess,
+            inputs: {
+                parent: this
             }
         })
     }
@@ -119,7 +109,8 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor, O
         this.form.removeControl(this.inputName(), this)
     }
 
-    set type(value: string) {}
+    set type(value: string) {
+    }
 
     registerOnChange(fn: any): void {
         this.onChange.push(fn)
@@ -159,7 +150,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor, O
     }
 
     override get pristine(): boolean {
-        return this.image().data === this.default().data
+        return this.image()?.data === this.default()?.data
     }
 
     override get dirty(): boolean {
@@ -168,10 +159,6 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor, O
 
     override get errors(): ValidationErrors {
         return {}
-    }
-
-    viewToModelUpdate(newValue: any): void {
-        this.writeValue(newValue)
     }
 
     override get path(): string[] | null {

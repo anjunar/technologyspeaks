@@ -29,6 +29,10 @@ html[data-theme="light"] {
 
     --color-selected: var(--color-olive-500);
     --color-reflective: var(--color-olive-200);
+
+    input {
+        color-scheme: light;
+    }
 }
 
 html[data-theme="dark"] {
@@ -59,6 +63,10 @@ html[data-theme="dark"] {
 
     --color-selected: var(--color-olive-500);
     --color-reflective: var(--color-olive-600);
+
+    input {
+        color-scheme: dark;
+    }
 }
 
 @font-face {
@@ -97,6 +105,25 @@ iframe {
 
 input {
     font-size: 16px;
+
+
+    &::placeholder {
+        color: var(--color-text);
+        opacity: 1;
+    }
+
+    &[disabled]::placeholder {
+        opacity: 0.5;
+    }
+
+    &[type=date] {
+
+
+
+        &[disabled] {
+            opacity: 0.5;
+        }
+    }
 }
 
 select {

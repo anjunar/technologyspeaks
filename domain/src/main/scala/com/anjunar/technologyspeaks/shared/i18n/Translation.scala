@@ -9,11 +9,11 @@ import scala.compiletime.uninitialized
 
 class Translation {
 
-  @PropertyDescriptor(title = "Text", writeable = true, naming = true)
+  @PropertyDescriptor(title = "Text", naming = true)
   @Basic
   var text : String = uninitialized
 
-  @PropertyDescriptor(title = "Language", writeable = true, naming = true)
+  @PropertyDescriptor(title = "Language", naming = true)
   @Basic
   var locale : Locale = uninitialized
   

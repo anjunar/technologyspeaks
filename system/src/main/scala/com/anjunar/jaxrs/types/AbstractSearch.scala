@@ -9,17 +9,17 @@ import java.util
 
 abstract class AbstractSearch {
 
-  @PropertyDescriptor(title = "Sort", writeable = true, hidden = true)
+  @PropertyDescriptor(title = "Sort", hidden = true)
   @RestSort(classOf[GenericSortProvider[?]])
   @QueryParam("sort")
   val sort: util.List[String] = new util.ArrayList[String]()
 
-  @PropertyDescriptor(title = "Index", writeable = true, hidden = true)
+  @PropertyDescriptor(title = "Index", hidden = true)
   @QueryParam("index")
   @DefaultValue("0")  
   var index = 0
 
-  @PropertyDescriptor(title = "Limit", writeable = true, hidden = true)
+  @PropertyDescriptor(title = "Limit", hidden = true)
   @QueryParam("limit")
   @DefaultValue("5")
   var limit = 5

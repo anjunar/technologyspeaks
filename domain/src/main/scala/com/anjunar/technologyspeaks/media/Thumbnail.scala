@@ -16,16 +16,16 @@ import scala.compiletime.uninitialized
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 class Thumbnail extends AbstractEntity with File {
 
-  @PropertyDescriptor(title = "Name", naming = true, writeable = true)
+  @PropertyDescriptor(title = "Name", naming = true)
   @Basic
   var name: String = uninitialized
 
-  @PropertyDescriptor(title = "Content Type", writeable = true)
+  @PropertyDescriptor(title = "Content Type")
   @Basic
   @NotEmpty
   var contentType: String = uninitialized
 
-  @PropertyDescriptor(title = "Data", writeable = true)
+  @PropertyDescriptor(title = "Data")
   @NotEmpty
   var data: Array[Byte] = uninitialized
 

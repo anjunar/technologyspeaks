@@ -262,7 +262,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
             case aClass: Class[?] if classOf[util.Set[?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.HashSet[AnyRef]())
             case aClass: Class[?] if classOf[util.List[?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.ArrayList[AnyRef]())
             case aClass: Class[?] if classOf[util.Map[?, ?]].isAssignableFrom(aClass) => CompletableFuture.completedFuture(new util.HashMap[AnyRef, AnyRef]())
-            case _ => null
+            case _ => CompletableFuture.completedFuture(null)
           }
         }
 

@@ -14,11 +14,11 @@ import scala.compiletime.uninitialized
 @Entity
 class I18n extends AbstractEntity {
 
-  @PropertyDescriptor(title = "Text", writeable = true, naming = true)
+  @PropertyDescriptor(title = "Text", naming = true)
   @Basic
   var text: String = uninitialized
 
-  @PropertyDescriptor(title = "Translations", writeable = true)
+  @PropertyDescriptor(title = "Translations")
   @Column(columnDefinition = "jsonb")
   @Type(classOf[TranslationType])
   val translations: util.Set[Translation] = new util.HashSet[Translation]()

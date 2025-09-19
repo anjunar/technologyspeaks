@@ -31,7 +31,10 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor, O
 
     constructor() {
         super()
-        this.el.addEventListener("input", () => this.onChange.forEach(callback => callback(this.inputName(), this.el.value)))
+        this.el.addEventListener("input", () => {
+            this.onChange.forEach(callback => callback(this.inputName(), this.el.value))
+            this.control.setValue(this.el.value, { emitEvent: true });
+        })
         this.el.addEventListener("blur", () => this.onTouched.forEach(callback => callback()))
     }
 
@@ -107,11 +110,12 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor, O
         if (this.el.validity.tooShort) e['minlength'] = { requiredLength: this.el.minLength, actualLength: this.el.value.length };
         if (this.el.validity.tooLong) e['maxlength'] = { requiredLength: this.el.maxLength, actualLength: this.el.value.length };
         if (this.el.validity.typeMismatch) e['email'] = true;
-        return Object.keys(e).length ? e : null;
-    }
 
-    viewToModelUpdate(newValue: any): void {
-        this.writeValue(newValue)
+        if (this.control.errors) {
+            Object.assign(e, this.control.errors);
+        }
+
+        return Object.keys(e).length ? e : null;
     }
 
     override get path(): string[] | null {

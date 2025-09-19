@@ -6,10 +6,10 @@ import scala.compiletime.uninitialized
 
 class Sort {
 
-  @PropertyDescriptor(title = "Property", writeable = true)
+  @PropertyDescriptor(title = "Property")
   var property : String = uninitialized
 
-  @PropertyDescriptor(title = "Value", writeable = true)
+  @PropertyDescriptor(title = "Value")
   var value : String = uninitialized
 
 }

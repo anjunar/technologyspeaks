@@ -1,5 +1,6 @@
 package com.anjunar.scala.mapper
 import com.anjunar.scala.mapper.exceptions.{ValidationException, ValidationViolation}
+import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 
 import java.lang.annotation.Annotation
@@ -9,10 +10,8 @@ import scala.collection.mutable.ListBuffer
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 
-trait EntitySecurity {
-  this: java.lang.Object =>
-
-  var callback: Callback = uninitialized
+@ApplicationScoped
+class EntitySecurity {
 
   def checkRestrictionAndViolations(annotations: Array[Annotation], context: Context, value: AnyRef) = {
     val path = new util.ArrayList[AnyRef]()
@@ -24,7 +23,7 @@ trait EntitySecurity {
     })
 
     if (violations.isEmpty) {
-      callback.call(value, annotations)
+      value
     } else {
       throw new ValidationException(violations.asJava)
     }
@@ -46,7 +45,7 @@ trait EntitySecurity {
       .map(violation => {
         val newPath = util.ArrayList[AnyRef](path)
         newPath.add(violation.getPropertyPath.toString)
-        new ValidationViolation(newPath, violation.getMessage, violation.getRootBeanClass)
+        new ValidationViolation(newPath, violation.getMessage, violation.getRootBeanClass.getSimpleName)
       })
   }
 }

@@ -9,7 +9,7 @@ import scala.compiletime.uninitialized
 
 class UserSearch extends AbstractSearch {
 
-  @PropertyDescriptor(title = "Text", writeable = true)
+  @PropertyDescriptor(title = "Text")
   @QueryParam("nickName")
   var nickName: String = uninitialized
 

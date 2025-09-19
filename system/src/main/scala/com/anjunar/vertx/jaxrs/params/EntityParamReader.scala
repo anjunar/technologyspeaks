@@ -1,7 +1,7 @@
 package com.anjunar.vertx.jaxrs.params
 
 import com.anjunar.scala.mapper.loader.JsonEntityLoader
-import com.anjunar.scala.mapper.{JsonContext, JsonMapper}
+import com.anjunar.scala.mapper.{EntitySecurity, JsonContext, JsonMapper}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.anjunar.scala.universe.members.ResolvedMethod
 import com.anjunar.vertx.engine.{DynamicSchemaProvider, EntitySchemaDef, RequestContext, SchemaProvider}
@@ -35,6 +35,9 @@ class EntityParamReader extends ParamReader {
   
   @Inject
   var validator : Validator = uninitialized
+  
+  @Inject
+  var entitySecurity : EntitySecurity = uninitialized
 
   override def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean = {
     val blackList : Set[Class[? <: Annotation]] = Set(classOf[QueryParam], classOf[BeanParam], classOf[PathParam], classOf[MatrixParam], classOf[Context])
@@ -68,6 +71,9 @@ class EntityParamReader extends ParamReader {
                 val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, entityLoader)
 
                 jsonMapper.toJava(jsonObject, entity, resolvedClass, context)
+                  .thenApply(entity => {
+                    this.entitySecurity.checkRestrictionAndViolations(annotations, context, entity)
+                  })
               })
 
           })

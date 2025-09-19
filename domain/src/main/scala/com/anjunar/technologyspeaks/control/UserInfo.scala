@@ -9,7 +9,7 @@ import com.anjunar.jpa.RepositoryContext
 import com.anjunar.security.SecurityUser
 import com.anjunar.vertx.engine.{EntitySchemaDef, OwnerRule, RequestContext, SchemaProvider, SchemaView, VisibilityRule}
 import jakarta.persistence.*
-import jakarta.validation.constraints.{NotBlank, NotNull, Past, Size}
+import jakarta.validation.constraints.{NotBlank, NotEmpty, NotNull, Past, Size}
 import jakarta.ws.rs.FormParam
 
 import java.time.LocalDate
@@ -32,16 +32,18 @@ class UserInfo extends AbstractEntity with OwnerProvider {
   @PropertyDescriptor(title = "First Name", naming = true)
   @Basic
   @FormParam("firstName")
+  @NotEmpty
   var firstName : String = uninitialized
   
   @Size(min = 3, max = 80)
   @PropertyDescriptor(title = "Last Name", naming = true)
   @Basic
   @FormParam("lastName")
+  @NotEmpty
   var lastName : String = uninitialized
   
   @ManyToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[Media])
-  @PropertyDescriptor(title = "Picture", widget = "file", writeable = true)
+  @PropertyDescriptor(title = "Picture", widget = "file")
   @FormParam("image")
   var image : Media = uninitialized
   
@@ -49,6 +51,7 @@ class UserInfo extends AbstractEntity with OwnerProvider {
   @PropertyDescriptor(title = "Birthdate")
   @Basic
   @FormParam("birthDate")
+  @NotEmpty
   var birthDate: LocalDate = uninitialized
 
   override def owner: SecurityUser = user

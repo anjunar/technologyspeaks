@@ -19,38 +19,41 @@ export default function JSONSerializer(entity: any) : any {
                     object = object()
                 }
 
-                if (object instanceof Array) {
-                    prev[current.name] = object.map(item => JSONSerializer(item))
-                } else {
-                    if (object instanceof Object) {
-                        let converter = findConverter(current.type);
-                        if (converter) {
-                            prev[current.name] = converter.toJson(object)
-                        } else {
-                            if (object.$type) {
-                                prev[current.name] = JSONSerializer(object)
-                            } else {
-                                prev[current.name] = Object.entries(object)
-                                    .reduce((prev, [key, value]) => {
-                                        if (value instanceof Array) {
-                                            prev[key] = value.map(item => JSONSerializer(item))
-                                            return prev
-                                        } else {
-                                            prev[key] = JSONSerializer(value)
-                                            return prev
-                                        }
-                                    }, {} as any)
-                            }
-                        }
+                if (object !== null) {
+                    if (object instanceof Array) {
+                        prev[current.name] = object.map(item => JSONSerializer(item))
                     } else {
-                        let converter = findConverter(current.type);
-                        if (converter) {
-                            prev[current.name] = converter.toJson(object)
+                        if (object instanceof Object) {
+                            let converter = findConverter(current.type);
+                            if (converter) {
+                                prev[current.name] = converter.toJson(object)
+                            } else {
+                                if (object.$type) {
+                                    prev[current.name] = JSONSerializer(object)
+                                } else {
+                                    prev[current.name] = Object.entries(object)
+                                        .reduce((prev, [key, value]) => {
+                                            if (value instanceof Array) {
+                                                prev[key] = value.map(item => JSONSerializer(item))
+                                                return prev
+                                            } else {
+                                                prev[key] = JSONSerializer(value)
+                                                return prev
+                                            }
+                                        }, {} as any)
+                                }
+                            }
                         } else {
-                            prev[current.name] = object
+                            let converter = findConverter(current.type);
+                            if (converter) {
+                                prev[current.name] = converter.toJson(object)
+                            } else {
+                                prev[current.name] = object
+                            }
                         }
                     }
                 }
+
                 return prev
             }, {} as any)
 

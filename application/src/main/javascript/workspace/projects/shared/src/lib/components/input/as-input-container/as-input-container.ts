@@ -27,7 +27,7 @@ export class AsInputContainer {
     constructor() {
         effect(() => {
             let asControl = this.control();
-            asControl.valueAccessor.registerOnChange((name: string, value: any) => {
+            asControl.control.valueChanges.subscribe((value: any) => {
                 this.isEmpty.set(!value);
                 this.dirty.set(asControl.dirty);
 
@@ -38,6 +38,7 @@ export class AsInputContainer {
                     if (e['minlength']) messages.push(`Minimum length: ${e['minlength'].requiredLength}`)
                     if (e['maxlength']) messages.push(`Maximum length: ${e['maxlength'].requiredLength}`)
                     if (e['email']) messages.push(`no valid Email`)
+                    if (e['server']) messages.push(e['server'].message)
                     this.errors.set(messages)
                 } else {
                     this.errors.set([])

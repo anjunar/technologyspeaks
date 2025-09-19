@@ -47,7 +47,7 @@ class ResourceMethodInvoker {
 
     compositeFuture
       .thenCompose(async => {
-        val parameters = futures.map(future => future.get())
+        val parameters = futures.map(future => future.join())
         state.method.invoke(instance, parameters *)
           .asInstanceOf[CompletableFuture[AnyRef]]
           .thenCompose(async => {

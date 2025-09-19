@@ -1,5 +1,7 @@
 package com.anjunar.vertx
 
+import com.anjunar.configuration.ObjectMapperContextResolver
+import com.anjunar.scala.mapper.exceptions.ValidationException
 import com.anjunar.vertx.fsm.FSMEngine
 import com.anjunar.vertx.jaxrs.ResourceMethodInvoker
 import com.google.common.collect.Lists
@@ -47,10 +49,24 @@ class VertxAPIEngine {
 
         if (state.rolesAllowed.exists(roles.contains)) {
           resourceMethodInvoker.invoke(handler, sessionHandler, state, transitions, instance.select(state.resource).get)
-            .exceptionally(exception => {
-              log.error(exception.getMessage, exception)
-              handler.fail(500, exception.getCause)
-              (exception.getMessage, "text/plain")
+            .exceptionally(exception => exception.getCause match {
+              case validation : ValidationException =>
+                try {
+                  val result = ObjectMapperContextResolver.objectMapper.writeValueAsString(validation.violations)
+                  handler.response()
+                    .setStatusCode(422)
+                    .putHeader("Content-Type", "application/json")
+                    .send(result)
+                  (result, "application/json")
+                } catch {
+                  case e : Exception =>
+                    log.error(exception.getMessage, exception)
+                    null
+                }
+              case _ =>
+                log.error(exception.getMessage, exception)
+                handler.fail(500, exception.getCause)
+                (exception.getMessage, "text/plain")
             })
             .thenApply((contentType, result) => {
               handler.response()

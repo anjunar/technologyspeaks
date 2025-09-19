@@ -22,11 +22,11 @@ import org.hibernate.annotations
 class HashTag extends AbstractEntity with EntityContext[HashTag] {
 
   @Basic
-  @PropertyDescriptor(title = "HashTag", writeable = true, naming = true)
+  @PropertyDescriptor(title = "HashTag", naming = true)
   var value : String = uninitialized
 
   @Basic
-  @PropertyDescriptor(title = "Description", writeable = true)
+  @PropertyDescriptor(title = "Description")
   var description : String = uninitialized
 
   @Basic

@@ -93,15 +93,15 @@ export default function JSONDeserializer<T>(object: any, buildObjectGraph : bool
                             instance[name] = converter.fromJson(object[name])
                         }
                     } else {
-                        if (element !== undefined) {
+                        if (element === undefined) {
                             if (property.configuration?.signal) {
-                                instance[name] = signal(element)
+                                instance[name] = signal(null)
                             } else {
                                 instance[name] = element
                             }
                         } else {
                             if (property.configuration?.signal) {
-                                instance[name] = signal("")
+                                instance[name] = signal(element)
                             } else {
                                 instance[name] = element
                             }

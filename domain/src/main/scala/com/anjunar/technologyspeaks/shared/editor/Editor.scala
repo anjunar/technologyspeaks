@@ -22,7 +22,7 @@ class Editor extends AbstractEntity {
   @FormParam("files")  
   val files: util.List[File] = new util.ArrayList[File]()
 
-  @PropertyDescriptor(title = "AST", writeable = true)
+  @PropertyDescriptor(title = "AST")
   @Column(columnDefinition = "jsonb")
   @Type(classOf[RootType])
   @Converter(classOf[RootConverter])

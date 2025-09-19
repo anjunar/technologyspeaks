@@ -1,7 +1,16 @@
-import {Directive, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
-import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
-import {AsControl, AsControlForm, AsControlValueAccessor} from "../../as-control";
+import {AfterViewInit, Directive, effect, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
+import {
+    AbstractControl,
+    FormControl,
+    FormGroup,
+    NG_VALUE_ACCESSOR,
+    NgControl,
+    ValidationErrors,
+    Validators
+} from "@angular/forms";
+import {AsControl, AsControlForm, AsControlInput, AsControlValueAccessor} from "../../as-control";
 import {MetaSignal} from "../../../meta-signal/meta-signal";
+import {ObjectDescriptor} from "../../../domain/descriptors";
 
 @Directive({
     selector: 'form[asModel], fieldset',
@@ -24,7 +33,9 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
     onTouched: (() => void)[] = []
 
     onChangeListener = (name: string, val: any) => {
-        this.model()[name].set(val)
+        if (this.model()) {
+            this.model()[name].set(val)
+        }
     };
 
     model = model<any>({}, {alias: "asModel"})
@@ -37,6 +48,17 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
 
     controls: Map<string, AsControl[]> = new Map()
 
+    constructor() {
+        super();
+        effect(() => {
+            if (this.model()) {
+                this.valueAccessor.setDisabledState(false)
+            } else {
+                this.valueAccessor.setDisabledState(true)
+            }
+        });
+    }
+
     controlAdded(): void {
 
     }
@@ -44,6 +66,9 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
     ngOnInit(): void {
         if (this.form) {
             this.form.addControl(this.formName(), this)
+            this.descriptor = this.form.descriptor.properties[this.formName()] as ObjectDescriptor
+        } else {
+            this.descriptor = this.model().$meta.descriptors
         }
     }
 
@@ -60,14 +85,39 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
         } else {
             this.controls.set(name, [control])
         }
-        let metaSignal: MetaSignal<any> = this.model()[name];
-        let value = metaSignal();
-        let valueAccessor = control.valueAccessor;
-        control.descriptor = metaSignal.descriptor
-        control.instance = metaSignal.instance
-        valueAccessor.writeValue(value)
-        valueAccessor.registerOnChange(this.onChangeListener)
+
+        let model = this.model();
+        control.descriptor = this.descriptor.properties[name]
+
+        if (model) {
+            let metaSignal: MetaSignal<any> = model[name];
+            let valueAccessor = control.valueAccessor;
+            valueAccessor.registerOnChange(this.onChangeListener)
+
+            if (metaSignal) {
+                let value = metaSignal();
+                control.instance = metaSignal.instance
+                valueAccessor.writeValue(value)
+                valueAccessor.writeDefaultValue(value)
+            }
+        }
+
+        if (control instanceof AsControlForm) {
+            let formGroup = new FormGroup({});
+            control.control = formGroup
+            this.control.addControl(name, formGroup);
+        }
+
+        if (control instanceof AsControlInput) {
+            const formControl = new FormControl(
+                { value: control.value, disabled: control.disabled }, Validators.required
+            );
+            control.control = formControl
+            this.control.addControl(name, formControl);
+        }
+
         control.controlAdded()
+
     }
 
     removeControl(name: string, control: AsControl) {
@@ -105,6 +155,11 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
 
     setDisabledState?(isDisabled: boolean): void {
         this.el.disabled = isDisabled
+        for (const controls of this.controls.values()) {
+            for (const control of controls) {
+                control.valueAccessor.setDisabledState(isDisabled)
+            }
+        }
     }
 
     override get dirty(): boolean {
@@ -113,10 +168,6 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
 
     override get pristine(): boolean {
         return !this.dirty
-    }
-
-    viewToModelUpdate(newValue: any): void {
-        this.writeValue(newValue)
     }
 
     override get errors(): ValidationErrors | null {

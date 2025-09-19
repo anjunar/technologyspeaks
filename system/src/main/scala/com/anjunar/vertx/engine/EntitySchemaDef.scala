@@ -36,6 +36,8 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
             view: String = "full"): CompletionStage[SchemaBuilder] = {
 
     val builder = new SchemaBuilder()
+    
+    val model = DescriptionIntrospector.createWithType(entityClass)
 
     val futures = mutable.ArrayBuffer[CompletionStage[Void]]()
 
@@ -44,7 +46,18 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
         .forInstance(entity, entity.getClass.asInstanceOf[Class[E]], (builder: EntitySchemaBuilder[E]) => {
 
           val visibilityFutures = props.map(p => p.name -> p.visibility.isVisible(entity, p.name, ctx, sessionFactory).toCompletableFuture).toMap
-          val writeableFutures = props.map(p => p.name -> p.visibility.isWriteable(entity, p.name, ctx, sessionFactory).toCompletableFuture).toMap
+          val writeableFutures = props.map(p => p.name -> {
+            p.visibility.isWriteable(entity, p.name, ctx, sessionFactory)
+              .thenApply(isWriteable => {
+                val descriptorProperty = model.findProperty(p.name)
+                descriptorProperty.propertyType.raw match {
+                  case clazz : Class[?] if classOf[util.Collection[?]].isAssignableFrom(clazz) => isWriteable
+                  case clazz : Class[?] if classOf[util.Map[?,?]].isAssignableFrom(clazz) => isWriteable
+                  case _ => descriptorProperty.isWriteable && isWriteable
+                }
+              })
+              .toCompletableFuture
+          }).toMap
 
           CompletableFuture.allOf((visibilityFutures.values ++ writeableFutures.values).toSeq *)
             .thenAccept(_ => {
