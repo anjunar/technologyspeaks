@@ -34,7 +34,7 @@ export class AsSubmit {
             }
 
             const [segment, ...rest] = path;
-            const controls = form.controls.get(segment);
+            const controls = Object.values(form.control.controls)
 
             if (!controls) {
                 return;
@@ -42,7 +42,7 @@ export class AsSubmit {
 
             for (const c of controls) {
                 if (rest.length === 0) {
-                    const formControl = (c.valueAccessor as any).control as AbstractControl | undefined;
+                    const formControl = c
                     if (formControl) {
                         const existing = formControl.errors || {};
                         formControl.setErrors({
