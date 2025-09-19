@@ -1,5 +1,5 @@
 import {Component, computed, effect, inject, input, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
-import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {AbstractControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControlInput, AsControlValueAccessor} from "../../../directives/as-control";
 import {AsForm} from "../../../directives/input/as-form/as-form";
 import Media from "../../../domain/types/Media";
@@ -26,18 +26,11 @@ import {CropperPosition} from "ngx-image-cropper";
         }
     ]
 })
-export class AsImage extends AsControlInput implements AsControlValueAccessor, OnInit, OnDestroy {
-
-    onChange: ((name: string, value: any) => void)[] = []
-    onTouched: (() => void)[] = []
-
-    form = inject(AsForm)
+export class AsImage extends AsControlInput implements AsControlValueAccessor {
 
     windowService = inject(WindowManagerService)
 
     cropper = signal<CropperPosition>({x1: 0, x2: 0, y1: 100, y2: 100})
-
-    inputName = input<string>("", {alias: "name"})
 
     image = signal<Media>(null)
 
@@ -99,30 +92,6 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor, O
             return `data:${type};base64,${data}`
         }
         return ""
-    }
-
-    ngOnInit(): void {
-        this.form.addControl(this.inputName(), this)
-    }
-
-    ngOnDestroy(): void {
-        this.form.removeControl(this.inputName(), this)
-    }
-
-    set type(value: string) {
-    }
-
-    registerOnChange(fn: any): void {
-        this.onChange.push(fn)
-    }
-
-    unRegisterOnChange(fn: any): void {
-        let indexOf = this.onChange.indexOf(fn);
-        this.onChange.splice(indexOf, 1)
-    }
-
-    registerOnTouched(fn: any): void {
-        this.onTouched.push(fn)
     }
 
     setDisabledState(isDisabled: boolean): void {

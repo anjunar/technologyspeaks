@@ -52,7 +52,7 @@ trait EntityContext[E <: EntityContext[E]] extends IdProvider {
           path.add(invoked.asInstanceOf[AnyRef])
         }
 
-        new ValidationViolation(path, violation.getMessage, violation.getRootBeanClass)
+        new ValidationViolation(path, violation.getMessage, violation.getRootBeanClass.getSimpleName)
       })
       .toList
 

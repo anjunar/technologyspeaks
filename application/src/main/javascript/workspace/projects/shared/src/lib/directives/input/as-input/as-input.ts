@@ -1,6 +1,6 @@
 import {Directive, ElementRef, inject, input, OnDestroy, OnInit} from '@angular/core';
 import {AsForm} from "../as-form/as-form";
-import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {AbstractControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControl, AsControlInput, AsControlValueAccessor} from "../../as-control";
 
 @Directive({
@@ -18,16 +18,9 @@ import {AsControl, AsControlInput, AsControlValueAccessor} from "../../as-contro
         }
     ]
 })
-export class AsInput extends AsControlInput implements AsControlValueAccessor, OnInit, OnDestroy {
+export class AsInput extends AsControlInput implements AsControlValueAccessor {
 
-    onChange: ((name : string, value: any) => void)[] = []
-    onTouched: (() => void)[] = []
-
-    el = inject(ElementRef<HTMLInputElement>).nativeElement
-
-    form = inject(AsForm)
-
-    inputName = input<string>("", {alias: "name"})
+    el = inject<ElementRef<HTMLInputElement>>(ElementRef<HTMLInputElement>).nativeElement
 
     constructor() {
         super()
@@ -81,27 +74,6 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor, O
 
         });
 
-    }
-
-    ngOnInit(): void {
-        this.form.addControl(this.inputName(), this)
-    }
-
-    ngOnDestroy(): void {
-        this.form.removeControl(this.inputName(), this)
-    }
-
-    registerOnChange(fn: any): void {
-        this.onChange.push(fn)
-    }
-
-    unRegisterOnChange(fn: any): void {
-        let indexOf = this.onChange.indexOf(fn);
-        this.onChange.splice(indexOf, 1)
-    }
-
-    registerOnTouched(fn: any): void {
-        this.onTouched.push(fn)
     }
 
     setDisabledState(isDisabled: boolean): void {

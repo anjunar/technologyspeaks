@@ -27,7 +27,7 @@ export class AsInputContainer {
     constructor() {
         effect(() => {
             let asControl = this.control();
-            asControl.control.valueChanges.subscribe((value: any) => {
+            let valueSub= asControl.control.valueChanges.subscribe((value) => {
                 this.isEmpty.set(!value);
                 this.dirty.set(asControl.dirty);
 
@@ -45,10 +45,25 @@ export class AsInputContainer {
                 }
             });
 
+            let statusSub = asControl.control.statusChanges.subscribe((value) => {
+                const e = this.control().errors
+                if (e) {
+                    const messages: string[] = []
+                    if (e['server']) messages.push(e['server'].message)
+                    this.errors.set(Object.assign(messages, this.errors()))
+                } else {
+                    this.errors.set([])
+                }
+            });
+
             this.placeholder.set((asControl as AsControlInput).placeholder)
             this.isEmpty.set(!asControl.value);
             this.dirty.set(asControl.dirty);
 
+            return () => {
+                valueSub.unsubscribe()
+                statusSub.unsubscribe()
+            }
         })
 
         effect(() => {

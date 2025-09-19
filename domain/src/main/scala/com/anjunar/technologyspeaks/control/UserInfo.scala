@@ -51,7 +51,6 @@ class UserInfo extends AbstractEntity with OwnerProvider {
   @PropertyDescriptor(title = "Birthdate")
   @Basic
   @FormParam("birthDate")
-  @NotEmpty
   var birthDate: LocalDate = uninitialized
 
   override def owner: SecurityUser = user

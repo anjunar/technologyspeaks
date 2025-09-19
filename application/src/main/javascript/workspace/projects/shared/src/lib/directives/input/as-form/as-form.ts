@@ -1,13 +1,5 @@
-import {AfterViewInit, Directive, effect, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
-import {
-    AbstractControl,
-    FormControl,
-    FormGroup,
-    NG_VALUE_ACCESSOR,
-    NgControl,
-    ValidationErrors,
-    Validators
-} from "@angular/forms";
+import {Directive, effect, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
+import {FormControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControl, AsControlForm, AsControlInput, AsControlValueAccessor} from "../../as-control";
 import {MetaSignal} from "../../../meta-signal/meta-signal";
 import {ObjectDescriptor} from "../../../domain/descriptors";
@@ -29,9 +21,6 @@ import {ObjectDescriptor} from "../../../domain/descriptors";
 })
 export class AsForm extends AsControlForm implements AsControlValueAccessor, OnInit, OnDestroy {
 
-    onChange: ((name: string, value: any) => void)[] = []
-    onTouched: (() => void)[] = []
-
     onChangeListener = (name: string, val: any) => {
         if (this.model()) {
             this.model()[name].set(val)
@@ -44,7 +33,8 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
 
     form = inject(AsForm, {skipSelf: true, optional: true})
 
-    el = inject(ElementRef<HTMLFormElement | HTMLFieldSetElement>).nativeElement
+    el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
+        .nativeElement
 
     controls: Map<string, AsControl[]> = new Map()
 
@@ -60,7 +50,6 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
     }
 
     controlAdded(): void {
-
     }
 
     ngOnInit(): void {
@@ -103,14 +92,12 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
         }
 
         if (control instanceof AsControlForm) {
-            let formGroup = new FormGroup({});
-            control.control = formGroup
-            this.control.addControl(name, formGroup);
+            this.control.addControl(name, control.control);
         }
 
         if (control instanceof AsControlInput) {
             const formControl = new FormControl(
-                { value: control.value, disabled: control.disabled }, Validators.required
+                {value: control.value, disabled: control.disabled}
             );
             control.control = formControl
             this.control.addControl(name, formControl);
@@ -127,6 +114,7 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
             controls[indexOf].valueAccessor.unRegisterOnChange(this.onChangeListener)
             controls.splice(indexOf, 1)
         }
+        this.control.removeControl(name, {emitEvent: true})
     }
 
     override get value(): any {
@@ -138,19 +126,6 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
     }
 
     writeDefaultValue(obj: any): void {
-    }
-
-    registerOnChange(fn: any): void {
-        this.onChange.push(fn)
-    }
-
-    unRegisterOnChange(fn: any): void {
-        let indexOf = this.onChange.indexOf(fn);
-        this.onChange.splice(indexOf, 1)
-    }
-
-    registerOnTouched(fn: any): void {
-        this.onTouched.push(fn)
     }
 
     setDisabledState?(isDisabled: boolean): void {

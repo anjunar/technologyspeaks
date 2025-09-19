@@ -23,42 +23,41 @@ export class AsSubmit {
     submit = output<AsResponse<any>>({alias : "asSubmit"})
 
     setServerError(path: string[], error: any) {
-        this._setServerErrorRecursive(this.asForm, path, error);
-    }
+        function setServerErrorRecursive(form: AsForm, path: string[], error: any) {
+            if (path.length === 0) {
+                const existing = form.control?.errors || {};
+                form.control?.setErrors({
+                    ...existing,
+                    server: {message : error}
+                });
+                return;
+            }
 
-    private _setServerErrorRecursive(form: AsForm, path: string[], error: any) {
-        if (path.length === 0) {
-            const existing = form.control?.errors || {};
-            form.control?.setErrors({
-                ...existing,
-                server: {message : error}
-            });
-            return;
-        }
+            const [segment, ...rest] = path;
+            const controls = form.controls.get(segment);
 
-        const [segment, ...rest] = path;
-        const controls = form.controls.get(segment);
+            if (!controls) {
+                return;
+            }
 
-        if (!controls) {
-            return;
-        }
-
-        for (const c of controls) {
-            if (rest.length === 0) {
-                const ngControl = (c.valueAccessor as any).control as AbstractControl | undefined;
-                if (ngControl) {
-                    const existing = ngControl.errors || {};
-                    ngControl.setErrors({
-                        ...existing,
-                        server: {message : error}
-                    });
+            for (const c of controls) {
+                if (rest.length === 0) {
+                    const formControl = (c.valueAccessor as any).control as AbstractControl | undefined;
+                    if (formControl) {
+                        const existing = formControl.errors || {};
+                        formControl.setErrors({
+                            ...existing,
+                            server: {message : error}
+                        });
+                    }
+                } else if (c instanceof AsForm) {
+                    setServerErrorRecursive(c, rest, error);
                 }
-            } else if (c instanceof AsForm) {
-                this._setServerErrorRecursive(c, rest, error);
             }
         }
-    }
 
+        setServerErrorRecursive(this.asForm, path, error);
+    }
 
     constructor() {
         this.el.nativeElement.addEventListener("submit", (event) => {
@@ -74,9 +73,19 @@ export class AsSubmit {
                         this.submit.emit({name : button.name, response : response.body, form : this.asForm})
                     },
                     error : (err: HttpErrorResponse) => {
-                        err.error.forEach((error : any) => {
-                            this.setServerError(error.path, error.message)
-                        })
+                        const grouped = new Map<string, { path: any[], messages: string[] }>();
+
+                        err.error.forEach((e: any) => {
+                            const key = JSON.stringify(e.path);
+                            if (!grouped.has(key)) {
+                                grouped.set(key, { path: e.path, messages: [] });
+                            }
+                            grouped.get(key)!.messages.push(e.message);
+                        });
+
+                        grouped.forEach(({ path, messages }) => {
+                            this.setServerError(path, messages);
+                        });
                     }
                 })
         })
