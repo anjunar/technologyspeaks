@@ -35,7 +35,11 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor, O
             this.onChange.forEach(callback => callback(this.inputName(), this.el.value))
             this.control.setValue(this.el.value, { emitEvent: true });
         })
-        this.el.addEventListener("blur", () => this.onTouched.forEach(callback => callback()))
+        this.el.addEventListener("blur", () => {
+            this.onTouched.forEach(callback => callback())
+            this.el.classList.remove("focus")
+        })
+        this.el.addEventListener("focus", () => this.el.classList.add("focus"))
     }
 
     get placeholder() {
@@ -49,6 +53,34 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor, O
     controlAdded(): void {
         this.el.type = this.descriptor.widget
         this.placeholder = this.descriptor.title
+
+        this.control.statusChanges.subscribe(status => {
+            if (status === "INVALID") {
+                this.el.classList.add('invalid');
+            } else {
+                this.el.classList.remove('invalid');
+            }
+            if (status === "DISABLED") {
+                this.el.classList.add('disabled');
+            } else {
+                this.el.classList.remove('disabled');
+            }
+            if (status === "PENDING") {
+                this.el.classList.add('pending');
+            } else {
+                this.el.classList.remove('pending');
+            }
+            if (status === "VALID") {
+                this.el.classList.add("valid")
+            } else {
+                this.el.classList.remove("valid")
+            }
+
+            this.el.classList.toggle('dirty', this.dirty);
+
+
+        });
+
     }
 
     ngOnInit(): void {

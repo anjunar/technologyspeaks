@@ -26,16 +26,6 @@ table {
     border-spacing: 0;
 }
 
-button {
-    border: 0;
-    font-size: 16px;
-    color: inherit;
-
-    &.active {
-        color: var(--color-selected);
-    }
-}
-
 a {
     color: var(--color-text);
     text-decoration: none;
@@ -54,25 +44,8 @@ ul {
     list-style-type: none;
 }
 
-input {
-    padding: 0;
-    border: 0;
-    outline: none;
-    background-color: inherit;
-    color: var(--color-text);
-
-    &.focus {
-        color: var(--color-selected);
-    }
-
-    &.dirty {
-        color: var(--color-warning);
-    }
-
-    &.ng-invalid {
-        color: var(--color-error);
-    }
-
+iframe {
+    border: none;
 }
 
 input:-webkit-autofill,
@@ -82,6 +55,77 @@ input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 1000px var(--color-background-primary) inset !important;
     -webkit-text-fill-color: var(--color-text) !important;
     transition: background-color 5000s ease-in-out 0s;
+}
+
+input {
+    font-size: 16px;
+    outline: 0;
+    border: 0;
+    background-color: inherit;
+
+    &.focus {
+        color: var(--color-selected);
+
+        &::placeholder {
+            color: var(--color-selected);
+        }
+    }
+
+    &.dirty {
+        color: var(--color-warning);
+
+        &::placeholder {
+            color: var(--color-warning);
+        }
+    }
+
+    &.invalid {
+        color: var(--color-error);
+
+        &::placeholder {
+            color: var(--color-error);
+        }
+    }
+
+    &::placeholder {
+        color: var(--color-text);
+        opacity: 1;
+    }
+
+    &[disabled]::placeholder {
+        opacity: 0.5;
+    }
+
+    &[type=date] {
+        &[disabled] {
+            opacity: 0.5;
+        }
+    }
+}
+
+button {
+    background-color: inherit;
+    border: 0;
+
+    color: var(--color-text);
+
+    &[disabled] {
+        color: var(--color-background-secondary);
+    }
+
+    &.container {
+        display : flex;
+        align-items : center;
+        justify-content : flex-start;
+        gap : 5px
+    }
+
+    &.hover {
+        &:not([disabled]):hover {
+            background-color: var(--color-selected);
+            color: var(--color-background-primary);
+        }
+    }
 }
 
 select, textarea {

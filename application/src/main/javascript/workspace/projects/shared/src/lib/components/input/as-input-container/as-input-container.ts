@@ -66,12 +66,6 @@ export class AsInputContainer {
                 element.removeEventListener('blur', blurListener)
             }
         });
-
-        effect(() => {
-            const element: HTMLInputElement = this.element().nativeElement;
-            element.classList.toggle('focus', this.focus());
-            element.classList.toggle('dirty', this.dirty() && this.focus());
-        });
     }
 
 }
