@@ -32,7 +32,7 @@ import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
         },
     ]
 })
-export class AsArrayForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit {
+export class AsArrayForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit, OnDestroy {
 
     onChangeListener = (name: string, val: any) => {
         if (this.model()) {
@@ -66,6 +66,11 @@ export class AsArrayForm extends AsControlSingleForm implements AsControlValueAc
     ngOnInit(): void {
         let indexOf = this.form.model().indexOf(this.model());
         this.form.addControl(indexOf, this)
+    }
+
+    ngOnDestroy(): void {
+        let indexOf = this.form.model().indexOf(this.model());
+        this.form.removeControl(indexOf, this)
     }
 
     addControl(name: string | number, control: AsControl) {

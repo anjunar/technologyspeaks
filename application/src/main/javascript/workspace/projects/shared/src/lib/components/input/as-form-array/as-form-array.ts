@@ -3,7 +3,7 @@ import {
     Component,
     contentChild,
     inject,
-    input,
+    input, OnDestroy,
     OnInit,
     signal,
     TemplateRef, viewChild,
@@ -42,7 +42,7 @@ import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
         }
     ]
 })
-export class AsFormArray extends AsControlArrayForm implements AsControlValueAccessor, AfterContentInit, OnInit {
+export class AsFormArray extends AsControlArrayForm implements AsControlValueAccessor, AfterContentInit, OnInit, OnDestroy {
 
     formName = input<string>(null, {alias: 'name'});
 
@@ -64,11 +64,16 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
     }
 
     removeControl(name : string | number, control: AsControl): void {
+        this.control.removeAt(name as number)
     }
 
     ngOnInit(): void {
         this.form.addControl(this.formName(), this)
         this.descriptor = (this.form.descriptor.properties[this.formName()] as CollectionDescriptor).items
+    }
+
+    ngOnDestroy(): void {
+        this.form.removeControl(this.formName(), this)
     }
 
     ngAfterContentInit() {
