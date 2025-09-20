@@ -6,17 +6,21 @@ import {
     input,
     OnInit,
     signal,
-    TemplateRef,
+    TemplateRef, viewChild,
     ViewContainerRef,
     ViewEncapsulation
 } from '@angular/core';
 import {AsControl, AsControlArrayForm, AsControlValueAccessor} from "../../../directives/as-control";
 import {CollectionDescriptor} from "../../../domain/descriptors";
 import {AsForm} from "../../../directives/input/as-form/as-form";
+import {AsMenu} from "../../layout/as-menu/as-menu";
+import {Constructor} from "../../../domain/container/ActiveObject";
 
 @Component({
     selector: 'form-array',
-    imports: [],
+    imports: [
+        AsMenu
+    ],
     templateUrl: './as-form-array.html',
     styleUrl: './as-form-array.css',
     encapsulation: ViewEncapsulation.None
@@ -31,9 +35,9 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     model = signal([])
 
-    vcr = inject(ViewContainerRef)
+    newInstance = input.required<Constructor<any>>()
 
-    override valueAccessor: AsControlValueAccessor = this;
+    vcr = viewChild("container", { read : ViewContainerRef })
 
     insertControl(index: number, control: AsForm) {
         control.descriptor = this.descriptor;
@@ -67,8 +71,10 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
         this.writeValue(obj);
     }
 
-    addItem(defaultValue: any = {value: ''}) {
-        this.model.update(arr => [...arr, defaultValue]);
+    addItem() {
+        let ctor = this.newInstance()
+        this.model.update(arr => [...arr, this.form.model().$instance(ctor)]);
+        this.form.model()[this.formName()] = this.model()
         this.renderItems();
     }
 
@@ -80,9 +86,9 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
     private renderItems() {
         if (!this.itemTemplate()) return;
 
-        this.vcr.clear();
+        this.vcr().clear();
         this.model().forEach((item, index) => {
-            this.vcr.createEmbeddedView(this.itemTemplate(), {$implicit: item, index}, index);
+            this.vcr().createEmbeddedView(this.itemTemplate(), {$implicit: item, index}, index);
         });
     }
 
@@ -95,4 +101,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
     override get value() {
         return this.model();
     }
+
+    override valueAccessor: AsControlValueAccessor = this;
+
 }

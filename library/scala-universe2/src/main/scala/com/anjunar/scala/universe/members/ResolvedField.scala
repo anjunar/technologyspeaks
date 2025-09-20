@@ -18,6 +18,11 @@ class ResolvedField(override val underlying: Field, owner : ResolvedClass) exten
     underlying.setAccessible(true)
     underlying.get(instance)
   }
+  
+  def set(instance : AnyRef, value : Any) : Unit = {
+    underlying.setAccessible(true)
+    underlying.set(instance, value)
+  }
 
   override lazy val declaredAnnotations: Array[Annotation] = underlying.getDeclaredAnnotations
   

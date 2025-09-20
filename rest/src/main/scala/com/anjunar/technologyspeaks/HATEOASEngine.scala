@@ -96,7 +96,6 @@ class HATEOASEngine extends FSMEngine {
                 StateDef(
                   rel = "create",
                   name = "Create",
-                  view = "form",
                   ref = classOf[Table[User]],
                   resource = classOf[UserResource.Create]
                 ), create => Seq(
@@ -104,7 +103,6 @@ class HATEOASEngine extends FSMEngine {
                     StateDef(
                       rel = "save",
                       name = "Save",
-                      view = "form",
                       resource = classOf[UserResource.Save]
                     ), save => Seq(search, documentDelete))
                 )),
@@ -112,7 +110,6 @@ class HATEOASEngine extends FSMEngine {
                 StateDef(
                   rel = "read",
                   name = "Read",
-                  view = "full",
                   ref = classOf[User],
                   resource = classOf[UserResource.Read]
                 ), read => Seq(
@@ -120,7 +117,6 @@ class HATEOASEngine extends FSMEngine {
                     StateDef(
                       rel = "update",
                       name = "Update",
-                      view = "form",
                       resource = classOf[UserResource.Update]
                     ), update => Seq(search, documentDelete))))
             )))

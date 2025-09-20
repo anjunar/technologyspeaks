@@ -88,8 +88,7 @@ class ResolvedClass(val underlying : Type) extends Annotated {
 
   def findField(name: String): ResolvedField =
     try {
-      val field = raw.getField(name)
-      fields.find(resolvedField => resolvedField == field).orNull
+      fields.find(resolvedField => resolvedField.name == name).orNull
     } catch {
       case e : NoSuchFieldException => null
     }

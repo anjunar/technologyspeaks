@@ -66,17 +66,20 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
                 .filter(p => p.views.contains(view))
                 .foreach { property =>
                   builder.property(property.name, propertyBuilder => {
-                    val typeHandlerOpt = property.instanceHandler
-                    if (typeHandlerOpt.isDefined) {
-                      val typeHandler = typeHandlerOpt.get.asInstanceOf[(Any, RequestContext, Stage.SessionFactory) => Seq[CompletionStage[SchemaBuilder]]]
+                    val instanceHandlerOpt = property.instanceHandler
+                    val typeHandlerOpt = property.typeHandler
+                    if (instanceHandlerOpt.isDefined && typeHandlerOpt.isDefined) {
+                      val instanceHandler = instanceHandlerOpt.get.asInstanceOf[(Any, RequestContext, Stage.SessionFactory) => Seq[CompletionStage[SchemaBuilder]]]
+                      val typeHandler = typeHandlerOpt.get
                       val model = DescriptionIntrospector.createWithType(entity.getClass)
                       val entityProperty = model.findProperty(property.name)
                       val value = entityProperty.get(entity.asInstanceOf[AnyRef])
 
                       value match {
                         case collection: util.Collection[?] =>
-                          val schemaFutures = typeHandler(value, ctx, sessionFactory)
-                          CompletableFuture.allOf(schemaFutures.map(_.toCompletableFuture) *)
+                          val instanceSchemaFutures = instanceHandler(value, ctx, sessionFactory)
+                          val typeSchema = typeHandler(ctx)
+                          CompletableFuture.allOf(instanceSchemaFutures.map(_.toCompletableFuture) *)
                             .thenAccept(_ => {
                               collection.forEach { instance =>
                                 propertyBuilder
@@ -84,7 +87,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
                                     instance,
                                     instance.getClass.asInstanceOf[Class[Any]],
                                     (childBuilder: EntitySchemaBuilder[Any]) => {
-                                      schemaFutures.foreach { sf =>
+                                      instanceSchemaFutures.foreach { sf =>
                                         sf.thenAccept(schema => {
                                           val mappingOpt = schema.instanceMapping.get(instance)
                                           if (mappingOpt.isDefined) {
@@ -94,11 +97,15 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
                                       }
                                     }
                                   )
+                                  .forType(instance.getClass.asInstanceOf[Class[Any]], (childBuilder: EntitySchemaBuilder[Any]) => {
+                                    childBuilder.mapping.addAll(typeSchema.typeMapping(instance.getClass).mapping.asInstanceOf[mutable.Map[String, PropertyBuilder[Any]]])
+                                  })
                               }
+
                             })
 
                         case _ =>
-                          val schemaFutures = typeHandler(value, ctx, sessionFactory)
+                          val schemaFutures = instanceHandler(value, ctx, sessionFactory)
                           val f = CompletableFuture.allOf(schemaFutures.map(_.toCompletableFuture) *)
                             .thenAccept(_ => {
                               schemaFutures.foreach { sf =>
@@ -127,6 +134,13 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
         .filter(property => property.views.contains(view))
         .foreach(property => {
           builder.property(property.name, propertyBuilder => {
+            val descriptorProperty = model.findProperty(property.name)
+            descriptorProperty.propertyType.raw match {
+              case clazz: Class[?] if classOf[util.Collection[?]].isAssignableFrom(clazz) => propertyBuilder.withWriteable(true)
+              case clazz: Class[?] if classOf[util.Map[?, ?]].isAssignableFrom(clazz) => propertyBuilder.withWriteable(true)
+              case _ => propertyBuilder.withWriteable(descriptorProperty.isWriteable)
+            }
+
             if (property.typeHandler.isDefined) {
               val typeHandler = property.typeHandler.get
               val schema = typeHandler(ctx)
@@ -146,6 +160,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
 
   def buildType(entityType: Class[E], ctx: RequestContext, view: String = "full"): SchemaBuilder = {
     val builder = new SchemaBuilder()
+    val model = DescriptionIntrospector.createWithType(entityType)
 
     builder
       .forType(entityType, (builder: EntitySchemaBuilder[E]) => {
@@ -153,6 +168,13 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
           .filter(property => property.views.contains(view))
           .foreach(property => {
             builder.property(property.name, propertyBuilder => {
+              val descriptorProperty = model.findProperty(property.name)
+              descriptorProperty.propertyType.raw match {
+                case clazz: Class[?] if classOf[util.Collection[?]].isAssignableFrom(clazz) => propertyBuilder.withWriteable(true)
+                case clazz: Class[?] if classOf[util.Map[?, ?]].isAssignableFrom(clazz) => propertyBuilder.withWriteable(true)
+                case _ => propertyBuilder.withWriteable(descriptorProperty.isWriteable)
+              }
+
               if (property.typeHandler.isDefined) {
                 val typeHandler = property.typeHandler.get
                 val schema = typeHandler(ctx)

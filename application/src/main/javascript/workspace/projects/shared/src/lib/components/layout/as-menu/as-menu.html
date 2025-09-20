@@ -1,0 +1,6 @@
+<button type="button" class="material-icons" (click)="toggle()">menu</button>
+@if (open()) {
+    <div class="menu">
+        <ng-content/>
+    </div>
+}

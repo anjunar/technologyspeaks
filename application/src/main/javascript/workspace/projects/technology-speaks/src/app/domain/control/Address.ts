@@ -1,5 +1,5 @@
 import {AbstractEntity, Basic, Entity} from "shared";
-import {MetaSignal} from "../../../../../shared/src/lib/meta-signal/meta-signal";
+import {MetaSignal} from "shared";
 
 @Entity("Address")
 export default class Address extends AbstractEntity {

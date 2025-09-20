@@ -8,6 +8,8 @@ export * from './lib/components/input/as-image/as-image'
 
 export * from './lib/components/input/as-input-container/as-input-container'
 
+export * from './lib/components/layout/as-menu/as-menu'
+
 export * from './lib/components/layout/as-drawer/as-drawer'
 export * from './lib/components/layout/as-drawer/as-drawer-container/as-drawer-container'
 export * from './lib/components/layout/as-drawer/as-drawer-content/as-drawer-content'
@@ -38,5 +40,7 @@ export * from './lib/domain/container'
 export * from './lib/domain/Persistence'
 
 export * from './lib/mapper'
+
+export * from './lib/meta-signal/meta-signal'
 
 export * from './lib/pattern-match'

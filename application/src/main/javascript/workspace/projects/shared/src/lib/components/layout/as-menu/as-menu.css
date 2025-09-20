@@ -1,0 +1,12 @@
+as-menu {
+    display: block;
+    position: relative;
+
+    .menu {
+        width: 150px;
+        border: 1px solid var(--color-background-secondary);
+        position: absolute;
+        box-shadow: 3px 3px 10px 3px #1a1a1a;
+        padding: 8px;
+    }
+}

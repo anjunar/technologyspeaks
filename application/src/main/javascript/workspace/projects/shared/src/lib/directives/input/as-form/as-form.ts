@@ -28,8 +28,6 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
         }
     };
 
-    index = input(0)
-
     model = model<any>({}, {alias: "asModel"})
 
     formName = input<string>(null, {alias: "name"})
@@ -60,7 +58,8 @@ export class AsForm extends AsControlForm implements AsControlValueAccessor, OnI
             }
 
             if (this.form instanceof AsFormArray) {
-                this.form.insertControl(this.index(), this)
+                let indexOf = this.form.model().indexOf(this.model());
+                this.form.insertControl(indexOf, this)
             }
 
         } else {

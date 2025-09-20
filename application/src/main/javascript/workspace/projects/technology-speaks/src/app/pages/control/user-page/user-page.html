@@ -7,9 +7,9 @@
             <as-input-container>
                 <input name="nickName"/>
             </as-input-container>
-            <form-array name="emails">
-                <ng-template let-item let-index="index">
-                    <fieldset [asModel]="item" [index]="index">
+            <form-array name="emails" [newInstance]="EMail">
+                <ng-template let-item>
+                    <fieldset [asModel]="item">
                         <as-input-container>
                             <input name="value"/>
                         </as-input-container>
