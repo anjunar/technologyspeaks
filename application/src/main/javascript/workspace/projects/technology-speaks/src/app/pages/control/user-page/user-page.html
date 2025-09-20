@@ -1,44 +1,46 @@
 <form [(asModel)]="user" (asSubmit)="onSubmit($event)">
     <div class="container">
-        <fieldset name="info">
-            <as-image style="width: 300px; height: 300px" name="image"/>
+        <fieldset asName="info">
+            <as-image style="width: 300px; height: 300px" asName="image"/>
         </fieldset>
         <div>
             <as-input-container>
-                <input name="nickName"/>
+                <input asName="nickName"/>
             </as-input-container>
-            <form-array name="emails" [newInstance]="EMail">
+            <form-array asName="emails" [newInstance]="EMail">
                 <ng-template let-item>
                     <array-form [asModel]="item">
                         <as-input-container>
-                            <input name="value"/>
+                            <input asName="value"/>
                         </as-input-container>
                     </array-form>
                 </ng-template>
             </form-array>
-            <fieldset name="info">
+            <fieldset asName="info">
+                <legend>User Info<input type="checkbox"></legend>
                 <as-input-container>
-                    <input name="firstName"/>
+                    <input asName="firstName"/>
                 </as-input-container>
                 <as-input-container>
-                    <input name="lastName"/>
+                    <input asName="lastName"/>
                 </as-input-container>
                 <as-input-container>
-                    <input name="birthDate"/>
+                    <input asName="birthDate"/>
                 </as-input-container>
             </fieldset>
-            <fieldset name="address">
+            <fieldset asName="address">
+                <legend>Address<input type="checkbox"></legend>
                 <as-input-container>
-                    <input name="street"/>
+                    <input asName="street"/>
                 </as-input-container>
                 <as-input-container>
-                    <input name="number"/>
+                    <input asName="number"/>
                 </as-input-container>
                 <as-input-container>
-                    <input name="zipCode"/>
+                    <input asName="zipCode"/>
                 </as-input-container>
                 <as-input-container>
-                    <input name="country"/>
+                    <input asName="country"/>
                 </as-input-container>
             </fieldset>
         </div>

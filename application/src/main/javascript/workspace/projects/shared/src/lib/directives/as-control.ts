@@ -97,7 +97,7 @@ export abstract class AsControl extends NgControl {
 @Directive()
 export abstract class AsControlInput extends AsControl implements OnInit, OnDestroy {
 
-    inputName = input<string>("", {alias: "name"})
+    inputName = input<string>("", {alias: "asName"})
 
     form = inject(AsControlForm)
 
@@ -123,7 +123,7 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 @Directive()
 export abstract class AsControlForm extends AsControl {
 
-    formName = input<string>(null, {alias: 'name'});
+    formName = input<string>(null, {alias: 'asName'});
 
     isDisabled = model(false, {alias : "disabled"})
 
@@ -151,9 +151,12 @@ export abstract class AsControlSingleForm extends AsControlForm {
 
     override control: FormGroup = new AsFormGroup({})
 
+    controls : Map<string, AsControl> = new Map()
+
     override descriptor: ObjectDescriptor
 
     addControl(name: string | number, control: AsControl) {
+        this.controls.set(name as string, control)
         control.descriptor = this.descriptor.properties[name];
         const model = this.model();
         if (model) {
@@ -176,6 +179,7 @@ export abstract class AsControlSingleForm extends AsControlForm {
     }
 
     removeControl(name: string | number, control: AsControl) {
+        this.controls.delete(name as string)
         control.valueAccessor.unRegisterOnChange(this.onChangeListener);
         this.control.removeControl(name as string)
     }

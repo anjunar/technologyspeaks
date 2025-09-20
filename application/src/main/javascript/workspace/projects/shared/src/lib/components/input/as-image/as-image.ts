@@ -78,14 +78,16 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
     }
 
     openWindow() {
-        this.windowService.open({
-            id: "image-processor",
-            title: "Image Processor",
-            component: AsImageProcess,
-            inputs: {
-                parent: this
-            }
-        })
+        if (! this.disabledImage()) {
+            this.windowService.open({
+                id: "image-processor",
+                title: "Image Processor",
+                component: AsImageProcess,
+                inputs: {
+                    parent: this
+                }
+            })
+        }
     }
 
     encodeBase64 = (type: string, data: string) => {

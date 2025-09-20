@@ -1,7 +1,6 @@
-import {Directive, ElementRef, inject, input, OnDestroy, OnInit} from '@angular/core';
-import {AsForm} from "../as-form/as-form";
-import {AbstractControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
-import {AsControl, AsControlInput, AsControlValueAccessor} from "../../as-control";
+import {Directive, effect, ElementRef, inject} from '@angular/core';
+import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors, Validators} from "@angular/forms";
+import {AsControlInput, AsControlValueAccessor} from "../../as-control";
 import {match} from "../../../pattern-match";
 import {
     EmailValidator,
@@ -12,7 +11,7 @@ import {
 } from "../../../domain/descriptors";
 
 @Directive({
-    selector: 'input',
+    selector: 'input[asName]',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -34,13 +33,17 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
         super()
         this.el.addEventListener("input", () => {
             this.onChange.forEach(callback => callback(this.inputName(), this.el.value))
-            this.control.setValue(this.el.value, { emitEvent: true });
+            this.control.setValue(this.el.value, {emitEvent: true});
         })
         this.el.addEventListener("blur", () => {
             this.onTouched.forEach(callback => callback())
             this.el.classList.remove("focus")
         })
         this.el.addEventListener("focus", () => this.el.classList.add("focus"))
+
+        effect(() => {
+            this.el.name = this.inputName()
+        });
     }
 
     get placeholder() {
@@ -138,8 +141,14 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
     override get errors(): ValidationErrors {
         const e: ValidationErrors = {};
         if (this.el.validity.valueMissing) e['required'] = true;
-        if (this.el.validity.tooShort) e['minlength'] = { requiredLength: this.el.minLength, actualLength: this.el.value.length };
-        if (this.el.validity.tooLong) e['maxlength'] = { requiredLength: this.el.maxLength, actualLength: this.el.value.length };
+        if (this.el.validity.tooShort) e['minlength'] = {
+            requiredLength: this.el.minLength,
+            actualLength: this.el.value.length
+        };
+        if (this.el.validity.tooLong) e['maxlength'] = {
+            requiredLength: this.el.maxLength,
+            actualLength: this.el.value.length
+        };
         if (this.el.validity.typeMismatch) e['email'] = true;
 
         if (this.control.errors) {

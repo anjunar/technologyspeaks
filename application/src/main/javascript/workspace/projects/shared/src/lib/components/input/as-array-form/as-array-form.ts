@@ -43,9 +43,9 @@ export class AsArrayForm extends AsControlSingleForm implements AsControlValueAc
         super();
         effect(() => {
             if (this.model()) {
-                this.valueAccessor.setDisabledState(false)
+                this.setDisabledState(false)
             } else {
-                this.valueAccessor.setDisabledState(true)
+                this.setDisabledState(true)
             }
         });
     }
@@ -75,11 +75,7 @@ export class AsArrayForm extends AsControlSingleForm implements AsControlValueAc
 
     setDisabledState?(isDisabled: boolean): void {
         this.el.disabled = isDisabled;
-        Object.values(this.control.controls).forEach(c => {
-            if ((c as any).valueAccessor) {
-                (c as any).valueAccessor.setDisabledState(isDisabled);
-            }
-        });
+        this.controls.forEach(control => (control as any).setDisabledState(isDisabled))
     }
 
     override get dirty(): boolean {

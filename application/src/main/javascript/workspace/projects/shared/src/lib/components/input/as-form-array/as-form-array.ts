@@ -3,26 +3,24 @@ import {
     Component,
     contentChild,
     inject,
-    input, OnDestroy,
+    input,
+    OnDestroy,
     OnInit,
     signal,
-    model,
-    TemplateRef, viewChild,
+    TemplateRef,
+    viewChild,
     ViewContainerRef,
     ViewEncapsulation
 } from '@angular/core';
 import {AsControl, AsControlArrayForm, AsControlForm, AsControlValueAccessor} from "../../../directives/as-control";
 import {CollectionDescriptor} from "../../../domain/descriptors";
 import {AsForm} from "../../../directives/input/as-form/as-form";
-import {AsMenu} from "../../layout/as-menu/as-menu";
 import {Constructor} from "../../../domain/container/ActiveObject";
 import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
 
 @Component({
     selector: 'form-array',
-    imports: [
-        AsMenu
-    ],
+    imports: [],
     templateUrl: './as-form-array.html',
     styleUrl: './as-form-array.css',
     encapsulation: ViewEncapsulation.None,
@@ -53,16 +51,16 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     newInstance = input.required<Constructor<any>>()
 
-    vcr = viewChild("container", { read : ViewContainerRef })
+    vcr = viewChild("container", {read: ViewContainerRef})
 
-    addControl(name : string | number, control: AsControl): void {
+    addControl(name: string | number, control: AsControl): void {
         control.descriptor = this.descriptor;
         control.valueAccessor.writeValue(this.model()[name as number] ?? null);
         this.control.insert(name as number, control.control);
         control.controlAdded();
     }
 
-    removeControl(name : string | number, control: AsControl): void {
+    removeControl(name: string | number, control: AsControl): void {
         this.control.removeAt(name as number)
     }
 

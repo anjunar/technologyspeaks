@@ -4,7 +4,7 @@ import {AsControl, AsControlForm, AsControlInput, AsControlSingleForm, AsControl
 import {MetaSignal} from "../../../meta-signal/meta-signal";
 
 @Directive({
-    selector: 'form[asModel], fieldset',
+    selector: 'form[asModel], fieldset[asName]',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -32,10 +32,15 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
     constructor() {
         super();
         effect(() => {
+
+            if (this.formName()) {
+                this.el.name = this.formName()
+            }
+
             if (this.model()) {
-                this.valueAccessor.setDisabledState(false)
+                this.setDisabledState(false)
             } else {
-                this.valueAccessor.setDisabledState(true)
+                this.setDisabledState(true)
             }
         });
     }
@@ -69,11 +74,7 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
 
     setDisabledState(isDisabled: boolean): void {
         this.el.disabled = isDisabled;
-        Object.values(this.control.controls).forEach(c => {
-            if ((c as any).valueAccessor) {
-                (c as any).valueAccessor.setDisabledState(isDisabled);
-            }
-        });
+        this.controls.forEach(control => (control as any).setDisabledState(isDisabled))
     }
 
     override get dirty(): boolean {
