@@ -2,7 +2,7 @@ import {Component, effect, ElementRef, inject, input, model, OnDestroy, OnInit, 
 import {
     AsControl,
     AsControlArrayForm,
-    AsControlForm,
+    AsControlForm, AsControlInput,
     AsControlSingleForm,
     AsControlValueAccessor
 } from "../../../directives/as-control";
@@ -34,16 +34,6 @@ import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 })
 export class AsArrayForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit, OnDestroy {
 
-    onChangeListener = (name: string, val: any) => {
-        if (this.model()) {
-            this.model()[name].set(val)
-        }
-    };
-
-    model = model<any>({}, {alias: "asModel"})
-
-    formName = input<string>(null, {alias: "name"})
-
     form: AsFormArray = inject(AsFormArray)
 
     el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
@@ -60,9 +50,6 @@ export class AsArrayForm extends AsControlSingleForm implements AsControlValueAc
         });
     }
 
-    controlAdded(): void {
-    }
-
     ngOnInit(): void {
         let indexOf = this.form.model().indexOf(this.model());
         this.form.addControl(indexOf, this)
@@ -71,31 +58,6 @@ export class AsArrayForm extends AsControlSingleForm implements AsControlValueAc
     ngOnDestroy(): void {
         let indexOf = this.form.model().indexOf(this.model());
         this.form.removeControl(indexOf, this)
-    }
-
-    addControl(name: string | number, control: AsControl) {
-        control.descriptor = this.descriptor.properties[name];
-        const model = this.model();
-        if (model) {
-            const metaSignal: MetaSignal<any> = model[name];
-            const valueAccessor = control.valueAccessor;
-            valueAccessor.registerOnChange(this.onChangeListener);
-            if (metaSignal) {
-                const value = metaSignal();
-                control.instance = metaSignal.instance;
-                valueAccessor.writeValue(value);
-                valueAccessor.writeDefaultValue(value);
-            }
-        }
-
-        this.control.addControl(name as string, control.control);
-
-        control.controlAdded();
-    }
-
-    removeControl(name: string | number, control: AsControl) {
-        control.valueAccessor.unRegisterOnChange(this.onChangeListener);
-        this.control.removeControl(name as string)
     }
 
     removeFromArray() {
@@ -109,9 +71,6 @@ export class AsArrayForm extends AsControlSingleForm implements AsControlValueAc
 
     writeValue(obj: any): void {
         this.model.set(obj);
-    }
-
-    writeDefaultValue(obj: any): void {
     }
 
     setDisabledState?(isDisabled: boolean): void {
@@ -146,6 +105,8 @@ export class AsArrayForm extends AsControlSingleForm implements AsControlValueAc
     override get path(): string[] | null {
         return this.formName() ? [this.formName()] : null;
     }
+
+    controlAdded(): void {}
 
     override valueAccessor: AsControlValueAccessor = this;
 }

@@ -8,9 +8,9 @@ import {
     NgControl,
     ValidatorFn
 } from "@angular/forms";
-import {AsForm, CollectionDescriptor, NodeDescriptor, ObjectDescriptor} from "shared";
+import {AsForm, CollectionDescriptor, MetaSignal, NodeDescriptor, ObjectDescriptor} from "shared";
 import PropDescriptor from "../domain/descriptors/PropDescriptor";
-import {Directive, inject, input, OnDestroy, OnInit} from "@angular/core";
+import {Directive, inject, input, model, OnDestroy, OnInit} from "@angular/core";
 
 export class AsFormGroup extends FormGroup {
     constructor(
@@ -58,8 +58,6 @@ export class AsFormGroup extends FormGroup {
 
 export interface AsControlValueAccessor extends ControlValueAccessor {
 
-    writeDefaultValue(obj: any): void
-
     unRegisterOnChange(fn: any): void
 
 }
@@ -73,7 +71,7 @@ export abstract class AsControl extends NgControl {
 
     abstract descriptor: NodeDescriptor
 
-    abstract controlAdded(): void
+    abstract controlAdded() : void
 
     registerOnChange(fn: any): void {
         this.onChange.push(fn)
@@ -110,6 +108,8 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
     abstract get placeholder(): string
     abstract set placeholder(value: string)
 
+    abstract writeDefaultValue(obj: any): void
+
     ngOnInit(): void {
         this.form.addControl(this.inputName(), this)
     }
@@ -120,18 +120,66 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 
 }
 
+@Directive()
 export abstract class AsControlForm extends AsControl {
+
+    formName = input<string>(null, {alias: 'name'});
+
+    isDisabled = model(false, {alias : "disabled"})
+
     abstract form : AsControlForm
+
+    // @ts-ignore
+    override get name() : string {
+        return this.formName()
+    }
 
     abstract addControl(name : string | number, control: AsControl) : void
     abstract removeControl(name : string | number, control: AsControl) : void
 }
 
+@Directive()
 export abstract class AsControlSingleForm extends AsControlForm {
+
+    onChangeListener = (name: string, val: any) => {
+        if (this.model()) {
+            this.model()[name].set(val)
+        }
+    };
+
+    model = model<any>({}, {alias: "asModel"})
 
     override control: FormGroup = new AsFormGroup({})
 
     override descriptor: ObjectDescriptor
+
+    addControl(name: string | number, control: AsControl) {
+        control.descriptor = this.descriptor.properties[name];
+        const model = this.model();
+        if (model) {
+            const metaSignal: MetaSignal<any> = model[name];
+            const valueAccessor = control.valueAccessor;
+            valueAccessor.registerOnChange(this.onChangeListener);
+            if (metaSignal) {
+                const value = metaSignal();
+                control.instance = metaSignal.instance;
+                valueAccessor.writeValue(value);
+                if (control instanceof AsControlInput) {
+                    control.writeDefaultValue(value);
+                }
+            }
+        }
+
+        this.control.addControl(name as string, control.control);
+
+        control.controlAdded();
+    }
+
+    removeControl(name: string | number, control: AsControl) {
+        control.valueAccessor.unRegisterOnChange(this.onChangeListener);
+        this.control.removeControl(name as string)
+    }
+
 }
 
 export abstract class AsControlArrayForm extends AsControlForm {
@@ -139,4 +187,5 @@ export abstract class AsControlArrayForm extends AsControlForm {
     override control: FormArray = new FormArray([])
 
     override descriptor: ObjectDescriptor
+
 }

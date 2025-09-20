@@ -1,9 +1,7 @@
 import {Directive, effect, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
 import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
-import {AsControl, AsControlForm, AsControlSingleForm, AsControlValueAccessor, AsFormGroup} from "../../as-control";
+import {AsControl, AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccessor} from "../../as-control";
 import {MetaSignal} from "../../../meta-signal/meta-signal";
-import {ObjectDescriptor} from "../../../domain/descriptors";
-import {AsFormArray} from "../../../components/input/as-form-array/as-form-array";
 
 @Directive({
     selector: 'form[asModel], fieldset',
@@ -26,17 +24,7 @@ import {AsFormArray} from "../../../components/input/as-form-array/as-form-array
 })
 export class AsForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit, OnDestroy {
 
-    onChangeListener = (name: string, val: any) => {
-        if (this.model()) {
-            this.model()[name].set(val)
-        }
-    };
-
-    model = model<any>({}, {alias: "asModel"})
-
-    formName = input<string>(null, {alias: "name"})
-
-    form = inject(AsControlForm, {skipSelf : true, optional : true})
+    form = inject(AsControlForm, {skipSelf: true, optional: true})
 
     el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
         .nativeElement
@@ -71,31 +59,6 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
         }
     }
 
-    addControl(name : string | number, control: AsControl) {
-        control.descriptor = this.descriptor.properties[name];
-        const model = this.model();
-        if (model) {
-            const metaSignal: MetaSignal<any> = model[name];
-            const valueAccessor = control.valueAccessor;
-            valueAccessor.registerOnChange(this.onChangeListener);
-            if (metaSignal) {
-                const value = metaSignal();
-                control.instance = metaSignal.instance;
-                valueAccessor.writeValue(value);
-                valueAccessor.writeDefaultValue(value);
-            }
-        }
-
-        this.control.addControl(name as string, control.control);
-
-        control.controlAdded();
-    }
-
-    removeControl(name : string | number, control: AsControl) {
-        control.valueAccessor.unRegisterOnChange(this.onChangeListener);
-        this.control.removeControl(name as string)
-    }
-
     override get value(): any {
         return this.model();
     }
@@ -104,10 +67,7 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
         this.model.set(obj);
     }
 
-    writeDefaultValue(obj: any): void {
-    }
-
-    setDisabledState?(isDisabled: boolean): void {
+    setDisabledState(isDisabled: boolean): void {
         this.el.disabled = isDisabled;
         Object.values(this.control.controls).forEach(c => {
             if ((c as any).valueAccessor) {

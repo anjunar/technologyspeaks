@@ -6,6 +6,7 @@ import {
     input, OnDestroy,
     OnInit,
     signal,
+    model,
     TemplateRef, viewChild,
     ViewContainerRef,
     ViewEncapsulation
@@ -43,8 +44,6 @@ import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
     ]
 })
 export class AsFormArray extends AsControlArrayForm implements AsControlValueAccessor, AfterContentInit, OnInit, OnDestroy {
-
-    formName = input<string>(null, {alias: 'name'});
 
     itemTemplate = contentChild(TemplateRef<any>)
 
@@ -89,10 +88,6 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
         this.renderItems();
     }
 
-    writeDefaultValue(obj: any): void {
-        this.writeValue(obj);
-    }
-
     addItem() {
         let ctor = this.newInstance()
         this.model.update(arr => [...arr, this.form.model().$instance(ctor)]);
@@ -116,14 +111,20 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
     }
 
     setDisabledState(isDisabled: boolean): void {
-    }
-
-    controlAdded(): void {
+        this.isDisabled.set(isDisabled)
+        this.control.controls.forEach(c => {
+            if ((c as any).valueAccessor) {
+                (c as any).valueAccessor.setDisabledState(isDisabled);
+            }
+        });
     }
 
     override get value() {
         return this.model();
 
+    }
+
+    controlAdded(): void {
     }
 
     override valueAccessor: AsControlValueAccessor = this;
