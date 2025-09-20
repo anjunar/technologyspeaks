@@ -32,14 +32,14 @@ class UserInfo extends AbstractEntity with OwnerProvider {
   @PropertyDescriptor(title = "First Name", naming = true)
   @Basic
   @FormParam("firstName")
-  @NotEmpty
+  @NotBlank
   var firstName : String = uninitialized
   
   @Size(min = 3, max = 80)
   @PropertyDescriptor(title = "Last Name", naming = true)
   @Basic
   @FormParam("lastName")
-  @NotEmpty
+  @NotBlank
   var lastName : String = uninitialized
   
   @ManyToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[Media])

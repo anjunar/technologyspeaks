@@ -7,7 +7,7 @@ import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.vertx.engine.{EntitySchemaDef, OwnerRule, SchemaProvider}
 import jakarta.persistence.{Basic, Entity, OneToOne}
-import jakarta.validation.constraints.{NotEmpty, Pattern, Size}
+import jakarta.validation.constraints.{NotBlank, NotEmpty, Pattern, Size}
 import jakarta.ws.rs.FormParam
 
 import scala.compiletime.uninitialized
@@ -22,28 +22,28 @@ class Address extends AbstractEntity with EntityContext[Address] with OwnerProvi
   @Size(min = 3, max = 80)
   @PropertyDescriptor(title = "Street", naming = true)
   @FormParam("street")
-  @NotEmpty
+  @NotBlank
   var street: String = uninitialized
 
   @Basic
   @Size(min = 0, max = 10)
   @PropertyDescriptor(title = "House number", naming = true)
   @FormParam("number")
-  @NotEmpty
+  @NotBlank
   var number: String = uninitialized
 
   @Basic
   @Pattern(regexp = "^\\d{5,5}$")
   @PropertyDescriptor(title = "Zipcode")
   @FormParam("zipCode")
-  @NotEmpty
+  @NotBlank
   var zipCode: String = uninitialized
 
   @Basic
   @Size(min = 3, max = 80)
   @PropertyDescriptor(title = "Country")
   @FormParam("country")
-  @NotEmpty
+  @NotBlank
   var country: String = uninitialized
 
   override def owner: SecurityUser = user

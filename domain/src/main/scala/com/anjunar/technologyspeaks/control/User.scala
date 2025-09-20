@@ -32,7 +32,7 @@ class User extends Identity with OwnerProvider with SecurityUser with EntityCont
   @Column(unique = true)
   @Basic
   @FormParam("nickName")
-  @NotEmpty  
+  @NotBlank  
   var nickName: String = uninitialized
 
   @OneToMany(cascade = Array(CascadeType.ALL), mappedBy = "user", orphanRemoval = true)

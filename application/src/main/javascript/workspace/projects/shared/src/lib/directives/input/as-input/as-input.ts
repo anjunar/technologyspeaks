@@ -1,7 +1,15 @@
 import {Directive, ElementRef, inject, input, OnDestroy, OnInit} from '@angular/core';
 import {AsForm} from "../as-form/as-form";
-import {AbstractControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {AbstractControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
 import {AsControl, AsControlInput, AsControlValueAccessor} from "../../as-control";
+import {match} from "../../../pattern-match";
+import {
+    EmailValidator,
+    NotBlankValidator,
+    NotNullValidator,
+    PastValidator,
+    SizeValidator
+} from "../../../domain/descriptors";
 
 @Directive({
     selector: 'input',
@@ -70,9 +78,28 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
             }
 
             this.el.classList.toggle('dirty', this.dirty);
-
-
         });
+
+        Object.values(this.descriptor.validators || {})
+            .forEach((validator) => {
+                match(validator)
+                    .withObject(EmailValidator, validator => {
+                        this.control.addValidators(Validators.email)
+                    })
+                    .withObject(NotBlankValidator, validator => {
+                        this.control.addValidators(Validators.required)
+                    })
+                    .withObject(NotNullValidator, validator => {
+                        this.control.addValidators(Validators.required)
+                    })
+                    .withObject(PastValidator, validator => {
+
+                    })
+                    .withObject(SizeValidator, (validator) => {
+                        this.control.addValidators(Validators.minLength(validator.min))
+                        this.control.addValidators(Validators.max(validator.max))
+                    })
+            })
 
     }
 
