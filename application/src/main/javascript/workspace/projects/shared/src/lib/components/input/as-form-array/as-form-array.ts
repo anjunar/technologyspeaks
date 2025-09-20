@@ -10,11 +10,12 @@ import {
     ViewContainerRef,
     ViewEncapsulation
 } from '@angular/core';
-import {AsControl, AsControlArrayForm, AsControlValueAccessor} from "../../../directives/as-control";
+import {AsControl, AsControlArrayForm, AsControlForm, AsControlValueAccessor} from "../../../directives/as-control";
 import {CollectionDescriptor} from "../../../domain/descriptors";
 import {AsForm} from "../../../directives/input/as-form/as-form";
 import {AsMenu} from "../../layout/as-menu/as-menu";
 import {Constructor} from "../../../domain/container/ActiveObject";
+import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
 
 @Component({
     selector: 'form-array',
@@ -23,7 +24,24 @@ import {Constructor} from "../../../domain/container/ActiveObject";
     ],
     templateUrl: './as-form-array.html',
     styleUrl: './as-form-array.css',
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: AsFormArray,
+            multi: true,
+        },
+        {
+            provide: NgControl,
+            useExisting: AsFormArray,
+            multi: true
+        },
+        {
+            provide: AsControlForm,
+            useExisting: AsFormArray,
+            multi: true
+        }
+    ]
 })
 export class AsFormArray extends AsControlArrayForm implements AsControlValueAccessor, AfterContentInit, OnInit {
 
@@ -39,14 +57,14 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     vcr = viewChild("container", { read : ViewContainerRef })
 
-    insertControl(index: number, control: AsForm) {
+    addControl(name : string | number, control: AsControl): void {
         control.descriptor = this.descriptor;
-        control.valueAccessor.writeValue(this.model()[index] ?? null);
-        this.control.insert(index, control.control);
+        control.valueAccessor.writeValue(this.model()[name as number] ?? null);
+        this.control.insert(name as number, control.control);
         control.controlAdded();
     }
 
-    removeControlAt(index: number, control: AsControl) {
+    removeControl(name : string | number, control: AsControl): void {
     }
 
     ngOnInit(): void {
@@ -100,6 +118,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     override get value() {
         return this.model();
+
     }
 
     override valueAccessor: AsControlValueAccessor = this;

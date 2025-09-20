@@ -9,11 +9,11 @@
             </as-input-container>
             <form-array name="emails" [newInstance]="EMail">
                 <ng-template let-item>
-                    <fieldset [asModel]="item">
+                    <array-form [asModel]="item">
                         <as-input-container>
                             <input name="value"/>
                         </as-input-container>
-                    </fieldset>
+                    </array-form>
                 </ng-template>
             </form-array>
             <fieldset name="info">

@@ -36,6 +36,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
 
     text = signal("Please click here...")
 
+
     thumbnailUrl = computed(() => {
         let media = this.image();
         if (media) {

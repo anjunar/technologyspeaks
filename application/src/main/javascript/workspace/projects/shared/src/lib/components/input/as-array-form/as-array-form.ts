@@ -1,31 +1,39 @@
-import {Directive, effect, ElementRef, inject, input, model, OnDestroy, OnInit} from '@angular/core';
+import {Component, effect, ElementRef, inject, input, model, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {
+    AsControl,
+    AsControlArrayForm,
+    AsControlForm,
+    AsControlSingleForm,
+    AsControlValueAccessor
+} from "../../../directives/as-control";
+import {AsFormArray, MetaSignal} from "shared";
 import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
-import {AsControl, AsControlForm, AsControlSingleForm, AsControlValueAccessor, AsFormGroup} from "../../as-control";
-import {MetaSignal} from "../../../meta-signal/meta-signal";
-import {ObjectDescriptor} from "../../../domain/descriptors";
-import {AsFormArray} from "../../../components/input/as-form-array/as-form-array";
 
-@Directive({
-    selector: 'form[asModel], fieldset',
+@Component({
+    selector: 'array-form',
+    imports: [],
+    templateUrl: './as-array-form.html',
+    styleUrl: './as-array-form.css',
+    encapsulation: ViewEncapsulation.None,
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
-            useExisting: AsForm,
+            useExisting: AsArrayForm,
             multi: true,
         },
         {
             provide: NgControl,
-            useExisting: AsForm,
+            useExisting: AsArrayForm,
             multi: true
         },
         {
             provide: AsControlForm,
-            useExisting: AsForm,
+            useExisting: AsArrayForm,
             multi: true
-        }
+        },
     ]
 })
-export class AsForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit, OnDestroy {
+export class AsArrayForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit {
 
     onChangeListener = (name: string, val: any) => {
         if (this.model()) {
@@ -37,8 +45,7 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
 
     formName = input<string>(null, {alias: "name"})
 
-    forms = (inject(AsControlForm, {skipSelf : true, optional : true}) as unknown as AsControlForm[])
-    form = this.forms?.[0];
+    form: AsFormArray = inject(AsFormArray)
 
     el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
         .nativeElement
@@ -58,22 +65,11 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
     }
 
     ngOnInit(): void {
-        if (this.form) {
-            if (this.form instanceof AsForm) {
-                this.form.addControl(this.formName(), this)
-            }
-        } else {
-            this.descriptor = this.model().$meta.descriptors
-        }
+        let indexOf = this.form.model().indexOf(this.model());
+        this.form.addControl(indexOf, this)
     }
 
-    ngOnDestroy(): void {
-        if (this.form instanceof AsForm) {
-            this.form.removeControl(this.formName(), this)
-        }
-    }
-
-    addControl(name : string | number, control: AsControl) {
+    addControl(name: string | number, control: AsControl) {
         control.descriptor = this.descriptor.properties[name];
         const model = this.model();
         if (model) {
@@ -93,9 +89,14 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
         control.controlAdded();
     }
 
-    removeControl(name : string | number, control: AsControl) {
+    removeControl(name: string | number, control: AsControl) {
         control.valueAccessor.unRegisterOnChange(this.onChangeListener);
         this.control.removeControl(name as string)
+    }
+
+    removeFromArray() {
+        let indexOf = this.form.model().indexOf(this.model());
+        this.form.removeItem(indexOf)
     }
 
     override get value(): any {
@@ -144,3 +145,4 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
 
     override valueAccessor: AsControlValueAccessor = this;
 }
+

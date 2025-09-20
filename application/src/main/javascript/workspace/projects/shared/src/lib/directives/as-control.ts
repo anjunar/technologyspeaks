@@ -101,7 +101,7 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 
     inputName = input<string>("", {alias: "name"})
 
-    form = inject(AsForm)
+    form = (inject(AsControlForm) as unknown as AsControlForm[])[0];
 
     override control: AbstractControl = new FormControl()
 
@@ -121,13 +121,20 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 }
 
 export abstract class AsControlForm extends AsControl {
+    abstract form : AsControlForm
+
+    abstract addControl(name : string | number, control: AsControl) : void
+    abstract removeControl(name : string | number, control: AsControl) : void
+}
+
+export abstract class AsControlSingleForm extends AsControlForm {
 
     override control: FormGroup = new AsFormGroup({})
 
     override descriptor: ObjectDescriptor
 }
 
-export abstract class AsControlArrayForm extends AsControl {
+export abstract class AsControlArrayForm extends AsControlForm {
 
     override control: FormArray = new FormArray([])
 
