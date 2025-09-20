@@ -43,7 +43,7 @@ trait EntityContext[E <: EntityContext[E]] extends IdProvider {
         val aClass = TypeResolver.resolve(annotation.annotationType)
         val method = aClass.findMethod("property")
 
-        val path = new util.ArrayList[AnyRef]()
+        val path = new util.ArrayList[Any]()
 
         if (method == null)
           violation.getPropertyPath.forEach(node => path.add(node.getName))

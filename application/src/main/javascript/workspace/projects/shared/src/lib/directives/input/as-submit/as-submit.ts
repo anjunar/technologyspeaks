@@ -1,16 +1,16 @@
 import {Directive, ElementRef, inject, output} from '@angular/core';
 import {ActiveObject, AsForm, Mapper} from "shared";
 import {HttpClient, HttpErrorResponse, HttpRequest, HttpResponse} from "@angular/common/http";
-import {AbstractControl} from "@angular/forms";
+import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 
 export interface AsResponse<E> {
-    name : string
-    response : E
-    form : AsForm
+    name: string
+    response: E
+    form: AsForm
 }
 
 @Directive({
-  selector: 'form[asSubmit]'
+    selector: 'form[asSubmit]'
 })
 export class AsSubmit {
 
@@ -20,43 +20,52 @@ export class AsSubmit {
 
     http = inject(HttpClient)
 
-    submit = output<AsResponse<any>>({alias : "asSubmit"})
+    submit = output<AsResponse<any>>({alias: "asSubmit"})
 
-    setServerError(path: string[], error: any) {
-        function setServerErrorRecursive(form: AsForm, path: string[], error: any) {
+    setServerError(path: any[], error: any) {
+        function setServerErrorRecursive(form: AbstractControl, path: any[], error: any) {
             if (path.length === 0) {
-                const existing = form.control?.errors || {};
-                form.control?.setErrors({
+                const existing = form.errors || {};
+                form.setErrors({
                     ...existing,
-                    server: {message : error}
+                    server: {message: error}
                 });
                 return;
             }
 
-            const [segment, ...rest] = path;
-            const controls = Object.values(form.control.controls)
+            if (form instanceof FormArray) {
+                const [segment, ...rest] = path;
+                setServerErrorRecursive(form.controls[segment], rest, error)
+            } else if (form instanceof FormGroup) {
+                const [segment, ...rest] = path;
+                let control = form.controls[segment] as AbstractControl;
 
-            if (!controls) {
-                return;
-            }
+                if (control instanceof FormGroup) {
+                    const controls = control.controls
 
-            for (const c of controls) {
-                if (rest.length === 0) {
-                    const formControl = c
-                    if (formControl) {
-                        const existing = formControl.errors || {};
-                        formControl.setErrors({
-                            ...existing,
-                            server: {message : error}
-                        });
+                    for (const c of Object.values(controls)) {
+                        if (rest.length === 0) {
+                            const formControl = c
+                            if (formControl) {
+                                const existing = formControl.errors || {};
+                                formControl.setErrors({
+                                    ...existing,
+                                    server: {message: error}
+                                });
+                            }
+                        } else {
+                            setServerErrorRecursive(c, rest, error);
+                        }
                     }
-                } else if (c instanceof AsForm) {
-                    setServerErrorRecursive(c, rest, error);
+                } else {
+                    setServerErrorRecursive(control, rest, error)
                 }
             }
+
+
         }
 
-        setServerErrorRecursive(this.asForm, path, error);
+        setServerErrorRecursive(this.asForm.control, path, error);
     }
 
     constructor() {
@@ -68,22 +77,22 @@ export class AsSubmit {
 
             this.http.request<ActiveObject>(new HttpRequest(link.method as any, "/service" + link.url, Mapper.toJson(activeObject)))
                 .subscribe({
-                    next : (value) => {
+                    next: (value) => {
                         let response = value as HttpResponse<any>
-                        this.submit.emit({name : button.name, response : response.body, form : this.asForm})
+                        this.submit.emit({name: button.name, response: response.body, form: this.asForm})
                     },
-                    error : (err: HttpErrorResponse) => {
+                    error: (err: HttpErrorResponse) => {
                         const grouped = new Map<string, { path: any[], messages: string[] }>();
 
                         err.error.forEach((e: any) => {
                             const key = JSON.stringify(e.path);
                             if (!grouped.has(key)) {
-                                grouped.set(key, { path: e.path, messages: [] });
+                                grouped.set(key, {path: e.path, messages: []});
                             }
                             grouped.get(key)!.messages.push(e.message);
                         });
 
-                        grouped.forEach(({ path, messages }) => {
+                        grouped.forEach(({path, messages}) => {
                             this.setServerError(path, messages);
                         });
                     }

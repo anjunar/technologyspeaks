@@ -14,7 +14,7 @@ import scala.jdk.CollectionConverters.*
 class EntitySecurity {
 
   def checkRestrictionAndViolations(annotations: Array[Annotation], context: Context, value: AnyRef) = {
-    val path = new util.ArrayList[AnyRef]()
+    val path = new util.ArrayList[Any]()
 
     val violations: ListBuffer[ValidationViolation] = new ListBuffer[ValidationViolation]()
 
@@ -29,21 +29,21 @@ class EntitySecurity {
     }
   }
 
-  def traverseContext(context: Context, path: util.List[AnyRef], callback: (util.List[AnyRef], Context) => Unit): Unit = {
+  def traverseContext(context: Context, path: util.List[Any], callback: (util.List[Any], Context) => Unit): Unit = {
     callback(path, context)
     context.children.foreach(entry => {
-      val paths = new util.ArrayList[AnyRef](path)
+      val paths = new util.ArrayList[Any](path)
       paths.add(entry._1)
       traverseContext(entry._2, paths, callback)
     })
   }
 
-  def extractViolations(context: Context, path: util.List[AnyRef]): mutable.Set[ValidationViolation] = {
+  def extractViolations(context: Context, path: util.List[Any]): mutable.Set[ValidationViolation] = {
     context
       .violations
       .asScala
       .map(violation => {
-        val newPath = util.ArrayList[AnyRef](path)
+        val newPath = util.ArrayList[Any](path)
         newPath.add(violation.getPropertyPath.toString)
         new ValidationViolation(newPath, violation.getMessage, violation.getRootBeanClass.getSimpleName)
       })

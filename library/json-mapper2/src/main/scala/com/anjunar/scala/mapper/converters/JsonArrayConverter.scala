@@ -33,14 +33,22 @@ class JsonArrayConverter extends JsonAbstractConverter(TypeResolver.resolve(clas
       
       val javaCollection = instance.asInstanceOf[util.Collection[IdProvider]]
 
-      val futures = array.value.map(node => converter.toJava(node, javaCollection.asScala.find(elem => {
-        val option = node.asInstanceOf[JsonObject].value.get("id")
-        if (option.isEmpty) {
-          false
-        } else {
-          elem.id.toString == option.get.value.toString  
-        }
-      }).orNull, aType.typeArguments.head, context).toCompletableFuture)
+      var index = 0
+      
+      val futures = array.value.map(node => {
+        val newContext = JsonContext(context, index, context.noValidation, context.schema, context)
+        val result = converter.toJava(node, javaCollection.asScala.find(elem => {
+          val option = node.asInstanceOf[JsonObject].value.get("id")
+          if (option.isEmpty) {
+            false
+          } else {
+            elem.id.toString == option.get.value.toString
+          }
+        }).orNull, aType.typeArguments.head, newContext).toCompletableFuture
+
+        index = index + 1
+        result
+      })
       
       CompletableFuture.allOf(futures.toArray*)
         .thenApply(_ => {

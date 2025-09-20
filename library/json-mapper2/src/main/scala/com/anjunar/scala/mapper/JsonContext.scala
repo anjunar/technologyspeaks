@@ -10,7 +10,7 @@ import scala.collection.mutable
 import scala.compiletime.uninitialized
 
 case class JsonContext(parent : JsonContext,
-                       name : String,
+                       name : Any,
                        noValidation : Boolean,
                        validator : Validator,
                        registry: JsonConverterRegistry,
@@ -23,7 +23,7 @@ case class JsonContext(parent : JsonContext,
 
 object JsonContext {
 
-  def apply(parent : JsonContext, propertyName: String, noValidation : Boolean, propertySchema : SchemaBuilder, context: JsonContext): JsonContext = {
+  def apply(parent : JsonContext, propertyName: Any, noValidation : Boolean, propertySchema : SchemaBuilder, context: JsonContext): JsonContext = {
     val newContext = JsonContext(
       parent,
       propertyName,
