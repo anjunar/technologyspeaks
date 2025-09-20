@@ -29,9 +29,9 @@ export const serverCookieInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req).pipe(
         catchError((error) => {
             if (error.status === 403) {
-                const currentUrl = router.url;
+                const currentUrl = window.location.pathname + window.location.search
                 router.navigate(['/security/login'], {
-                    queryParams: { link: currentUrl }
+                    queryParams: { redirect: currentUrl }
                 });
             }
             return throwError(() => error);

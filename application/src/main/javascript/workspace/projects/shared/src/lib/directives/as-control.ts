@@ -125,8 +125,6 @@ export abstract class AsControlForm extends AsControl {
 
     formName = input<string>(null, {alias: 'asName'});
 
-    isDisabled = model(false, {alias : "disabled"})
-
     abstract form : AsControlForm
 
     // @ts-ignore

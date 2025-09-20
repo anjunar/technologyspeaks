@@ -2,9 +2,11 @@ import {Directive, effect, ElementRef, inject, input, model, OnDestroy, OnInit} 
 import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControl, AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccessor} from "../../as-control";
 import {MetaSignal} from "../../../meta-signal/meta-signal";
+import {Constructor} from "../../../domain/container/ActiveObject";
 
 @Directive({
     selector: 'form[asModel], fieldset[asName]',
+    exportAs : "AsForm",
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -28,6 +30,8 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
 
     el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
         .nativeElement
+
+    newInstance = input<Constructor<any>>(null)
 
     constructor() {
         super();
@@ -72,9 +76,30 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
         this.model.set(obj);
     }
 
+
+    toggleDisabled() {
+        this.setDisabledState(! this.el.disabled)
+    }
+
     setDisabledState(isDisabled: boolean): void {
+        if (isDisabled) {
+            this.model.set(null)
+        } else {
+            let model = this.model();
+            if (! model) {
+                let newInstance = this.newInstance();
+                if (newInstance) {
+                    let instance = (this.form as any).model().$instance(newInstance);
+                    this.model.set(instance)
+                }
+            }
+        }
         this.el.disabled = isDisabled;
-        this.controls.forEach(control => (control as any).setDisabledState(isDisabled))
+        this.controls.forEach(control => {
+            if (control instanceof AsControlInput) {
+                control.valueAccessor.setDisabledState(isDisabled)
+            }
+        })
     }
 
     override get dirty(): boolean {

@@ -4,6 +4,7 @@ import {
     contentChild,
     inject,
     input,
+    model,
     OnDestroy,
     OnInit,
     signal,
@@ -52,6 +53,8 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
     newInstance = input.required<Constructor<any>>()
 
     vcr = viewChild("container", {read: ViewContainerRef})
+
+    isDisabled = model(false, {alias : "disabled"})
 
     addControl(name: string | number, control: AsControl): void {
         control.descriptor = this.descriptor;

@@ -21,7 +21,7 @@ export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: P
             let type = findType(ctor);
             let result = JSONDeserializer<E>({ $type : type });
             let objectDescriptor = schema as ObjectDescriptor
-            let nodeDescriptor = Object.values(objectDescriptor.properties).find(node => node.$type === type);
+            let nodeDescriptor = Object.values(objectDescriptor.properties).find(node => node.type === type);
             traverseObjectGraph(result, nodeDescriptor, prop)
             return result
         }
@@ -53,8 +53,8 @@ export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: P
                         }
                     }))
 
-                    .withObject(ObjectDescriptor, (jsonObject) => traverseObjectGraph(value, jsonObject, object.$meta.instance[key]))
-                    .withObject(NodeDescriptor, (jsonObject) => traverseObjectGraph(value, jsonObject, object.$meta.instance[key]))
+                    .withObject(ObjectDescriptor, (jsonObject) => traverseObjectGraph(value, jsonObject, object.$meta?.instance?.[key] || {}))
+                    .withObject(NodeDescriptor, (jsonObject) => traverseObjectGraph(value, jsonObject, object.$meta?.instance?.[key] || {}))
                     .nonExhaustive()
             }
         })

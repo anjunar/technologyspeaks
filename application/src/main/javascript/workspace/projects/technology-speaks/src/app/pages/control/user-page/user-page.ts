@@ -2,6 +2,8 @@ import {Component, model, ViewEncapsulation} from '@angular/core';
 import User from "../../../domain/control/User";
 import {AsArrayForm, AsForm, AsFormArray, AsImage, AsInput, AsInputContainer, AsResponse, AsSubmit} from "shared";
 import EMail from "../../../domain/control/EMail";
+import UserInfo from "../../../domain/control/UserInfo";
+import Address from "../../../domain/control/Address";
 
 @Component({
     selector: 'user-page',
@@ -21,4 +23,6 @@ export class UserPage {
     }
 
     protected readonly EMail = EMail;
+    protected readonly UserInfo = UserInfo;
+    protected readonly Address = Address;
 }

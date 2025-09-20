@@ -1,6 +1,6 @@
 <form [(asModel)]="user" (asSubmit)="onSubmit($event)">
     <div class="container">
-        <fieldset asName="info">
+        <fieldset asName="info" [newInstance]="UserInfo">
             <as-image style="width: 300px; height: 300px" asName="image"/>
         </fieldset>
         <div>
@@ -16,8 +16,8 @@
                     </array-form>
                 </ng-template>
             </form-array>
-            <fieldset asName="info">
-                <legend>User Info<input type="checkbox"></legend>
+            <fieldset asName="info" #info="AsForm" [newInstance]="UserInfo">
+                <legend>User Info<input type="checkbox" (click)="info.toggleDisabled()"></legend>
                 <as-input-container>
                     <input asName="firstName"/>
                 </as-input-container>
@@ -28,8 +28,8 @@
                     <input asName="birthDate"/>
                 </as-input-container>
             </fieldset>
-            <fieldset asName="address">
-                <legend>Address<input type="checkbox"></legend>
+            <fieldset asName="address" #address="AsForm" [newInstance]="Address">
+                <legend>Address<input type="checkbox" (click)="address.toggleDisabled()"></legend>
                 <as-input-container>
                     <input asName="street"/>
                 </as-input-container>
