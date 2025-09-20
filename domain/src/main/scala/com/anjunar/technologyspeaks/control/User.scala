@@ -35,7 +35,7 @@ class User extends Identity with OwnerProvider with SecurityUser with EntityCont
   @NotEmpty  
   var nickName: String = uninitialized
 
-  @OneToMany(cascade = Array(CascadeType.ALL), mappedBy = "user")
+  @OneToMany(cascade = Array(CascadeType.ALL), mappedBy = "user", orphanRemoval = true)
   @PropertyDescriptor(title = "Emails", widget = "form-array")
   val emails: util.Set[EMail] = new util.HashSet[EMail]()
 

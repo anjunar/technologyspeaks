@@ -101,7 +101,7 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 
     inputName = input<string>("", {alias: "name"})
 
-    form = (inject(AsControlForm) as unknown as AsControlForm[])[0];
+    form = inject(AsControlForm)
 
     override control: AbstractControl = new FormControl()
 

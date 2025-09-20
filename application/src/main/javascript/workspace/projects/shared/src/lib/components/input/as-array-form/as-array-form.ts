@@ -28,8 +28,7 @@ import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
         },
         {
             provide: AsControlForm,
-            useExisting: AsArrayForm,
-            multi: true
+            useExisting: AsArrayForm
         },
     ]
 })

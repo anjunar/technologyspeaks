@@ -38,8 +38,7 @@ import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
         },
         {
             provide: AsControlForm,
-            useExisting: AsFormArray,
-            multi: true
+            useExisting: AsFormArray
         }
     ]
 })
@@ -98,6 +97,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     removeItem(index: number) {
         this.model.update(arr => arr.filter((_, i) => i !== index));
+        this.form.model()[this.formName()] = this.model()
         this.renderItems();
     }
 

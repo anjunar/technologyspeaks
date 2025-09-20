@@ -20,8 +20,7 @@ import {AsFormArray} from "../../../components/input/as-form-array/as-form-array
         },
         {
             provide: AsControlForm,
-            useExisting: AsForm,
-            multi: true
+            useExisting: AsForm
         }
     ]
 })
@@ -37,8 +36,7 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
 
     formName = input<string>(null, {alias: "name"})
 
-    forms = (inject(AsControlForm, {skipSelf : true, optional : true}) as unknown as AsControlForm[])
-    form = this.forms?.[0];
+    form = inject(AsControlForm, {skipSelf : true, optional : true})
 
     el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
         .nativeElement
