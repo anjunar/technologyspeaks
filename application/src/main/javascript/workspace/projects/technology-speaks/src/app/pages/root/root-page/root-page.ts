@@ -1,5 +1,5 @@
 import {Component, computed, inject, input, signal, ViewEncapsulation} from '@angular/core';
-import {AsDrawer, AsDrawerContainer, AsDrawerContent, AsToolbar, AsViewPort} from "shared";
+import {AsDrawer, AsDrawerContainer, AsDrawerContent, AsIcon, AsToolbar, AsViewPort} from "shared";
 import {RouterLink, RouterOutlet} from "@angular/router";
 import Application from "../../../domain/Application";
 import {AppService} from "../../../app.service";
@@ -13,7 +13,8 @@ import {AppService} from "../../../app.service";
         AsToolbar,
         RouterOutlet,
         RouterLink,
-        AsViewPort
+        AsViewPort,
+        AsIcon
     ],
     templateUrl: './root-page.html',
     styleUrl: './root-page.css',

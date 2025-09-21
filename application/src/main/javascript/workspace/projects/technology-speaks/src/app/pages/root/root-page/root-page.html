@@ -1,10 +1,10 @@
 <as-toolbar>
     <div ngProjectAs="left">
-        <button type="button" class="material-icons" (click)="open.set(! open())">menu</button>
+        <button type="button" (click)="open.set(! open())"><as-icon value="menu"/></button>
     </div>
     <div ngProjectAs="right">
         @if (links()['logout']; as link) {
-            <a [routerLink]="link.url" class="center"><span class="material-icons">logout</span></a>
+            <a [routerLink]="link.url" class="center"><as-icon value="logout"/></a>
         }
     </div>
 </as-toolbar>
@@ -13,25 +13,22 @@
         <ul>
             @if (links()['login']; as link) {
                 <li>
-                    <a [routerLink]="link.url" class="center"><span class="material-icons">login</span> {{ link.title }}</a>
+                    <a [routerLink]="link.url" class="center"><as-icon value="login"/>{{ link.title }}</a>
                 </li>
             }
             @if (links()['register']; as link) {
                 <li>
-                    <a [routerLink]="link.url" class="center"><span
-                            class="material-icons">app_registration</span> {{ link.title }}</a>
+                    <a [routerLink]="link.url" class="center"><as-icon value="app_registration"/> {{ link.title }}</a>
                 </li>
             }
             @if (links()['users']; as link) {
                 <li>
-                    <a [routerLink]="link.url" class="center"><span
-                            class="material-icons">groups</span> {{ link.title }}</a>
+                    <a [routerLink]="link.url" class="center"><as-icon value="groups"/> {{ link.title }}</a>
                 </li>
             }
             @if (links()['documents']; as link) {
                 <li>
-                    <a [routerLink]="link.url" class="center"><span
-                            class="material-icons">menu_book</span> {{ link.title }}</a>
+                    <a [routerLink]="link.url" class="center"><as-icon value="menu_book"/> {{ link.title }}</a>
                 </li>
             }
 

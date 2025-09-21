@@ -1,6 +1,7 @@
 import {Component, input, model, signal, ViewEncapsulation} from '@angular/core';
 import {CropperPosition, ImageCroppedEvent, ImageCropperComponent, LoadedImage} from 'ngx-image-cropper';
-import {AsImage, Media, Thumbnail} from "shared";
+import {AsImage} from "../as-image";
+import {Media, Thumbnail} from "../../../../domain/types";
 
 @Component({
     selector: 'as-image-process',

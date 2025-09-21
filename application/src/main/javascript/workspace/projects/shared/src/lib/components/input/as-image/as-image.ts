@@ -3,9 +3,9 @@ import {AbstractControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@
 import {AsControlInput, AsControlValueAccessor} from "../../../directives/as-control";
 import {AsForm} from "../../../directives/input/as-form/as-form";
 import Media from "../../../domain/types/Media";
-import {WindowManagerService} from "shared";
 import {AsImageProcess} from "./as-image-process/as-image-process";
 import {CropperPosition} from "ngx-image-cropper";
+import {WindowManagerService} from "../../modal/as-window/service/window-manager-service";
 
 @Component({
     selector: 'as-image',

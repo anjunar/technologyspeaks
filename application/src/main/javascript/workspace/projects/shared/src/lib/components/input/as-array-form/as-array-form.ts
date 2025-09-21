@@ -6,12 +6,15 @@ import {
     AsControlSingleForm,
     AsControlValueAccessor
 } from "../../../directives/as-control";
-import {AsFormArray, MetaSignal} from "shared";
 import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {AsIcon} from "../../layout/as-icon/as-icon";
+import {AsFormArray} from "../as-form-array/as-form-array";
 
 @Component({
     selector: 'array-form',
-    imports: [],
+    imports: [
+        AsIcon
+    ],
     templateUrl: './as-array-form.html',
     styleUrl: './as-array-form.css',
     encapsulation: ViewEncapsulation.None,

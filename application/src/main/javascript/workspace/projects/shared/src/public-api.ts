@@ -12,6 +12,8 @@ export * from './lib/components/input/as-input-container/as-input-container'
 
 export * from './lib/components/layout/as-menu/as-menu'
 
+export * from './lib/components/layout/as-icon/as-icon'
+
 export * from './lib/components/layout/as-drawer/as-drawer'
 export * from './lib/components/layout/as-drawer/as-drawer-container/as-drawer-container'
 export * from './lib/components/layout/as-drawer/as-drawer-content/as-drawer-content'

@@ -1,7 +1,9 @@
 {
   "name": "workspace",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
+    "subset-icons": "node scripts/subset-icons.js",
     "start": "ng build technology-speaks --watch --configuration development",
     "serve": "nodemon --inspect dist/technology-speaks/server/server.mjs"
   },
@@ -26,8 +28,11 @@
     "@angular/router": "^20.3.0",
     "@github/webauthn-json": "^2.1.1",
     "@js-joda/core": "^5.6.5",
+    "fs-extra": "^11.3.2",
+    "glob": "^11.0.3",
     "ngx-image-cropper": "^9.1.5",
     "rxjs": "~7.8.0",
+    "subset-font": "^2.4.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -42,6 +47,7 @@
     "@types/ws": "^8.18.1",
     "detect-port": "^2.1.0",
     "jasmine-core": "~5.9.0",
+    "jsdom": "^27.0.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
@@ -50,6 +56,7 @@
     "ng-packagr": "^20.3.0",
     "nodemon": "^3.1.10",
     "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "~5.9.2"
   }

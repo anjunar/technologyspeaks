@@ -8,9 +8,10 @@ import {
     NgControl,
     ValidatorFn
 } from "@angular/forms";
-import {AsForm, CollectionDescriptor, MetaSignal, NodeDescriptor, ObjectDescriptor} from "shared";
 import PropDescriptor from "../domain/descriptors/PropDescriptor";
 import {Directive, inject, input, model, OnDestroy, OnInit} from "@angular/core";
+import {NodeDescriptor, ObjectDescriptor} from "../domain/descriptors";
+import {MetaSignal} from "../meta-signal/meta-signal";
 
 export class AsFormGroup extends FormGroup {
     constructor(

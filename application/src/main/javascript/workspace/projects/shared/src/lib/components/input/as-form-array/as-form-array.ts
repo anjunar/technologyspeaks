@@ -18,10 +18,13 @@ import {CollectionDescriptor} from "../../../domain/descriptors";
 import {AsForm} from "../../../directives/input/as-form/as-form";
 import {Constructor} from "../../../domain/container/ActiveObject";
 import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
+import {AsIcon} from "../../layout/as-icon/as-icon";
 
 @Component({
     selector: 'form-array',
-    imports: [],
+    imports: [
+        AsIcon
+    ],
     templateUrl: './as-form-array.html',
     styleUrl: './as-form-array.css',
     encapsulation: ViewEncapsulation.None,

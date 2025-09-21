@@ -1,11 +1,13 @@
 import {Component, computed, ElementRef, inject, input, ViewEncapsulation} from '@angular/core';
 import {WindowConfig, WindowManagerService} from "./service/window-manager-service";
 import {NgComponentOutlet} from "@angular/common";
+import {AsIcon} from "../../layout/as-icon/as-icon";
 
 @Component({
     selector: 'as-window',
     imports: [
-        NgComponentOutlet
+        NgComponentOutlet,
+        AsIcon
     ],
     templateUrl: './as-window.html',
     styleUrl: './as-window.css',

@@ -1,5 +1,5 @@
 <div class="header" (mousedown)="dragElementMouseDown($event)">
-    <button type="button" class="material-icons" (click)="close()">close</button>
+    <button type="button" (click)="close()"><as-icon value="close"/></button>
 </div>
 <ng-container *ngComponentOutlet="window().component; inputs: window().inputs"></ng-container>
 @if (resizable()) {

@@ -1,4 +1,4 @@
-import {Component, contentChild, effect, ElementRef, input, signal, ViewEncapsulation} from '@angular/core';
+import {Component, contentChild, effect, ElementRef, input, model, signal, ViewEncapsulation} from '@angular/core';
 import {NgControl} from "@angular/forms";
 import {AsControlInput} from "../../../directives/as-control";
 
@@ -10,7 +10,7 @@ import {AsControlInput} from "../../../directives/as-control";
 })
 export class AsInputContainer {
 
-    placeholder = signal<string>("")
+    placeholder = model<string>("")
 
     control = contentChild(NgControl)
 
@@ -56,7 +56,10 @@ export class AsInputContainer {
                 }
             });
 
-            this.placeholder.set((asControl as AsControlInput).placeholder)
+            if (! this.placeholder()) {
+                this.placeholder.set((asControl as AsControlInput).placeholder)
+            }
+
             this.isEmpty.set(!asControl.value);
             this.dirty.set(asControl.dirty);
 

@@ -1,6 +1,6 @@
 @for (user of users().rows; track user.id) {
     <a [routerLink]="['/control/users/user', user.id]">
-        <div style="font-size:100px" class="material-icons">account_circle</div>
+        <as-icon style="font-size:100px" value="account_circle"></as-icon>
         <h2>{{user.nickName()}}</h2>
     </a>
 }

@@ -73,7 +73,7 @@ html[data-theme="dark"] {
     font-family: 'Material Icons';
     font-style: normal;
     font-weight: 400;
-    src: url(./material.woff2) format('woff');
+    src: url(./material-subset.woff2) format('woff2');
 }
 
 .material-icons {

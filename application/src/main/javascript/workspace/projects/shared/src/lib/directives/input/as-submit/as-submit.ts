@@ -1,7 +1,9 @@
 import {Directive, ElementRef, inject, output} from '@angular/core';
-import {ActiveObject, AsForm, Mapper} from "shared";
 import {HttpClient, HttpErrorResponse, HttpRequest, HttpResponse} from "@angular/common/http";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
+import {AsForm} from "../as-form/as-form";
+import {ActiveObject} from "../../../domain/container";
+import {Mapper} from "../../../mapper";
 
 export interface AsResponse<E> {
     name: string
