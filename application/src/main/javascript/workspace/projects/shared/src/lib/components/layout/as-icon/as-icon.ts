@@ -14,7 +14,7 @@ export class AsIcon {
     el = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>).nativeElement
 
     constructor() {
-        this.el.className = "material-icons"
+        this.el.classList.add("material-icons")
     }
 
 }

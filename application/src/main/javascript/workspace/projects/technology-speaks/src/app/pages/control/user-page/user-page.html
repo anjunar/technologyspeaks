@@ -17,7 +17,7 @@
                 </ng-template>
             </form-array>
             <fieldset asName="info" #info="AsForm" [newInstance]="UserInfo">
-                <legend>User Info<input type="checkbox" (click)="info.toggleDisabled()"></legend>
+                <legend>User Info<button type="button" (click)="info.toggleDisabled()"><as-icon class="middle" value="shield_toggle"/></button></legend>
                 <as-input-container>
                     <input asName="firstName"/>
                 </as-input-container>
@@ -29,7 +29,7 @@
                 </as-input-container>
             </fieldset>
             <fieldset asName="address" #address="AsForm" [newInstance]="Address">
-                <legend>Address<input type="checkbox" (click)="address.toggleDisabled()"></legend>
+                <legend>Address<button type="button" (click)="address.toggleDisabled()"><as-icon class="middle" value="shield_toggle"/></button></legend>
                 <as-input-container>
                     <input asName="street"/>
                 </as-input-container>
