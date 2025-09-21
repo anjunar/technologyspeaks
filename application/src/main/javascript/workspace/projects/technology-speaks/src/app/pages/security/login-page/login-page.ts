@@ -3,6 +3,8 @@ import {AsInputContainer} from "shared";
 import {FormsModule} from "@angular/forms";
 import * as webauthnJson from "@github/webauthn-json";
 import {Router} from "@angular/router";
+import {AppService} from "../../../app.service";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
     selector: 'login-page',
@@ -16,6 +18,10 @@ export class LoginPage {
     email = model<string>()
 
     router = inject(Router);
+
+    service = inject(AppService)
+
+    http = inject(HttpClient)
 
     async onSubmit() {
 
@@ -41,16 +47,11 @@ export class LoginPage {
         });
 
         if (responseFinish.ok) {
-            let link = responseFinish.headers.get("Link");
-            if (link) {
-                let regex = /<([^>]+)>; rel="(.+)"/g
-                let exec = regex.exec(link);
-                this.router.navigateByUrl(exec[1])
-            } else {
-                const params = new URLSearchParams(window.location.search)
-                let redirect = params.get("redirect");
-                this.router.navigateByUrl(redirect ? decodeURIComponent(redirect) : "/")
-            }
+            const params = new URLSearchParams(window.location.search)
+            let redirect = params.get("redirect");
+            this.service.run(this.http).then(() => {
+                this.router.navigateByUrl(redirect ? decodeURIComponent(redirect) : "/", {onSameUrlNavigation : "reload"})
+            })
         } else {
             alert("Something went wrong")
         }

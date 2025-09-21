@@ -9,6 +9,8 @@ import {JSONDeserializer, traverseObjectGraph} from "shared";
 import Application from "./domain/Application";
 import {UsersPage} from "./pages/control/users-page/users-page";
 import {UserPage} from "./pages/control/user-page/user-page";
+import {AppService} from "./app.service";
+import {LogoutPage} from "./pages/security/logout-page/logout-page";
 
 export const routes: Routes = [
     {
@@ -16,14 +18,19 @@ export const routes: Routes = [
         component : RootPage,
         resolve : {
             application : async () => {
+                const service = inject(AppService);
                 const http = inject(HttpClient);
-                return JSONDeserializer<Application>(await firstValueFrom(http.get('/service')))
+                return service.run(http)
             }
         },
         children : [
             {
                 path : "",
                 component : HomePage,
+            },
+            {
+                path : "security/logout",
+                component : LogoutPage
             },
             {
                 path : "security/login",

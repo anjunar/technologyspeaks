@@ -11,7 +11,7 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
         provideZonelessChangeDetection(),
-        provideRouter(routes, withComponentInputBinding(), withRouterConfig({ onSameUrlNavigation: 'reload' })),
+        provideRouter(routes, withComponentInputBinding()),
         // provideClientHydration(withEventReplay()),
         provideHttpClient(
             withInterceptors([serverCookieInterceptor]),

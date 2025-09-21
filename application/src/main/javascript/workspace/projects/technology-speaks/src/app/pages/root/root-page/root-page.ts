@@ -1,7 +1,8 @@
-import {Component, computed, input, signal, ViewEncapsulation} from '@angular/core';
+import {Component, computed, inject, input, signal, ViewEncapsulation} from '@angular/core';
 import {AsDrawer, AsDrawerContainer, AsDrawerContent, AsToolbar, AsViewPort} from "shared";
 import {RouterLink, RouterOutlet} from "@angular/router";
 import Application from "../../../domain/Application";
+import {AppService} from "../../../app.service";
 
 @Component({
     selector: 'root-page',
@@ -20,10 +21,10 @@ import Application from "../../../domain/Application";
 })
 export class RootPage {
 
-    application = input.required<Application>();
+    application = inject(AppService)
 
     open = signal(true)
 
-    links = computed(() => this.application().$meta.links);
+    links = computed(() => this.application.app().$meta.links);
 
 }

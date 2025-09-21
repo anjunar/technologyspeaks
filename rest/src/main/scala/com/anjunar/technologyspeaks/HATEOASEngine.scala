@@ -4,7 +4,7 @@ import com.anjunar.jaxrs.types.Table
 import com.anjunar.technologyspeaks.control.{User, UserResource, UsersResource}
 import com.anjunar.technologyspeaks.document.Document
 import com.anjunar.technologyspeaks.documents.{DocumentResource, DocumentsResource}
-import com.anjunar.technologyspeaks.security.{LoginFinishResource, LoginOptionsResource, RegisterFinishResource, RegisterOptionsResource}
+import com.anjunar.technologyspeaks.security.{LoginFinishResource, LoginOptionsResource, LogoutResource, RegisterFinishResource, RegisterOptionsResource}
 import com.anjunar.vertx.fsm.{FSMBuilder, FSMEngine, StateDef}
 import jakarta.enterprise.context.ApplicationScoped
 import org.hibernate.boot.model.process.internal.UserTypeResolution
@@ -21,6 +21,12 @@ class HATEOASEngine extends FSMEngine {
       view = "application",
       resource = classOf[ApplicationResource]
     ), application => {
+      
+      val logout = fsm.transition(StateDef(
+        rel = "logout", 
+        name = "Logout", 
+        resource = classOf[LogoutResource]
+      ), logout => Seq())
 
       val loginOptions = loginFlow(application)
 
@@ -30,7 +36,7 @@ class HATEOASEngine extends FSMEngine {
 
       val documentSearch = documentFlow
 
-      Seq(loginOptions, registerOptions, userSearch, documentSearch)
+      Seq(logout, loginOptions, registerOptions, userSearch, documentSearch)
     }
   )
 
