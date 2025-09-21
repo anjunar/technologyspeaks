@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import { WebSocketServer } from 'ws';
 import { renderApplication } from '@angular/platform-server';
 import bootstrap from './main.server';
