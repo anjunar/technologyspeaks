@@ -2,6 +2,7 @@ import {Component, input, model, signal, ViewEncapsulation} from '@angular/core'
 import {CropperPosition, ImageCroppedEvent, ImageCropperComponent, LoadedImage} from 'ngx-image-cropper';
 import {AsImage} from "../as-image";
 import {Media, Thumbnail} from "../../../../domain/types";
+import {AsControlSingleForm} from "../../../../directives/as-control";
 
 @Component({
     selector: 'as-image-process',
@@ -65,8 +66,8 @@ export class AsImageProcess {
         this.blobToBase64(image.original.objectUrl).then(base64 => {
             let decodeBase64 = this.decodeBase64(base64);
             let form = this.parent().form;
-            let media = form.form.value.$instance(Media)
-            let thumbnail = form.form.value.$instance(Thumbnail)
+            let media = (form as AsControlSingleForm).model().$instance(Media)
+            let thumbnail = (form as AsControlSingleForm).model().$instance(Thumbnail)
             media.thumbnail.set(thumbnail)
             media.data.set(decodeBase64.data)
             media.contentType.set(decodeBase64.contentType)

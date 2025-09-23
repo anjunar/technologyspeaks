@@ -1,5 +1,5 @@
 import {Directive, effect, ElementRef, inject} from '@angular/core';
-import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors, Validators} from "@angular/forms";
+import {AbstractControl, NG_VALUE_ACCESSOR, ValidationErrors} from "@angular/forms";
 import {AsControlInput, AsControlValueAccessor} from "../../as-control";
 import {match} from "../../../pattern-match";
 import {
@@ -17,11 +17,9 @@ import {
             provide: NG_VALUE_ACCESSOR,
             useExisting: AsInput,
             multi: true
-        },
-        {
-            provide: NgControl,
+        }, {
+            provide: AsControlInput,
             useExisting: AsInput,
-            multi: true
         }
     ]
 })
@@ -31,87 +29,25 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
 
     constructor() {
         super()
-        this.el.addEventListener("input", () => {
-            this.onChange.forEach(callback => callback(this.inputName(), this.el.value))
-            this.control.setValue(this.el.value, {emitEvent: true});
-        })
-        this.el.addEventListener("blur", () => {
-            this.onTouched.forEach(callback => callback())
-            this.el.classList.remove("focus")
-        })
+        this.el.addEventListener("input", () => this.onChange.forEach(callback => callback(this.name(), this.el.value, this.el.defaultValue, this.el)))
+        this.el.addEventListener("blur", () => this.onTouched.forEach(callback => callback(this.el)))
         this.el.addEventListener("focus", () => this.el.classList.add("focus"))
 
         effect(() => {
-            this.el.name = this.inputName()
+            this.el.name = this.name()
         });
-    }
-
-    get placeholder() {
-        return this.el.placeholder
-    }
-
-    set placeholder(value: string) {
-        this.el.placeholder = value
     }
 
     controlAdded(): void {
         this.el.type = this.descriptor.widget
-        this.placeholder = this.descriptor.title
-
-        this.control.statusChanges.subscribe(status => {
-            if (status === "INVALID") {
-                this.el.classList.add('invalid');
-            } else {
-                this.el.classList.remove('invalid');
-            }
-            if (status === "DISABLED") {
-                this.el.classList.add('disabled');
-            } else {
-                this.el.classList.remove('disabled');
-            }
-            if (status === "PENDING") {
-                this.el.classList.add('pending');
-            } else {
-                this.el.classList.remove('pending');
-            }
-            if (status === "VALID") {
-                this.el.classList.add("valid")
-            } else {
-                this.el.classList.remove("valid")
-            }
-
-            this.el.classList.toggle('dirty', this.dirty);
-        });
-
-        Object.values(this.descriptor.validators || {})
-            .forEach((validator) => {
-                match(validator)
-                    .withObject(EmailValidator, validator => {
-                        this.control.addValidators(Validators.email)
-                    })
-                    .withObject(NotBlankValidator, validator => {
-                        this.control.addValidators(Validators.required)
-                    })
-                    .withObject(NotNullValidator, validator => {
-                        this.control.addValidators(Validators.required)
-                    })
-                    .withObject(PastValidator, validator => {
-
-                    })
-                    .withObject(SizeValidator, (validator) => {
-                        this.control.addValidators(Validators.minLength(validator.min))
-                        this.control.addValidators(Validators.max(validator.max))
-                    })
-            })
-
+        this.placeholder.set(this.descriptor.title)
+        Object.values(this.descriptor.validators || {}).forEach(validator => {
+            this.addValidator(validator)
+        })
     }
 
     setDisabledState(isDisabled: boolean): void {
         this.el.disabled = isDisabled
-    }
-
-    override get value(): any {
-        return this.el.value
     }
 
     writeValue(obj: any): void {
@@ -130,37 +66,4 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
         }
     }
 
-    override get pristine(): boolean {
-        return this.el.value === this.el.defaultValue
-    }
-
-    override get dirty(): boolean {
-        return !this.pristine
-    }
-
-    override get errors(): ValidationErrors {
-        const e: ValidationErrors = {};
-        if (this.el.validity.valueMissing) e['required'] = true;
-        if (this.el.validity.tooShort) e['minlength'] = {
-            requiredLength: this.el.minLength,
-            actualLength: this.el.value.length
-        };
-        if (this.el.validity.tooLong) e['maxlength'] = {
-            requiredLength: this.el.maxLength,
-            actualLength: this.el.value.length
-        };
-        if (this.el.validity.typeMismatch) e['email'] = true;
-
-        if (this.control.errors) {
-            Object.assign(e, this.control.errors);
-        }
-
-        return Object.keys(e).length ? e : null;
-    }
-
-    override get path(): string[] | null {
-        return this.inputName() ? [this.inputName()] : null;
-    }
-
-    override valueAccessor: AsControlValueAccessor = this
 }

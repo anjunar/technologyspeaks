@@ -1,89 +1,90 @@
-import {Component, contentChild, effect, ElementRef, input, model, signal, ViewEncapsulation} from '@angular/core';
-import {NgControl} from "@angular/forms";
-import {AsControlInput} from "../../../directives/as-control";
+import {Component, contentChild, effect, ElementRef, model, signal, ViewEncapsulation,} from '@angular/core';
+import {AsControlInput} from '../../../directives/as-control';
+import {toObservable} from "@angular/core/rxjs-interop";
+import {match} from "../../../pattern-match";
+import {
+    EmailValidator,
+    NotBlankValidator,
+    NotNullValidator,
+    PastValidator,
+    SizeValidator
+} from "../../../domain/descriptors";
 
 @Component({
     selector: 'as-input-container',
     templateUrl: './as-input-container.html',
     styleUrl: './as-input-container.css',
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
 })
 export class AsInputContainer {
+    placeholder = model<string>('default');
+    control = contentChild(AsControlInput);
+    element = contentChild(AsControlInput, {read: ElementRef<HTMLInputElement>});
 
-    placeholder = model<string>("")
-
-    control = contentChild(NgControl)
-
-    element = contentChild(NgControl, {read: ElementRef<HTMLInputElement>})
-
-    focus = signal(false)
-
-    dirty = signal(false)
-
-    isEmpty = signal(true)
-
-    errors = signal([])
+    focus = signal(false);
+    dirty = signal(false);
+    isEmpty = signal(true);
+    errors = signal<string[]>([]);
 
     constructor() {
-        effect(() => {
-            let asControl = this.control();
-            let valueSub= asControl.control.valueChanges.subscribe((value) => {
-                this.isEmpty.set(!value);
-                this.dirty.set(asControl.dirty);
 
-                const e = this.control().errors
-                if (e && asControl.dirty) {
-                    const messages: string[] = []
-                    if (e['required']) messages.push('A value is required')
-                    if (e['minlength']) messages.push(`Minimum length: ${e['minlength'].requiredLength}`)
-                    if (e['maxlength']) messages.push(`Maximum length: ${e['maxlength'].requiredLength}`)
-                    if (e['email']) messages.push(`no valid Email`)
-                    if (e['server']) messages.push(e['server'].message)
-                    this.errors.set(messages)
-                } else {
-                    this.errors.set([])
+        toObservable(this.control)
+            .subscribe((control) => {
+                this.placeholder.set(control.placeholder());
+                this.isEmpty.set(!control.model());
+                this.dirty.set(control.dirty());
+
+                let placeHolderSubscription = control.placeholder.subscribe(value => {
+                    this.placeholder.set(value);
+                })
+
+
+                let errorSubscription = control.errors.subscribe(errors => {
+                    if (errors && control.dirty()) {
+                        let messages : unknown[] = errors.map(error => {
+                            return match(error)
+                                .withObject(EmailValidator, validator => "not a valid Email")
+                                .withObject(NotBlankValidator, validator => "not a Blank")
+                                .withObject(NotNullValidator, validator => "not Null")
+                                .withObject(PastValidator, validator => "not in the past")
+                                .withObject(SizeValidator, validator => `Size between ${validator.min} and ${validator.max}`)
+                                .nonExhaustive()
+                        })
+                        this.errors.set(messages as string[]);
+                    } else {
+                        this.errors.set([]);
+                    }
+                })
+
+                let controlSubscription = control.model.subscribe(value => {
+                    this.isEmpty.set(!value);
+                    this.dirty.set(control.dirty());
+                })
+
+                return () => {
+                    placeHolderSubscription.unsubscribe()
+                    errorSubscription.unsubscribe()
+                    controlSubscription.unsubscribe()
                 }
-            });
-
-            let statusSub = asControl.control.statusChanges.subscribe((value) => {
-                const e = this.control().errors
-                if (e) {
-                    const messages: string[] = []
-                    if (e['server']) messages.push(e['server'].message)
-                    this.errors.set(Object.assign(messages, this.errors()))
-                } else {
-                    this.errors.set([])
-                }
-            });
-
-            if (! this.placeholder()) {
-                this.placeholder.set((asControl as AsControlInput).placeholder)
-            }
-
-            this.isEmpty.set(!asControl.value);
-            this.dirty.set(asControl.dirty);
-
-            return () => {
-                valueSub.unsubscribe()
-                statusSub.unsubscribe()
-            }
-        })
+            })
 
         effect(() => {
-            const element: HTMLInputElement = this.element().nativeElement
+            const elRef = this.element();
+            const input: HTMLInputElement = elRef.nativeElement;
+            input.placeholder = this.placeholder();
 
-            element.placeholder = this.placeholder()
+            const onFocus = () => this.focus.set(true);
+            const onBlur = () => this.focus.set(false);
 
-            let focusListener = () => this.focus.set(true);
-            element.addEventListener('focus', focusListener)
-            let blurListener = () => this.focus.set(false);
-            element.addEventListener('blur', blurListener);
+            input.addEventListener('focus', onFocus);
+            input.addEventListener('blur', onBlur);
 
             return () => {
-                element.removeEventListener('focus', focusListener)
-                element.removeEventListener('blur', blurListener)
-            }
+                input.removeEventListener('focus', onFocus);
+                input.removeEventListener('blur', onBlur);
+            };
         });
-    }
 
+
+    }
 }

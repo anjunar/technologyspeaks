@@ -1,61 +1,44 @@
-import {
-    AbstractControl,
-    AbstractControlOptions,
-    AsyncValidatorFn,
-    ControlValueAccessor, FormArray,
-    FormControl,
-    FormGroup,
-    NgControl,
-    ValidatorFn
-} from "@angular/forms";
+import {ControlValueAccessor, ValidationErrors} from "@angular/forms";
 import PropDescriptor from "../domain/descriptors/PropDescriptor";
-import {Directive, inject, input, model, OnDestroy, OnInit} from "@angular/core";
+import {Directive, inject, input, model, ModelSignal, OnDestroy, OnInit, Signal, signal} from "@angular/core";
 import {NodeDescriptor, ObjectDescriptor} from "../domain/descriptors";
 import {MetaSignal} from "../meta-signal/meta-signal";
+import {AsForm} from "./input/as-form/as-form";
+import {Subject, Subscription} from "rxjs";
+import Validator from "../domain/descriptors/validators/Validator";
 
-export class AsFormGroup extends FormGroup {
-    constructor(
-        controls: { [key: string]: AbstractControl } = {},
-        validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null,
-        asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null
-    ) {
-        super(controls, validatorOrOpts, asyncValidator);
-    }
+export function value<T>(initial?: T) : ModelSignal<T> {
+    const _signal = signal<T | null>(initial ?? null);
+    const _subject = new Subject<T>();
+    const subscriptions: Subscription[] = [];
 
-    override addControl(name: string, control: AbstractControl, options?: { emitEvent?: boolean }): void {
-        const existing = this.controls[name];
+    const fn = (() => _signal()) as {
+        (): T | null;
+        set(value: T): void;
+        subscribe(callback: (value: T) => void): Subscription;
+        destroy(): void;
+    };
 
-        if (!existing) {
-            super.addControl(name, control, options);
-            return;
-        }
+    fn.set = (value: T) => {
+        _signal.set(value);
+        _subject.next(value);
+    };
 
-        if (existing instanceof FormGroup && control instanceof FormGroup) {
-            this.registerLazyChildren(existing, control);
-            return;
-        }
+    fn.subscribe = (callback: (value: T) => void) => {
+        const sub = _subject.subscribe(callback);
+        subscriptions.push(sub);
+        return sub;
+    };
 
-        this.setControl(name, control, options);
-    }
+    fn.destroy = () => {
+        subscriptions.forEach(sub => sub.unsubscribe());
+        subscriptions.length = 0;
+    };
 
-    private registerLazyChildren(target: FormGroup, source: FormGroup) {
-        Object.keys(source.controls).forEach(key => {
-            if (!target.contains(key)) {
-                target.addControl(key, source.get(key)!);
-            }
-        });
 
-        const originalAdd = source.addControl.bind(source);
-        source.addControl = (childName: string, childControl: AbstractControl, options?: { emitEvent?: boolean }) => {
-            if (!target.contains(childName)) {
-                target.addControl(childName, childControl, options);
-            } else {
-                target.setControl(childName, childControl, options);
-            }
-            originalAdd(childName, childControl, options);
-        };
-    }
+    return fn as unknown as ModelSignal<T>;
 }
+
 
 export interface AsControlValueAccessor extends ControlValueAccessor {
 
@@ -63,34 +46,72 @@ export interface AsControlValueAccessor extends ControlValueAccessor {
 
 }
 
-export abstract class AsControl extends NgControl {
+@Directive()
+export abstract class AsControl {
 
-    onChange: ((name: string, value: any) => void)[] = []
-    onTouched: (() => void)[] = []
+    onChange: ((name: string, value: any, defaultValue : any, el : HTMLElement) => void)[] = []
+    onTouched: ((el : HTMLElement) => void)[] = []
 
     instance: PropDescriptor
 
+    dirty = model(false)
+
+    errors = model<Validator[]>()
+
+    placeholder = model<string>()
+
     abstract descriptor: NodeDescriptor
 
-    abstract controlAdded() : void
+    abstract controlAdded(): void
 
-    registerOnChange(fn: any): void {
+    abstract setDisabledState(isDisabled: boolean): void
+
+    abstract get value() : ModelSignal<any>
+
+    status = signal("INITIAL")
+
+    validators : Validator[] = []
+
+    constructor() {
+        this.onChange.push((name, value, defaultValue, el) => {
+            if (defaultValue === value) {
+                this.dirty.set(false)
+                el.classList.add("pristine")
+                el.classList.remove("dirty")
+            } else {
+                this.dirty.set(true)
+                el.classList.add("dirty")
+                el.classList.remove("pristine")
+            }
+
+            this.value.set(value)
+
+            let errors = this.validators.filter(validator => ! validator.validate(this));
+            this.errors.set(errors)
+
+            if (this.errors().length) {
+                el.classList.add("invalid")
+            } else {
+                el.classList.remove("invalid")
+            }
+
+        })
+        this.onTouched.push((el) => {
+            el.classList.remove("focus")
+        })
+    }
+
+    registerOnChange(fn: (name: string, value: any) => void): void {
         this.onChange.push(fn)
     }
 
-    unRegisterOnChange(fn: any): void {
+    unRegisterOnChange(fn: (name: string, value: any) => void): void {
         let indexOf = this.onChange.indexOf(fn);
         this.onChange.splice(indexOf, 1)
     }
 
-    registerOnTouched(fn: any): void {
+    registerOnTouched(fn: () => void): void {
         this.onTouched.push(fn)
-    }
-
-    abstract override valueAccessor: AsControlValueAccessor
-
-    override viewToModelUpdate(newValue: any): void {
-        this.valueAccessor.writeValue(newValue);
     }
 
 }
@@ -98,25 +119,32 @@ export abstract class AsControl extends NgControl {
 @Directive()
 export abstract class AsControlInput extends AsControl implements OnInit, OnDestroy {
 
-    inputName = input<string>("", {alias: "asName"})
+    name = input<string>("", {alias: "asName"})
+
+    model = value<any>()
 
     form = inject(AsControlForm)
 
-    override control: AbstractControl = new FormControl()
-
     override descriptor: NodeDescriptor
 
-    abstract get placeholder(): string
-    abstract set placeholder(value: string)
+    abstract writeValue(obj: any): void
 
     abstract writeDefaultValue(obj: any): void
 
+    override get value() {
+        return this.model
+    }
+
+    addValidator(validator : Validator) {
+        this.validators.push(validator)
+    }
+
     ngOnInit(): void {
-        this.form.addControl(this.inputName(), this)
+        this.form.addControl(this.name(), this)
     }
 
     ngOnDestroy(): void {
-        this.form.removeControl(this.inputName(), this)
+        this.form.removeControl(this.name(), this)
     }
 
 }
@@ -124,71 +152,72 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 @Directive()
 export abstract class AsControlForm extends AsControl {
 
-    formName = input<string>(null, {alias: 'asName'});
+    name = input<string>(null, {alias: 'asName'});
 
-    abstract form : AsControlForm
+    abstract form: AsControlForm
 
-    // @ts-ignore
-    override get name() : string {
-        return this.formName()
-    }
+    abstract addControl(name: string | number, control: AsControl): void
 
-    abstract addControl(name : string | number, control: AsControl) : void
-    abstract removeControl(name : string | number, control: AsControl) : void
+    abstract removeControl(name: string | number, control: AsControl): void
 }
 
 @Directive()
 export abstract class AsControlSingleForm extends AsControlForm {
 
-    onChangeListener = (name: string, val: any) => {
-        if (this.model()) {
-            this.model()[name].set(val)
-        }
-    };
-
-    model = model<any>({}, {alias: "asModel"})
-
-    override control: FormGroup = new AsFormGroup({})
-
-    controls : Map<string, AsControl> = new Map()
+    controls: Map<string, AsControl[]> = new Map()
 
     override descriptor: ObjectDescriptor
 
+    model = model<any>({}, {alias: "asModel"})
+
+    override get value() {
+        return this.model
+    }
+
     addControl(name: string | number, control: AsControl) {
-        this.controls.set(name as string, control)
+        let controls = this.controls.get(name as string);
+        if (controls) {
+            controls.push(control)
+        } else {
+            this.controls.set(name as string, [control])
+        }
         control.descriptor = this.descriptor.properties[name];
         const model = this.model();
         if (model) {
             const metaSignal: MetaSignal<any> = model[name];
-            const valueAccessor = control.valueAccessor;
-            valueAccessor.registerOnChange(this.onChangeListener);
             if (metaSignal) {
                 const value = metaSignal();
                 control.instance = metaSignal.instance;
-                valueAccessor.writeValue(value);
                 if (control instanceof AsControlInput) {
+                    control.writeValue(value)
                     control.writeDefaultValue(value);
+                } else {
+                    (control as AsForm).model.set(value)
                 }
+
             }
         }
-
-        this.control.addControl(name as string, control.control);
 
         control.controlAdded();
     }
 
     removeControl(name: string | number, control: AsControl) {
-        this.controls.delete(name as string)
-        control.valueAccessor.unRegisterOnChange(this.onChangeListener);
-        this.control.removeControl(name as string)
+        let controls = this.controls.get(name as string);
+        let indexOf = controls.indexOf(control);
+        controls.splice(indexOf, 1)
     }
 
 }
 
+@Directive()
 export abstract class AsControlArrayForm extends AsControlForm {
 
-    override control: FormArray = new FormArray([])
+    model = value([])
 
     override descriptor: ObjectDescriptor
+
+    override get value() {
+        return this.model
+    }
 
 }

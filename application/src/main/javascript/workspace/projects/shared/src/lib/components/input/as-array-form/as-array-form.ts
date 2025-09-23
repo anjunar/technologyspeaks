@@ -25,11 +25,6 @@ import {AsFormArray} from "../as-form-array/as-form-array";
             multi: true,
         },
         {
-            provide: NgControl,
-            useExisting: AsArrayForm,
-            multi: true
-        },
-        {
             provide: AsControlForm,
             useExisting: AsArrayForm
         },
@@ -63,50 +58,23 @@ export class AsArrayForm extends AsControlSingleForm implements AsControlValueAc
         this.form.removeControl(indexOf, this)
     }
 
+
     removeFromArray() {
         let indexOf = this.form.model().indexOf(this.model());
         this.form.removeItem(indexOf)
-    }
-
-    override get value(): any {
-        return this.model();
     }
 
     writeValue(obj: any): void {
         this.model.set(obj);
     }
 
-    setDisabledState?(isDisabled: boolean): void {
+    setDisabledState(isDisabled: boolean): void {
         this.el.disabled = isDisabled;
-        this.controls.forEach(control => (control as any).setDisabledState(isDisabled))
-    }
-
-    override get dirty(): boolean {
-        return Object.values(this.control.controls).some(c => (c as any).dirty);
-    }
-
-    override get pristine(): boolean {
-        return !this.dirty;
-    }
-
-    override get errors(): ValidationErrors | null {
-        const merged: ValidationErrors = {};
-        Object.entries(this.control.controls).forEach(([name, c]) => {
-            if ((c as any).errors) merged[name] = (c as any).errors;
-        });
-        return Object.keys(merged).length ? merged : null;
-    }
-
-    override get touched(): boolean {
-        return Object.values(this.control.controls).some(c => (c as any).touched);
-    }
-
-    override get path(): string[] | null {
-        return this.formName() ? [this.formName()] : null;
+        // this.controls.forEach(control => control.setDisabledState(isDisabled))
     }
 
     controlAdded(): void {}
 
-    override valueAccessor: AsControlValueAccessor = this;
-}
 
+
+}

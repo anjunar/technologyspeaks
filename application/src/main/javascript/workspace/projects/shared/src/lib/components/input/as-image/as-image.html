@@ -2,7 +2,7 @@
     @if (image()?.thumbnail()) {
         <img [src]="thumbnailUrl()">
     } @else {
-        <span [class.disabled]="disabledImage()">{{placeholder}}</span>
+        <span [class.disabled]="disabledImage()">{{placeholder()}}</span>
     }
 </div>
 

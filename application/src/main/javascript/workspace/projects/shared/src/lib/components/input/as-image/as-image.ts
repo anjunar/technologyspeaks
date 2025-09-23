@@ -1,4 +1,15 @@
-import {Component, computed, effect, inject, input, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    ElementRef,
+    inject,
+    input,
+    OnDestroy,
+    OnInit,
+    signal,
+    ViewEncapsulation
+} from '@angular/core';
 import {AbstractControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
 import {AsControlInput, AsControlValueAccessor} from "../../../directives/as-control";
 import {AsForm} from "../../../directives/input/as-form/as-form";
@@ -20,9 +31,8 @@ import {WindowManagerService} from "../../modal/as-window/service/window-manager
             multi: true
         },
         {
-            provide: NgControl,
+            provide: AsControlInput,
             useExisting: AsImage,
-            multi: true
         }
     ]
 })
@@ -36,6 +46,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
 
     text = signal("Please click here...")
 
+    el = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>)
 
     thumbnailUrl = computed(() => {
         let media = this.image();
@@ -61,20 +72,12 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
         super();
 
         effect(() => {
-            this.onChange.forEach(fn => fn(this.inputName(), this.image()));
+            this.onChange.forEach(fn => fn(this.name(), this.image(), this.default(), this.el.nativeElement));
         });
     }
 
     controlAdded(): void {
-        this.placeholder = this.descriptor.title
-    }
-
-    get placeholder() {
-        return this.text()
-    }
-
-    set placeholder(value: string) {
-        this.text.set(value)
+        this.placeholder.set(this.descriptor.title)
     }
 
     openWindow() {
@@ -101,10 +104,6 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
         this.disabledImage.set(isDisabled)
     }
 
-    override get value(): any {
-        return this.image()
-    }
-
     writeValue(obj: any): void {
         if (obj) {
             this.image.set(obj)
@@ -120,23 +119,5 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
             this.default.set(null)
         }
     }
-
-    override get pristine(): boolean {
-        return this.image()?.data === this.default()?.data
-    }
-
-    override get dirty(): boolean {
-        return !this.pristine
-    }
-
-    override get errors(): ValidationErrors {
-        return {}
-    }
-
-    override get path(): string[] | null {
-        return this.inputName() ? [this.inputName()] : null;
-    }
-
-    override valueAccessor: AsControlValueAccessor = this
 
 }

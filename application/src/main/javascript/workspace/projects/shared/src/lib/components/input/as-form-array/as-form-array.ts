@@ -19,6 +19,7 @@ import {AsForm} from "../../../directives/input/as-form/as-form";
 import {Constructor} from "../../../domain/container/ActiveObject";
 import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
 import {AsIcon} from "../../layout/as-icon/as-icon";
+import {AsArrayForm} from "../as-array-form/as-array-form";
 
 @Component({
     selector: 'form-array',
@@ -35,11 +36,6 @@ import {AsIcon} from "../../layout/as-icon/as-icon";
             multi: true,
         },
         {
-            provide: NgControl,
-            useExisting: AsFormArray,
-            multi: true
-        },
-        {
             provide: AsControlForm,
             useExisting: AsFormArray
         }
@@ -51,7 +47,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     form = inject(AsForm)
 
-    model = signal([])
+    controls = signal<AsArrayForm[]>([])
 
     newInstance = input.required<Constructor<any>>()
 
@@ -61,22 +57,24 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     addControl(name: string | number, control: AsControl): void {
         control.descriptor = this.descriptor;
-        control.valueAccessor.writeValue(this.model()[name as number] ?? null);
-        this.control.insert(name as number, control.control);
-        control.controlAdded();
+        if (control instanceof AsArrayForm) {
+            control.writeValue(this.model()[name as number]);
+            this.controls().splice(name as number, 0, control)
+            control.controlAdded();
+        }
     }
 
     removeControl(name: string | number, control: AsControl): void {
-        this.control.removeAt(name as number)
+        this.controls().splice(name as number, 1)
     }
 
     ngOnInit(): void {
-        this.form.addControl(this.formName(), this)
-        this.descriptor = (this.form.descriptor.properties[this.formName()] as CollectionDescriptor).items
+        this.form.addControl(this.name(), this)
+        this.descriptor = (this.form.descriptor.properties[this.name()] as CollectionDescriptor).items
     }
 
     ngOnDestroy(): void {
-        this.form.removeControl(this.formName(), this)
+        this.form.removeControl(this.name(), this)
     }
 
     ngAfterContentInit() {
@@ -95,13 +93,13 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
     addItem() {
         let ctor = this.newInstance()
         this.model.update(arr => [...arr, this.form.model().$instance(ctor)]);
-        this.form.model()[this.formName()] = this.model()
+        this.form.model()[this.name()] = this.model()
         this.renderItems();
     }
 
     removeItem(index: number) {
         this.model.update(arr => arr.filter((_, i) => i !== index));
-        this.form.model()[this.formName()] = this.model()
+        this.form.model()[this.name()] = this.model()
         this.renderItems();
     }
 
@@ -116,21 +114,12 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     setDisabledState(isDisabled: boolean): void {
         this.isDisabled.set(isDisabled)
-        this.control.controls.forEach(c => {
-            if ((c as any).valueAccessor) {
-                (c as any).valueAccessor.setDisabledState(isDisabled);
-            }
+        this.controls().forEach(c => {
+            c.setDisabledState(isDisabled);
         });
-    }
-
-    override get value() {
-        return this.model();
-
     }
 
     controlAdded(): void {
     }
-
-    override valueAccessor: AsControlValueAccessor = this;
 
 }

@@ -4,6 +4,7 @@ import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {AsForm} from "../as-form/as-form";
 import {ActiveObject} from "../../../domain/container";
 import {Mapper} from "../../../mapper";
+import {AsControl} from "../../as-control";
 
 export interface AsResponse<E> {
     name: string
@@ -25,7 +26,8 @@ export class AsSubmit {
     submit = output<AsResponse<any>>({alias: "asSubmit"})
 
     setServerError(path: any[], error: any) {
-        function setServerErrorRecursive(form: AbstractControl, path: any[], error: any) {
+        function setServerErrorRecursive(form: AsControl, path: any[], error: any) {
+/*
             if (path.length === 0) {
                 const existing = form.errors || {};
                 form.setErrors({
@@ -63,18 +65,20 @@ export class AsSubmit {
                     setServerErrorRecursive(control, rest, error)
                 }
             }
+*/
 
 
         }
 
-        setServerErrorRecursive(this.asForm.control, path, error);
+        // setServerErrorRecursive(this.asForm.controls, path, error);
     }
+
 
     constructor() {
         this.el.nativeElement.addEventListener("submit", (event) => {
             event.preventDefault()
             let button = event.submitter as HTMLButtonElement;
-            let activeObject = this.asForm.value as ActiveObject;
+            let activeObject = this.asForm.model() as ActiveObject;
             let link = activeObject.$meta.links[button.name];
 
             this.http.request<ActiveObject>(new HttpRequest(link.method as any, "/service" + link.url, Mapper.toJson(activeObject)))
