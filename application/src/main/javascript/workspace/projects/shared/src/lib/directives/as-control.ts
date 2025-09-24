@@ -67,6 +67,7 @@ export abstract class AsControl {
     abstract setDisabledState(isDisabled: boolean): void
 
     abstract get model() : ModelSignal<any>
+    abstract set model(model : ModelSignal<any>)
 
     status = signal("INITIAL")
 
@@ -84,6 +85,7 @@ export abstract class AsControl {
                 el.classList.remove("pristine")
             }
 
+            this.writeValue(value)
             this.model.set(value)
 
             let errors = this.validators.filter(validator => ! validator.validate(this));
@@ -102,6 +104,8 @@ export abstract class AsControl {
             el.classList.remove("focus")
         })
     }
+
+    abstract writeValue(obj: any): void
 
     registerOnChange(fn: (name: string, value: any) => void): void {
         this.onChange.push(fn)
@@ -128,8 +132,6 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
     form = inject(AsControlForm)
 
     override descriptor: NodeDescriptor
-
-    abstract writeValue(obj: any): void
 
     abstract writeDefaultValue(obj: any): void
 
@@ -180,16 +182,14 @@ export abstract class AsControlSingleForm extends AsControlForm {
         if (model) {
             const metaSignal: MetaSignal<any> = model[name];
             if (metaSignal) {
-                const value = metaSignal();
                 control.instance = metaSignal.instance;
-                if (control instanceof AsControlInput) {
-                    control.model.set(value)
-                    control.writeValue(value)
-                    control.writeDefaultValue(value);
-                } else {
-                    (control as AsForm).model.set(value)
-                }
+                control.model = metaSignal
 
+                let value = metaSignal()
+                control.writeValue(value)
+                if (control instanceof AsControlInput) {
+                    control.writeDefaultValue(value);
+                }
             }
         }
 
@@ -198,8 +198,10 @@ export abstract class AsControlSingleForm extends AsControlForm {
 
     removeControl(name: string | number, control: AsControl) {
         let controls = this.controls.get(name as string);
-        let indexOf = controls.indexOf(control);
-        controls.splice(indexOf, 1)
+        if (controls) {
+            let indexOf = controls.indexOf(control);
+            controls.splice(indexOf, 1)
+        }
     }
 
 }

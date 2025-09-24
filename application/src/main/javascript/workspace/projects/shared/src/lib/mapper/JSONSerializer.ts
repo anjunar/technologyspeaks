@@ -1,63 +1,67 @@
-import {findConverter, findProperties} from "./Registry";
+import { findConverter, findProperties } from "./Registry";
 
-export default function JSONSerializer(entity: any) : any {
-    if (entity instanceof Array) {
-        return entity.map(element => JSONSerializer(element))
-    } else {
-        if (entity instanceof Object) {
-            let converter = findConverter(entity.constructor);
-            if (converter) {
-                return converter.toJson(entity)
-            }
-            let properties = findProperties(entity.constructor);
-            return properties
-                .filter(property => ! property.name.startsWith("$") || property.name === "$type")
-                .reduce((prev, current) => {
-                let object = entity[current.name];
+function isPlainObject(obj: any): obj is Record<string, any> {
+    if (obj === null || typeof obj !== 'object') return false;
+    const proto = Object.getPrototypeOf(obj);
+    return proto === Object.prototype || proto === null;
+}
 
-                if (object instanceof Function) {
-                    object = object()
-                }
-
-                if (object !== null) {
-                    if (object instanceof Array) {
-                        prev[current.name] = object.map(item => JSONSerializer(item))
-                    } else {
-                        if (object instanceof Object) {
-                            let converter = findConverter(current.type);
-                            if (converter) {
-                                prev[current.name] = converter.toJson(object)
-                            } else {
-                                if (object.$type) {
-                                    prev[current.name] = JSONSerializer(object)
-                                } else {
-                                    prev[current.name] = Object.entries(object)
-                                        .reduce((prev, [key, value]) => {
-                                            if (value instanceof Array) {
-                                                prev[key] = value.map(item => JSONSerializer(item))
-                                                return prev
-                                            } else {
-                                                prev[key] = JSONSerializer(value)
-                                                return prev
-                                            }
-                                        }, {} as any)
-                                }
-                            }
-                        } else {
-                            let converter = findConverter(current.type);
-                            if (converter) {
-                                prev[current.name] = converter.toJson(object)
-                            } else {
-                                prev[current.name] = object
-                            }
-                        }
-                    }
-                }
-
-                return prev
-            }, {} as any)
-
-        }
-        return entity
+export default function JSONSerializer(entity: any): any {
+    if (Array.isArray(entity)) {
+        return entity.map(item => JSONSerializer(item));
     }
+
+    if (!(entity instanceof Object)) {
+        return entity;
+    }
+
+    const converter = findConverter(entity.constructor);
+    if (converter) {
+        return converter.toJson(entity);
+    }
+
+    const properties = findProperties(entity.constructor);
+
+    return properties
+        .filter(prop => !prop.name.startsWith("$") || prop.name === "$type")
+        .reduce((prev, prop) => {
+            let value = entity[prop.name];
+
+            if (typeof value === "function") {
+                value = value();
+            }
+
+            if (value === null || value === undefined) {
+                prev[prop.name] = value;
+                return prev;
+            }
+
+            if (Array.isArray(value)) {
+                prev[prop.name] = value.map(item => JSONSerializer(item));
+                return prev;
+            }
+
+            const propConverter = findConverter(prop.configuration?.type);
+            if (propConverter) {
+                prev[prop.name] = propConverter.toJson(value);
+                return prev;
+            }
+
+            if (value.$type) {
+                prev[prop.name] = JSONSerializer(value);
+                return prev;
+            }
+
+            if (isPlainObject(value)) {
+                prev[prop.name] = Object.entries(value).reduce((acc, [k, v]) => {
+                    acc[k] = JSONSerializer(v);
+                    return acc;
+                }, {} as any);
+                return prev;
+            }
+
+            prev[prop.name] = value;
+
+            return prev;
+        }, {} as any);
 }

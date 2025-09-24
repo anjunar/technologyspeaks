@@ -19,6 +19,8 @@ namespace Basic {
 
         signal? : boolean
 
+        type? : any
+
     }
 
     export interface SyncWith {

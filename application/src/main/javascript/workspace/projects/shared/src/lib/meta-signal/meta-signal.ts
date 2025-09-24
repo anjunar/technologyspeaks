@@ -1,9 +1,9 @@
-import {Signal} from '@angular/core';
+import {ModelSignal} from '@angular/core';
 import PropDescriptor from "../domain/descriptors/PropDescriptor";
 import {NodeDescriptor} from "../domain/descriptors";
 import {LinkContainer} from "../domain/container";
 
-export interface MetaSignal<T> extends Signal<T> {
+export interface MetaSignal<T> extends ModelSignal<T> {
     descriptor: NodeDescriptor
     instance: PropDescriptor
     links : LinkContainer
