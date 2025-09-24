@@ -36,6 +36,10 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
         effect(() => {
             this.el.name = this.name()
         });
+
+        effect(() => {
+            this.writeValue(this.model())
+        });
     }
 
     controlAdded(): void {
@@ -54,7 +58,7 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
         if (obj) {
             this.el.value = obj
         } else {
-            this.el.value = null
+            this.el.value = ""
         }
     }
 
@@ -62,7 +66,7 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
         if (obj) {
             this.el.defaultValue = obj
         } else {
-            this.el.defaultValue = null
+            this.el.defaultValue = ""
         }
     }
 

@@ -1,13 +1,12 @@
-import {ControlValueAccessor, ValidationErrors} from "@angular/forms";
+import {ControlValueAccessor} from "@angular/forms";
 import PropDescriptor from "../domain/descriptors/PropDescriptor";
-import {Directive, inject, input, model, ModelSignal, OnDestroy, OnInit, Signal, signal} from "@angular/core";
+import {Directive, effect, inject, input, model, ModelSignal, OnDestroy, OnInit, Signal, signal} from "@angular/core";
 import {NodeDescriptor, ObjectDescriptor} from "../domain/descriptors";
 import {MetaSignal} from "../meta-signal/meta-signal";
-import {AsForm} from "./input/as-form/as-form";
 import {Subject, Subscription} from "rxjs";
 import Validator from "../domain/descriptors/validators/Validator";
 
-export function value<T>(initial?: T) : ModelSignal<T> {
+export function value<T>(initial?: T): ModelSignal<T> {
     const _signal = signal<T | null>(initial ?? null);
     const _subject = new Subject<T>();
     const subscriptions: Subscription[] = [];
@@ -39,6 +38,24 @@ export function value<T>(initial?: T) : ModelSignal<T> {
     return fn as unknown as ModelSignal<T>;
 }
 
+function bindSignals<T>(target: ModelSignal<T>, source: ModelSignal<T>) {
+    const sub1 = source.subscribe(val => {
+        if (target() !== val) {
+            target.set(val);
+        }
+    });
+
+    const sub2 = target.subscribe(val => {
+        if (source() !== val) {
+            source.set(val);
+        }
+    });
+
+    return () => {
+        sub1.unsubscribe();
+        sub2.unsubscribe();
+    };
+}
 
 export interface AsControlValueAccessor extends ControlValueAccessor {
 
@@ -49,14 +66,16 @@ export interface AsControlValueAccessor extends ControlValueAccessor {
 @Directive()
 export abstract class AsControl {
 
-    onChange: ((name: string, value: any, defaultValue : any, el : HTMLElement) => void)[] = []
-    onTouched: ((el : HTMLElement) => void)[] = []
+    onChange: ((name: string, value: any, defaultValue: any, el: HTMLElement) => void)[] = []
+    onTouched: ((el: HTMLElement) => void)[] = []
 
     instance: PropDescriptor
 
+    abstract get name(): Signal<string>
+
     dirty = model(false)
 
-    errors = model<Validator[]>()
+    errors = model<Validator[]>([])
 
     placeholder = model<string>()
 
@@ -66,38 +85,45 @@ export abstract class AsControl {
 
     abstract setDisabledState(isDisabled: boolean): void
 
-    abstract get model() : ModelSignal<any>
-    abstract set model(model : ModelSignal<any>)
+    abstract get model(): ModelSignal<any>
+    abstract set model(model: ModelSignal<any>)
 
-    status = signal("INITIAL")
+    abstract el : HTMLElement
 
-    validators : Validator[] = []
+    status = value("INITIAL")
+
+    validators: Validator[] = []
 
     constructor() {
+
+        effect(() => {
+            if (this.dirty()) {
+                this.el.classList.add("dirty")
+            } else {
+                this.el.classList.remove("dirty")
+            }
+
+            if (this.errors().length) {
+                this.el.classList.add("invalid")
+                this.el.classList.remove("valid")
+            } else {
+                this.el.classList.add("valid")
+                this.el.classList.remove("invalid")
+            }
+        });
+
         this.onChange.push((name, value, defaultValue, el) => {
             if (defaultValue === value) {
                 this.dirty.set(false)
-                el.classList.add("pristine")
-                el.classList.remove("dirty")
             } else {
                 this.dirty.set(true)
-                el.classList.add("dirty")
-                el.classList.remove("pristine")
             }
 
             this.writeValue(value)
             this.model.set(value)
 
-            let errors = this.validators.filter(validator => ! validator.validate(this));
+            let errors = this.validators.filter(validator => !validator.validate(this));
             this.errors.set(errors)
-
-            if (this.errors().length) {
-                this.status.set("INVALID")
-                el.classList.add("invalid")
-            } else {
-                this.status.set("VALID")
-                el.classList.remove("invalid")
-            }
 
         })
         this.onTouched.push((el) => {
@@ -135,7 +161,7 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 
     abstract writeDefaultValue(obj: any): void
 
-    addValidator(validator : Validator) {
+    addValidator(validator: Validator) {
         this.validators.push(validator)
     }
 
@@ -183,7 +209,9 @@ export abstract class AsControlSingleForm extends AsControlForm {
             const metaSignal: MetaSignal<any> = model[name];
             if (metaSignal) {
                 control.instance = metaSignal.instance;
-                control.model = metaSignal
+                control.model.set(metaSignal())
+
+                bindSignals(metaSignal, control.model)
 
                 let value = metaSignal()
                 control.writeValue(value)

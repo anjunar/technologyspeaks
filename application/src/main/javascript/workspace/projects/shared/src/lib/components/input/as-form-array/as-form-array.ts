@@ -1,7 +1,7 @@
 import {
     AfterContentInit,
     Component,
-    contentChild,
+    contentChild, ElementRef,
     inject,
     input,
     model,
@@ -42,6 +42,8 @@ import {AsArrayForm} from "../as-array-form/as-array-form";
     ]
 })
 export class AsFormArray extends AsControlArrayForm implements AsControlValueAccessor, AfterContentInit, OnInit, OnDestroy {
+
+    el = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>).nativeElement
 
     itemTemplate = contentChild(TemplateRef<any>)
 

@@ -34,16 +34,15 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
             if (this.name()) {
                 this.el.name = this.name()
             }
-
-            if (this.model()) {
-                this.setDisabledState(false)
-            } else {
-                this.setDisabledState(true)
-            }
         });
     }
 
     controlAdded(): void {
+        if (this.model()) {
+            this.setDisabledState(false)
+        } else {
+            this.setDisabledState(true)
+        }
     }
 
     ngOnInit(): void {
@@ -72,24 +71,48 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
     }
 
     setDisabledState(isDisabled: boolean): void {
-        if (isDisabled) {
+        let presentValue = this.model();
+        if (isDisabled && presentValue) {
             this.model.set(null)
+            this.status.set("DISABLED")
+            this.controls.forEach(controls => {
+                controls.forEach(control => {
+                    control.model.set(null)
+                    control.errors.set([])
+                    control.dirty.set(false)
+                    control.setDisabledState(isDisabled)
+                    this.status.set("DISABLED")
+                    if (control instanceof AsControlInput) {
+                        control.writeDefaultValue(null)
+                    }
+                })
+            })
         } else {
-            let model = this.model();
-            if (!model) {
+            if (!presentValue) {
                 let newInstance = this.newInstance();
                 if (newInstance) {
                     let instance = (this.form as any).model().$instance(newInstance);
                     this.model.set(instance)
+                    this.status.set("ENABLED")
+
+                    this.controls.forEach(controls => {
+                        controls.forEach(control => {
+                            let value = this.model()[control.name()]();
+                            control.model.set(value)
+                            control.errors.set([])
+                            control.dirty.set(false)
+                            control.setDisabledState(isDisabled)
+                            control.status.set("ENABLED")
+
+                            if (control instanceof AsControlInput) {
+                                control.writeDefaultValue(value)
+                            }
+                        })
+                    })
                 }
             }
         }
         this.el.disabled = isDisabled;
-        this.controls.forEach(control => {
-            if (control instanceof AsControlInput) {
-                control.setDisabledState(isDisabled)
-            }
-        })
     }
 
 }

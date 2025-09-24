@@ -46,7 +46,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
 
     text = signal("Please click here...")
 
-    el = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>)
+    el = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>).nativeElement
 
     thumbnailUrl = computed(() => {
         let media = this.image();
@@ -72,7 +72,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
         super();
 
         effect(() => {
-            this.onChange.forEach(fn => fn(this.name(), this.image(), this.default(), this.el.nativeElement));
+            this.onChange.forEach(fn => fn(this.name(), this.image(), this.default(), this.el));
         });
     }
 

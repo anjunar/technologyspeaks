@@ -55,13 +55,17 @@ export class AsInputContainer {
                     }
                 })
 
+                let dirtySubscription = control.dirty.subscribe(value => {
+                    this.dirty.set(value);
+                })
+
                 let controlSubscription = control.model.subscribe(value => {
                     this.isEmpty.set(!value);
-                    this.dirty.set(control.dirty());
                     this.placeholder.set(control.placeholder());
                 })
 
                 return () => {
+                    dirtySubscription.unsubscribe()
                     errorSubscription.unsubscribe()
                     controlSubscription.unsubscribe()
                 }
