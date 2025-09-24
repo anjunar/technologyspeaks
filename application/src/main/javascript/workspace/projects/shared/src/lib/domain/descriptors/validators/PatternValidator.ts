@@ -11,7 +11,7 @@ export default class PatternValidator implements Validator {
 
     validate(control: AsControl): boolean {
         let regex = new RegExp(this.regexp, "g")
-        return regex.test(control.value())
+        return regex.test(control.model())
     }
 
 }

@@ -7,7 +7,7 @@ import {LocalDateTime} from "@js-joda/core";
 export default class PastValidator implements Validator {
 
     validate(control: AsControl): boolean {
-        return LocalDateTime.now().isBefore(control.value())
+        return LocalDateTime.now().isBefore(control.model())
     }
 
 }

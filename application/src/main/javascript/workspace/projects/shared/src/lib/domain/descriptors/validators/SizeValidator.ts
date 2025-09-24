@@ -14,7 +14,7 @@ export default class SizeValidator implements Validator {
 
     validate(control: AsControl): boolean {
         if (control instanceof AsControlInput) {
-            return control.value().length > this.min && control.value().length < this.max
+            return control.model().length > this.min && control.model().length < this.max
         } else {
             return false
         }

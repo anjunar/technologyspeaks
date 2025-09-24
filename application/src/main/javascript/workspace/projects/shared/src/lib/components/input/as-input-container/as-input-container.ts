@@ -17,27 +17,26 @@ import {
     encapsulation: ViewEncapsulation.None,
 })
 export class AsInputContainer {
-    placeholder = model<string>('default');
+    placeholder = model<string>('');
     control = contentChild(AsControlInput);
     element = contentChild(AsControlInput, {read: ElementRef<HTMLInputElement>});
 
     focus = signal(false);
     dirty = signal(false);
-    isEmpty = signal(true);
+    isEmpty = signal(false);
     errors = signal<string[]>([]);
 
     constructor() {
 
         toObservable(this.control)
             .subscribe((control) => {
-                this.placeholder.set(control.placeholder());
-                this.isEmpty.set(!control.model());
-                this.dirty.set(control.dirty());
+                let model = ! control.model();
+                let dirty = control.dirty();
+                let placeholder = control.placeholder();
 
-                let placeHolderSubscription = control.placeholder.subscribe(value => {
-                    this.placeholder.set(value);
-                })
-
+                this.isEmpty.set(model);
+                this.dirty.set(dirty);
+                this.placeholder.set(placeholder);
 
                 let errorSubscription = control.errors.subscribe(errors => {
                     if (errors && control.dirty()) {
@@ -59,10 +58,10 @@ export class AsInputContainer {
                 let controlSubscription = control.model.subscribe(value => {
                     this.isEmpty.set(!value);
                     this.dirty.set(control.dirty());
+                    this.placeholder.set(control.placeholder());
                 })
 
                 return () => {
-                    placeHolderSubscription.unsubscribe()
                     errorSubscription.unsubscribe()
                     controlSubscription.unsubscribe()
                 }

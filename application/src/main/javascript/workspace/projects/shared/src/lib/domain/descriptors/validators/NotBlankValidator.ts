@@ -6,7 +6,7 @@ import {AsControl} from "../../../directives/as-control";
 export default class NotBlankValidator implements Validator {
 
     validate(control: AsControl): boolean {
-        return !! control.value()
+        return !! control.model()
     }
 
 }

@@ -66,7 +66,7 @@ export abstract class AsControl {
 
     abstract setDisabledState(isDisabled: boolean): void
 
-    abstract get value() : ModelSignal<any>
+    abstract get model() : ModelSignal<any>
 
     status = signal("INITIAL")
 
@@ -84,14 +84,16 @@ export abstract class AsControl {
                 el.classList.remove("pristine")
             }
 
-            this.value.set(value)
+            this.model.set(value)
 
             let errors = this.validators.filter(validator => ! validator.validate(this));
             this.errors.set(errors)
 
             if (this.errors().length) {
+                this.status.set("INVALID")
                 el.classList.add("invalid")
             } else {
+                this.status.set("VALID")
                 el.classList.remove("invalid")
             }
 
@@ -131,10 +133,6 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 
     abstract writeDefaultValue(obj: any): void
 
-    override get value() {
-        return this.model
-    }
-
     addValidator(validator : Validator) {
         this.validators.push(validator)
     }
@@ -170,10 +168,6 @@ export abstract class AsControlSingleForm extends AsControlForm {
 
     model = model<any>({}, {alias: "asModel"})
 
-    override get value() {
-        return this.model
-    }
-
     addControl(name: string | number, control: AsControl) {
         let controls = this.controls.get(name as string);
         if (controls) {
@@ -189,6 +183,7 @@ export abstract class AsControlSingleForm extends AsControlForm {
                 const value = metaSignal();
                 control.instance = metaSignal.instance;
                 if (control instanceof AsControlInput) {
+                    control.model.set(value)
                     control.writeValue(value)
                     control.writeDefaultValue(value);
                 } else {
@@ -215,9 +210,5 @@ export abstract class AsControlArrayForm extends AsControlForm {
     model = value([])
 
     override descriptor: ObjectDescriptor
-
-    override get value() {
-        return this.model
-    }
 
 }
