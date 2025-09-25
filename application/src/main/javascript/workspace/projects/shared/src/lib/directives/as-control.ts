@@ -27,6 +27,7 @@ export function value<T>(initial?: T): ModelSignal<T> {
     const fn = (() => _signal()) as {
         (): T | null;
         set(value: T): void;
+        update(update : (value : any) => any) : void
         subscribe(callback: (value: T) => void): Subscription;
         destroy(): void;
     };
@@ -35,6 +36,12 @@ export function value<T>(initial?: T): ModelSignal<T> {
         _signal.set(value);
         _subject.next(value);
     };
+
+    fn.update = (update : (value : any) => any) => {
+        let value = update(_signal());
+        _signal.set(value)
+        _subject.next(value);
+    }
 
     fn.subscribe = (callback: (value: T) => void) => {
         const sub = _subject.subscribe(callback);

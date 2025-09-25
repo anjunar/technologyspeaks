@@ -110,7 +110,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
     }
 
     addItem() {
-        let ctor = this.newInstance()
+        let ctor = this.newInstance
         this.model.update(arr => [...arr, this.form.model().$instance(ctor)]);
         this.form.model()[this.name()] = this.model()
         this.renderItems();
