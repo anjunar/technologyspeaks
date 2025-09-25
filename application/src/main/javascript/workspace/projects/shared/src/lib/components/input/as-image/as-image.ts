@@ -42,24 +42,22 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
 
     cropper = signal<CropperPosition>({x1: 0, x2: 0, y1: 100, y2: 100})
 
-    image = signal<Media>(null)
-
     text = signal("Please click here...")
 
     el = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>).nativeElement
 
     thumbnailUrl = computed(() => {
-        let media = this.image();
+        let media = this.model();
         if (media) {
-            return this.encodeBase64(media.thumbnail().contentType(), this.image().thumbnail().data())
+            return this.encodeBase64(media.thumbnail().contentType(), this.model().thumbnail().data())
         }
         return null
     })
 
     mediaUrl = computed(() => {
-        let image = this.image();
+        let image = this.model();
         if (image) {
-            return this.encodeBase64(image.contentType(), this.image().data())
+            return this.encodeBase64(image.contentType(), this.model().data())
         }
         return null
     })
@@ -72,7 +70,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
         super();
 
         effect(() => {
-            this.onChange.forEach(fn => fn(this.name(), this.image(), this.default(), this.el));
+            this.onChange.forEach(fn => fn(this.name(), this.model(), this.default(), this.el));
         });
     }
 
@@ -106,9 +104,9 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
 
     writeValue(obj: any): void {
         if (obj) {
-            this.image.set(obj)
+            this.model.set(obj)
         } else {
-            this.image.set(null)
+            this.model.set(null)
         }
     }
 

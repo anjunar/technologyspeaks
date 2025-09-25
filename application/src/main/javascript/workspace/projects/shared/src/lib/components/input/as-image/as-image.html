@@ -1,5 +1,5 @@
 <div class="container" (click)="openWindow()">
-    @if (image()?.thumbnail()) {
+    @if (model()?.thumbnail()) {
         <img [src]="thumbnailUrl()">
     } @else {
         <span [class.disabled]="disabledImage()">{{placeholder()}}</span>

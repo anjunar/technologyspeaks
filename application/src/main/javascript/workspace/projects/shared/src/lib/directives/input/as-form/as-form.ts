@@ -1,20 +1,9 @@
-import {
-    AfterViewInit,
-    Directive,
-    effect,
-    ElementRef,
-    forwardRef,
-    inject,
-    input, model,
-    OnDestroy,
-    OnInit
-} from '@angular/core';
+import {AfterViewInit, Directive, effect, ElementRef, forwardRef, inject, OnDestroy, OnInit} from '@angular/core';
 import {NG_VALUE_ACCESSOR} from "@angular/forms";
-import {AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccessor, value} from "../../as-control";
-import {Constructor} from "../../../domain/container/ActiveObject";
+import {AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccessor} from "../../as-control";
 
 @Directive({
-    selector: 'form[asModel], fieldset[asName]',
+    selector: 'form[asModel], fieldset[property]',
     exportAs: "AsForm",
     providers: [
         {
@@ -44,7 +33,8 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
         });
     }
 
-    controlAdded(): void {}
+    controlAdded(): void {
+    }
 
     ngAfterViewInit(): void {
         let model = this.model();

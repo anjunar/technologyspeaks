@@ -1,46 +1,49 @@
 <form [(asModel)]="user" (asSubmit)="onSubmit($event)">
     <div class="container">
-        <fieldset asName="info">
-            <as-image style="width: 300px; height: 300px" asName="image"/>
-        </fieldset>
+        <div class="image">
+            <fieldset property="info" #image="AsForm">
+                <as-image style="width: 300px; height: 300px" property="image"/>
+            </fieldset>
+            <button type="button" (click)="image.toggleDisabled()"><as-icon value="shield_toggle"/></button>
+        </div>
         <div>
             <as-input-container>
-                <input asName="nickName"/>
+                <input property="nickName"/>
             </as-input-container>
-            <form-array asName="emails">
+            <form-array property="emails">
                 <ng-template let-item>
                     <array-form [asModel]="item">
                         <as-input-container>
-                            <input asName="value"/>
+                            <input property="value"/>
                         </as-input-container>
                     </array-form>
                 </ng-template>
             </form-array>
-            <fieldset asName="info" #info="AsForm">
+            <fieldset property="info" #info="AsForm">
                 <legend>User Info<button type="button" (click)="info.toggleDisabled()"><as-icon value="shield_toggle"/></button></legend>
                 <as-input-container>
-                    <input asName="firstName"/>
+                    <input property="firstName"/>
                 </as-input-container>
                 <as-input-container>
-                    <input asName="lastName"/>
+                    <input property="lastName"/>
                 </as-input-container>
                 <as-input-container>
-                    <input asName="birthDate"/>
+                    <input property="birthDate"/>
                 </as-input-container>
             </fieldset>
-            <fieldset asName="address" #address="AsForm">
+            <fieldset property="address" #address="AsForm">
                 <legend>Address<button type="button" (click)="address.toggleDisabled()"><as-icon value="shield_toggle"/></button></legend>
                 <as-input-container>
-                    <input asName="street"/>
+                    <input property="street"/>
                 </as-input-container>
                 <as-input-container>
-                    <input asName="number"/>
+                    <input property="number"/>
                 </as-input-container>
                 <as-input-container>
-                    <input asName="zipCode"/>
+                    <input property="zipCode"/>
                 </as-input-container>
                 <as-input-container>
-                    <input asName="country"/>
+                    <input property="country"/>
                 </as-input-container>
             </fieldset>
         </div>

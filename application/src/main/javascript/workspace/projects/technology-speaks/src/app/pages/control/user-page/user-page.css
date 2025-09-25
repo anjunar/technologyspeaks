@@ -8,6 +8,11 @@ user-page {
         display: flex;
         gap: 12px;
 
+        .image {
+            display: flex;
+            align-items: flex-start;
+        }
+
         legend {
             width: 100%;
             display: flex;

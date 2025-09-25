@@ -1,17 +1,9 @@
 import {Directive, effect, ElementRef, inject} from '@angular/core';
-import {AbstractControl, NG_VALUE_ACCESSOR, ValidationErrors} from "@angular/forms";
+import {NG_VALUE_ACCESSOR} from "@angular/forms";
 import {AsControlInput, AsControlValueAccessor} from "../../as-control";
-import {match} from "../../../pattern-match";
-import {
-    EmailValidator,
-    NotBlankValidator,
-    NotNullValidator,
-    PastValidator,
-    SizeValidator
-} from "../../../domain/descriptors";
 
 @Directive({
-    selector: 'input[asName]',
+    selector: 'input[property]',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

@@ -178,7 +178,7 @@ export abstract class AsControl {
 @Directive()
 export abstract class AsControlInput extends AsControl implements OnInit, OnDestroy {
 
-    name = input<string>("", {alias: "asName"})
+    name = input<string>("", {alias: "property"})
 
     model = value<any>()
 
@@ -216,7 +216,7 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 @Directive()
 export abstract class AsControlForm extends AsControl {
 
-    name = input<string>(null, {alias: 'asName'});
+    name = input<string>(null, {alias: 'property'});
 
     abstract form: AsControlForm
 

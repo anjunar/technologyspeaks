@@ -56,7 +56,7 @@ export class AsImageProcess {
     imageCropped(event: ImageCroppedEvent) {
         this.blobToBase64(event.objectUrl).then(base64 => {
             let decodeBase64 = this.decodeBase64(base64);
-            let thumbnail = this.parent().image().thumbnail()
+            let thumbnail = this.parent().model().thumbnail()
             thumbnail.data.set(decodeBase64.data)
             thumbnail.contentType.set(decodeBase64.contentType)
         });
@@ -71,7 +71,7 @@ export class AsImageProcess {
             media.thumbnail.set(thumbnail)
             media.data.set(decodeBase64.data)
             media.contentType.set(decodeBase64.contentType)
-            this.parent().image.set(media)
+            this.parent().model.set(media)
         });
     }
 }
