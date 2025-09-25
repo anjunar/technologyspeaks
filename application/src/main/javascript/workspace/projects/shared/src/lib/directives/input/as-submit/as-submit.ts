@@ -4,7 +4,10 @@ import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {AsForm} from "../as-form/as-form";
 import {ActiveObject} from "../../../domain/container";
 import {Mapper} from "../../../mapper";
-import {AsControl} from "../../as-control";
+import {AsControl, AsControlArrayForm, AsControlForm, AsControlInput, AsControlSingleForm} from "../../as-control";
+import Validator, {ServerValidator} from "../../../domain/descriptors/validators/Validator";
+import {AsFormArray} from "../../../components/input/as-form-array/as-form-array";
+import {AsArrayForm} from "../../../components/input/as-array-form/as-array-form";
 
 export interface AsResponse<E> {
     name: string
@@ -25,54 +28,30 @@ export class AsSubmit {
 
     submit = output<AsResponse<any>>({alias: "asSubmit"})
 
-    setServerError(path: any[], error: any) {
-        function setServerErrorRecursive(form: AsControl, path: any[], error: any) {
-/*
-            if (path.length === 0) {
-                const existing = form.errors || {};
-                form.setErrors({
-                    ...existing,
-                    server: {message: error}
-                });
-                return;
-            }
 
-            if (form instanceof FormArray) {
-                const [segment, ...rest] = path;
-                setServerErrorRecursive(form.controls[segment], rest, error)
-            } else if (form instanceof FormGroup) {
-                const [segment, ...rest] = path;
-                let control = form.controls[segment] as AbstractControl;
-
-                if (control instanceof FormGroup) {
-                    const controls = control.controls
-
-                    for (const c of Object.values(controls)) {
-                        if (rest.length === 0) {
-                            const formControl = c
-                            if (formControl) {
-                                const existing = formControl.errors || {};
-                                formControl.setErrors({
-                                    ...existing,
-                                    server: {message: error}
-                                });
-                            }
-                        } else {
-                            setServerErrorRecursive(c, rest, error);
-                        }
-                    }
-                } else {
-                    setServerErrorRecursive(control, rest, error)
-                }
-            }
-*/
-
-
+    setServerError(path : any[], message : string, control: AsControl) {
+        if (control instanceof AsControlInput) {
+            control.markAsDirty()
+            control.errors.set([...control.errors(), new ServerValidator(message)])
         }
 
-        // setServerErrorRecursive(this.asForm.controls, path, error);
-    }
+        if (control instanceof AsFormArray) {
+            const [segment, ...rest] = path
 
+            let arrayForm = control.controls()[segment];
+            this.setServerError(rest, message, arrayForm)
+        }
+
+        if (control instanceof AsControlSingleForm) {
+            const [segment, ...rest] = path
+            let controls = control.controls.get(segment);
+            if (controls) {
+                controls.forEach(control => {
+                    this.setServerError(rest, message, control)
+                })
+            }
+        }
+    }
 
     constructor() {
         this.el.nativeElement.addEventListener("submit", (event) => {
@@ -88,19 +67,11 @@ export class AsSubmit {
                         this.submit.emit({name: button.name, response: response.body, form: this.asForm})
                     },
                     error: (err: HttpErrorResponse) => {
-                        const grouped = new Map<string, { path: any[], messages: string[] }>();
-
-                        err.error.forEach((e: any) => {
-                            const key = JSON.stringify(e.path);
-                            if (!grouped.has(key)) {
-                                grouped.set(key, {path: e.path, messages: []});
-                            }
-                            grouped.get(key)!.messages.push(e.message);
+                        let error = err.error;
+                        error.forEach((e: any) => {
+                            this.setServerError(e.path, e.message, this.asForm)
                         });
 
-                        grouped.forEach(({path, messages}) => {
-                            this.setServerError(path, messages);
-                        });
                     }
                 })
         })

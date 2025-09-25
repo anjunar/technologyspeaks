@@ -9,6 +9,7 @@ import {
     PastValidator,
     SizeValidator
 } from "../../../domain/descriptors";
+import {ServerValidator} from "../../../domain/descriptors/validators/Validator";
 
 @Component({
     selector: 'as-input-container',
@@ -47,6 +48,7 @@ export class AsInputContainer {
                                 .withObject(NotNullValidator, validator => "not Null")
                                 .withObject(PastValidator, validator => "not in the past")
                                 .withObject(SizeValidator, validator => `Size between ${validator.min} and ${validator.max}`)
+                                .withObject(ServerValidator, validator => validator.message)
                                 .nonExhaustive()
                         })
                         this.errors.set(messages as string[]);

@@ -1,6 +1,16 @@
-import {Directive, effect, ElementRef, forwardRef, inject, input, OnDestroy, OnInit} from '@angular/core';
+import {
+    AfterViewInit,
+    Directive,
+    effect,
+    ElementRef,
+    forwardRef,
+    inject,
+    input, model,
+    OnDestroy,
+    OnInit
+} from '@angular/core';
 import {NG_VALUE_ACCESSOR} from "@angular/forms";
-import {AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccessor} from "../../as-control";
+import {AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccessor, value} from "../../as-control";
 import {Constructor} from "../../../domain/container/ActiveObject";
 
 @Directive({
@@ -18,7 +28,7 @@ import {Constructor} from "../../../domain/container/ActiveObject";
         }
     ]
 })
-export class AsForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit, OnDestroy {
+export class AsForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit, OnDestroy, AfterViewInit {
 
     form = inject(AsControlForm, {skipSelf: true, optional: true})
 
@@ -28,15 +38,17 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
     constructor() {
         super();
         effect(() => {
-
             if (this.name()) {
                 this.el.name = this.name()
             }
         });
     }
 
-    controlAdded(): void {
-        if (this.model()) {
+    controlAdded(): void {}
+
+    ngAfterViewInit(): void {
+        let model = this.model();
+        if (model) {
             this.setDisabledState(false)
         } else {
             this.setDisabledState(true)
@@ -74,7 +86,7 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
         this.markAsPristine()
         this.el.disabled = isDisabled;
 
-        if (isDisabled && presentValue) {
+        if (isDisabled) {
             this.model.set(null)
             this.setControls(isDisabled);
         } else {

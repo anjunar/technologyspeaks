@@ -32,7 +32,6 @@ export default function JSONSerializer(entity: any): any {
             }
 
             if (value === null || value === undefined) {
-                prev[prop.name] = value;
                 return prev;
             }
 
