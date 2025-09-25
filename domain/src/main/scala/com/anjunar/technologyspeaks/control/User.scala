@@ -64,72 +64,81 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
       .forInstance((emails, ctx, factory) => emails.asScala.map(elem => EMail.schema.build(elem, classOf[EMail], ctx, factory)).toSeq)
       .visibleWhen(ManagedRule(classOf[User]))
       .withDynamicLinks((user, ctx, session) => {
-        User.findByUser(user)(using session)
-          .thenCompose(view => {
-            val property = view.findProperty("emails")
-            if (property == null) {
-              val newManagedProperty = new ManagedProperty()
-              newManagedProperty.value = "emails"
-              newManagedProperty.view = view
+        session.getFactory.openSession().thenCompose(session => {
+          session.withTransaction(transaction => {
+            User.findByUser(user)(using session)
+              .thenCompose(view => {
+                val property = view.findProperty("emails")
+                if (property == null) {
+                  val newManagedProperty = new ManagedProperty()
+                  newManagedProperty.value = "emails"
+                  newManagedProperty.view = view
 
-              session.withTransaction(transaction => {
-                session.persist(newManagedProperty)
-                  .thenApply(_ => {
-                    Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
-                  })
+                  session.persist(newManagedProperty)
+                    .thenApply(_ => {
+                      Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
+                    })
+                } else {
+                  CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))
+                }
               })
-            } else {
-              CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))  
-            }
           })
+            .whenComplete((_,_) => session.close())
+        })
       })
     val info = column[UserInfo]("info", views = Set("full", "application", "form", "table"))
       .forType(ctx => UserInfo.schema.buildType(classOf[UserInfo], ctx))
       .forInstance((userInfo, ctx, factory) => Seq(UserInfo.schema.build(userInfo, classOf[UserInfo], ctx, factory)))
       .visibleWhen(ManagedRule(classOf[User]))
       .withDynamicLinks((user, ctx, session) => {
-        User.findByUser(user)(using session)
-          .thenCompose(view => {
-            val property = view.findProperty("info")
-            if (property == null) {
-              val newManagedProperty = new ManagedProperty()
-              newManagedProperty.value = "info"
-              newManagedProperty.view = view
+        session.getFactory.openSession().thenCompose(session => {
+          session.withTransaction(transaction => {
+            User.findByUser(user)(using session)
+              .thenCompose(view => {
+                val property = view.findProperty("info")
+                if (property == null) {
+                  val newManagedProperty = new ManagedProperty()
+                  newManagedProperty.value = "info"
+                  newManagedProperty.view = view
 
-              session.withTransaction(transaction => {
-                session.persist(newManagedProperty)
-                  .thenApply(_ => {
-                    Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
-                  })
+                  session.persist(newManagedProperty)
+                    .thenApply(_ => {
+                      Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
+                    })
+                } else {
+                  CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))
+                }
               })
-            } else {
-              CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))
-            }
           })
+            .whenComplete((_,_) => session.close())
+        })
       })
     val address = column[Address]("address", views = Set("full", "form"))
       .forType(ctx => Address.schema.buildType(classOf[Address], ctx))
       .forInstance((address, ctx, factory) => Seq(Address.schema.build(address, classOf[Address], ctx, factory)))
       .visibleWhen(ManagedRule(classOf[User]))
       .withDynamicLinks((user, ctx, session) => {
-        User.findByUser(user)(using session)
-          .thenCompose(view => {
-            val property = view.findProperty("address")
-            if (property == null) {
-              val newManagedProperty = new ManagedProperty()
-              newManagedProperty.value = "address"
-              newManagedProperty.view = view
+        session.getFactory.openSession().thenCompose(session => {
+          session.withTransaction(transaction => {
+            User.findByUser(user)(using session)
+              .thenCompose(view => {
+                val property = view.findProperty("address")
+                if (property == null) {
+                  val newManagedProperty = new ManagedProperty()
+                  newManagedProperty.value = "address"
+                  newManagedProperty.view = view
 
-              session.withTransaction(transaction => {
-                session.persist(newManagedProperty)
-                  .thenApply(_ => {
-                    Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
-                  })
+                  session.persist(newManagedProperty)
+                    .thenApply(_ => {
+                      Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
+                    })
+                } else {
+                  CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))
+                }
               })
-            } else {
-              CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))
-            }
           })
+            .whenComplete((_,_) => session.close())
+        })
       })
   }
 
@@ -143,7 +152,7 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
     if (user == null) {
       CompletableFuture.completedFuture(new View())
     } else {
-      session.createQuery("select v from UserView v where v.user = :user", classOf[View])
+      session.createQuery("select v from UserView v join fetch v.properties where v.user = :user", classOf[View])
         .setParameter("user", user)
         .getSingleResultOrNull
         .thenCompose(view => {
@@ -152,9 +161,7 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
           } else {
             val newView = new View()
             newView.user = user
-            session.withTransaction(transaction => {
-              newView.persist().thenApply(_ => newView)
-            })
+            newView.persist().thenApply(_ => newView)
           }
         })
     }
