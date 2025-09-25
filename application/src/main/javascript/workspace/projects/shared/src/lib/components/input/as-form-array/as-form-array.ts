@@ -20,6 +20,7 @@ import {Constructor} from "../../../domain/container/ActiveObject";
 import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
 import {AsIcon} from "../../layout/as-icon/as-icon";
 import {AsArrayForm} from "../as-array-form/as-array-form";
+import {findClass} from "../../../mapper";
 
 @Component({
     selector: 'form-array',
@@ -51,7 +52,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     controls = signal<AsArrayForm[]>([])
 
-    newInstance = input.required<Constructor<any>>()
+    newInstance : Function
 
     vcr = viewChild("container", {read: ViewContainerRef})
 
@@ -59,6 +60,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     addControl(name: string | number, control: AsControl): void {
         control.descriptor = this.descriptor;
+        this.newInstance = findClass(this.descriptor.$type)
         if (control instanceof AsArrayForm) {
             control.writeValue(this.model()[name as number]);
             this.controls().splice(name as number, 0, control)

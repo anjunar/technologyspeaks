@@ -11,9 +11,6 @@ import {
     AsResponse,
     AsSubmit
 } from "shared";
-import EMail from "../../../domain/control/EMail";
-import UserInfo from "../../../domain/control/UserInfo";
-import Address from "../../../domain/control/Address";
 
 @Component({
     selector: 'user-page',
@@ -26,13 +23,10 @@ export class UserPage {
 
     user = model<User>()
 
-    onSubmit(response : AsResponse<User>) {
+    onSubmit(response: AsResponse<User>) {
 
         console.log(response)
 
     }
 
-    protected readonly EMail = EMail;
-    protected readonly UserInfo = UserInfo;
-    protected readonly Address = Address;
 }

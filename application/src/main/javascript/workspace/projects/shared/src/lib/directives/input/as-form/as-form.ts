@@ -25,8 +25,6 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
     el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
         .nativeElement
 
-    newInstance = input<Constructor<any>>(null)
-
     constructor() {
         super();
         effect(() => {
@@ -81,7 +79,7 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
             this.setControls(isDisabled);
         } else {
             if (!presentValue) {
-                let newInstance = this.newInstance();
+                let newInstance = this.newInstance
                 if (newInstance) {
                     let instance = (this.form as any).model().$instance(newInstance);
                     this.model.set(instance)

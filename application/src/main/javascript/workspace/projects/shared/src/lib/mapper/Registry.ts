@@ -1,14 +1,15 @@
 import Converter from "./converters/Converter";
 import Basic from "./annotations/Basic";
 import BasicConfiguration = Basic.Configuration;
+import {Type} from "@angular/core";
 
-const entityRegistry = new Set<Function>();
+const entityRegistry = new Set<Type<any>>();
 
 const propertyRegistry = new Map<Function, PropertyDescriptor[]>()
 
 const schemaPropertyRegistry = new Map<Function, PropertyDescriptor[]>()
 
-const classRegistry = new Map<string, Function>()
+const classRegistry = new Map<string, Type<any>>()
 
 const converterRegistry = new Map<any, Converter<any, any>>()
 
@@ -27,7 +28,7 @@ export class PropertyDescriptor {
     }
 }
 
-export function registerEntity(clazz : Function) {
+export function registerEntity(clazz : Type<any>) {
     entityRegistry.add(clazz)
 }
 
@@ -54,7 +55,7 @@ export function registerSchemaProperty(clazz : Function, name : string, type : a
 }
 
 
-export function registerClass(name : string, clazz : Function) {
+export function registerClass(name : string, clazz : Type<any>) {
     classRegistry.set(name, clazz)
 }
 
@@ -66,7 +67,7 @@ export function findClass(name : string) {
     return classRegistry.get(name)
 }
 
-export function findType(clazz : Function) : string {
+export function findType(clazz : Type<any>) : string {
     return Array.from(classRegistry.entries()).find(([key, value]) => value === clazz)[0]
 }
 

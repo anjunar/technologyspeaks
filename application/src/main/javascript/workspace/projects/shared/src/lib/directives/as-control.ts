@@ -1,10 +1,23 @@
 import {ControlValueAccessor} from "@angular/forms";
 import PropDescriptor from "../domain/descriptors/PropDescriptor";
-import {Directive, effect, inject, input, model, ModelSignal, OnDestroy, OnInit, Signal, signal} from "@angular/core";
+import {
+    Directive,
+    effect,
+    inject,
+    input,
+    model,
+    ModelSignal,
+    OnDestroy,
+    OnInit,
+    Signal,
+    signal,
+    Type
+} from "@angular/core";
 import {NodeDescriptor, ObjectDescriptor} from "../domain/descriptors";
 import {MetaSignal} from "../meta-signal/meta-signal";
 import {Subject, Subscription} from "rxjs";
 import Validator from "../domain/descriptors/validators/Validator";
+import {findClass} from "../mapper";
 
 export function value<T>(initial?: T): ModelSignal<T> {
     const _signal = signal<T | null>(initial ?? null);
@@ -214,6 +227,8 @@ export abstract class AsControlSingleForm extends AsControlForm {
 
     model = model<any>({}, {alias: "asModel"})
 
+    newInstance: Type<any>
+
     addControl(name: string | number, control: AsControl) {
         let controls = this.controls.get(name as string);
         if (controls) {
@@ -222,6 +237,7 @@ export abstract class AsControlSingleForm extends AsControlForm {
             this.controls.set(name as string, [control])
         }
         control.descriptor = this.descriptor.properties[name];
+        this.newInstance = findClass(this.descriptor.type)
         const model = this.model();
         if (model) {
             const metaSignal: MetaSignal<any> = model[name];
