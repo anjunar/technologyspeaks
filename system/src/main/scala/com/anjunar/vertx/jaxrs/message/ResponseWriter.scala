@@ -27,7 +27,7 @@ class ResponseWriter extends MessageBodyWriter {
     javaType.raw == classOf[Response]
   }
 
-  override def write(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef], factory: Stage.SessionFactory): CompletionStage[String] = {
+  override def write(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef], factory: Stage.Session): CompletionStage[String] = {
     entity match {
       case response : Response if response.hasEntity => writers.stream()
         .filter(writer => writer.canWrite(response.getEntity, TypeResolver.resolve(response.getEntity.getClass), annotations, ctx, state, transitions))

@@ -2,6 +2,8 @@ package com.anjunar.vertx.engine
 
 import com.anjunar.scala.introspector.DescriptorsModel
 import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
+import com.anjunar.scala.schema.builder2.Schemas
+import com.anjunar.scala.schema.model.Link
 import com.anjunar.scala.universe.introspector.BeanModel
 import org.hibernate.reactive.stage.Stage
 
@@ -11,20 +13,21 @@ import scala.reflect.Typeable
 
 case class PropDef[E, T](name: String,
                          entity : DescriptorsModel,
-                         var typeHandler: Option[RequestContext => SchemaBuilder] = None,
-                         var instanceHandler: Option[(T, RequestContext, Stage.SessionFactory) => Seq[CompletionStage[SchemaBuilder]]] = None,
+                         var typeHandler: Option[RequestContext => Schemas] = None,
+                         var instanceHandler: Option[(T, RequestContext, Stage.Session) => Seq[CompletionStage[Schemas]]] = None,
                          var visibility: VisibilityRule[E] = DefaultRule[E](),
                          var views: Set[String] = Set("Full"),
-                         var links: Seq[Link[E]] = Seq[Link[E]]()) {
+                         var dynamicLinks: Seq[(entity : E, ctx : RequestContext, factory : Stage.Session) => CompletionStage[Link]] = Seq[(entity : E, ctx : RequestContext, factory : Stage.Session) => CompletionStage[Link]](),
+                         var staticLinks: Seq[() => Link] = Seq[() => Link]()) {
   
   val propType = entity.findProperty(name)
 
-  def forType(schema: RequestContext => SchemaBuilder): PropDef[E, T] = {
+  def forType(schema: RequestContext => Schemas): PropDef[E, T] = {
     typeHandler = Some(schema)
     this
   }
 
-  def forInstance(schema: (T, RequestContext, Stage.SessionFactory) => Seq[CompletionStage[SchemaBuilder]]): PropDef[E, T] = {
+  def forInstance(schema: (T, RequestContext, Stage.Session) => Seq[CompletionStage[Schemas]]): PropDef[E, T] = {
     instanceHandler = Some(schema)
     this
   }
@@ -39,8 +42,14 @@ case class PropDef[E, T](name: String,
     this
   }
 
-  def withLinks(ls: Link[E]*): PropDef[E, T] = {
-    links = ls
+  def withDynamicLinks(ls: ((entity : E, ctx : RequestContext, factory : Stage.Session) => CompletionStage[Link])*): PropDef[E, T] = {
+    dynamicLinks = ls
     this
   }
+
+  def withStaticLinks(ls: (() => Link)*): PropDef[E, T] = {
+    staticLinks = ls
+    this
+  }
+
 }

@@ -5,6 +5,7 @@ import com.anjunar.scala.introspector.DescriptionIntrospector
 import com.anjunar.scala.mapper.annotations.Converter
 import com.anjunar.scala.schema.analyzer.*
 import com.anjunar.scala.schema.builder.{PropertyBuilder, SchemaBuilder}
+import com.anjunar.scala.schema.builder2.{ClassProperty, Schemas}
 import com.anjunar.scala.schema.model.validators.{NotBlankValidator, NotNullValidator, SizeValidator}
 import com.anjunar.scala.schema.model.{CollectionDescriptor, EnumDescriptor, NodeDescriptor, ObjectDescriptor}
 import com.anjunar.scala.universe.introspector.{AbstractProperty, BeanIntrospector}
@@ -35,98 +36,75 @@ object JsonDescriptorsGenerator {
     }
   }
 
-  def generateObject(aClass: ResolvedClass, schema: SchemaBuilder, context: JsonDescriptorsContext): ObjectDescriptor = {
+  def generateObject(aClass: ResolvedClass, schema: Schemas, context: JsonDescriptorsContext): ObjectDescriptor = {
 
-    if (aClass.raw == classOf[Tuple]) {
-      val schemaBuilder = schema.tupleMapping.schemaBuilder
-      val head = schemaBuilder.typeMapping.head
-      val objectDescriptor = generateObject(TypeResolver.resolve(head._1), schemaBuilder, context)
+    val beanModel = DescriptionIntrospector.create(aClass)
 
-      schemaBuilder.primitiveMapping.foreach((clazz, builder) => {
-        val nodeDescriptor = NodeDescriptor(
-          builder.title,
-          builder.description,
-          builder.widget,
-          builder.id,
-          builder.naming,
-          builder.hidden,
-          clazz.getSimpleName,
-          builder.step,
-          null)
+    val descriptor = new ObjectDescriptor
+    descriptor.`type` = aClass.raw.getSimpleName
+    context.descriptor = descriptor
 
-        objectDescriptor.properties.put(builder.alias, nodeDescriptor)
-      })
+    beanModel.properties.foreach(property => {
 
-      objectDescriptor
-    } else {
-      val beanModel = DescriptionIntrospector.create(aClass)
+      val typeMapping = schema.types(aClass.raw).properties.get(property.name)
 
-      val descriptor = new ObjectDescriptor
-      descriptor.`type` = aClass.raw.getSimpleName
-      context.descriptor = descriptor
-
-      beanModel.properties.foreach(property => {
-
-        val typeMapping = schema.findTypeMapping(aClass.underlying).get(property.name)
-
-        val option = if (typeMapping.isDefined) {
-          val propertySchema = typeMapping.get
-          if (propertySchema.secured) {
-            if (propertySchema.visible) {
-              typeMapping
-            } else {
-              None
-            }
-          } else {
+      val option = if (typeMapping.isDefined) {
+        val propertySchema = typeMapping.get
+        if (propertySchema.secured) {
+          if (propertySchema.visible) {
             typeMapping
+          } else {
+            None
           }
         } else {
-          None
+          typeMapping
         }
-
-        if (option.isDefined) {
-          val schemaDefinition = option.get
-
-          val converter = property.findAnnotation(classOf[Converter])
-
-          val propertyType = property.propertyType
-
-          if (converter == null) {
-            findAnalyzer(propertyType) match
-              case p: PrimitiveAnalyser =>
-                val nodeDescriptor = generatePrimitive(property, propertyType.raw, schemaDefinition)
-                descriptor.properties.put(property.name, nodeDescriptor)
-              case e: EnumAnalyzer =>
-                val enumDescriptor = generateEnum(property, schemaDefinition)
-                descriptor.properties.put(property.name, enumDescriptor)
-              case c: CollectionAnalyzer =>
-                val collectionDescriptor = generateArray(property, propertyType, schemaDefinition, new JsonDescriptorsContext(context))
-                collectionDescriptor.links.putAll(schemaDefinition.links.asJava)
-                descriptor.properties.put(property.name, collectionDescriptor)
-              case c: ArrayAnalyzer =>
-                val collectionDescriptor = generatePrimitive(property, propertyType.raw, schemaDefinition)
-                descriptor.properties.put(property.name, collectionDescriptor)
-              case o: ObjectAnalyzer =>
-                val objectDescriptor = generateObject(property, propertyType, schemaDefinition, new JsonDescriptorsContext(context))
-                descriptor.properties.put(property.name, objectDescriptor)
-          } else {
-            descriptor.properties.put(property.name, generatePrimitive(property, classOf[String], schemaDefinition))
-          }
-        }
-      })
-
-      val jsonSubTypes = aClass.findDeclaredAnnotation(classOf[JsonSubTypes])
-      if (jsonSubTypes != null) {
-
-        val backReference = context.findClass(aClass.raw)
-
-        jsonSubTypes
-          .value()
-          .foreach(subType => descriptor.oneOf.add(JsonDescriptorsGenerator.generateObject(TypeResolver.resolve(subType.value()), schema, new JsonDescriptorsContext(context))))
+      } else {
+        None
       }
 
-      descriptor
+      if (option.isDefined) {
+        val schemaDefinition = option.get
+
+        val converter = property.findAnnotation(classOf[Converter])
+
+        val propertyType = property.propertyType
+
+        if (converter == null) {
+          findAnalyzer(propertyType) match
+            case p: PrimitiveAnalyser =>
+              val nodeDescriptor = generatePrimitive(property, propertyType.raw, schemaDefinition)
+              descriptor.properties.put(property.name, nodeDescriptor)
+            case e: EnumAnalyzer =>
+              val enumDescriptor = generateEnum(property, schemaDefinition)
+              descriptor.properties.put(property.name, enumDescriptor)
+            case c: CollectionAnalyzer =>
+              val collectionDescriptor = generateArray(property, propertyType, schemaDefinition, new JsonDescriptorsContext(context))
+              collectionDescriptor.links.putAll(schemaDefinition.getLinks)
+              descriptor.properties.put(property.name, collectionDescriptor)
+            case c: ArrayAnalyzer =>
+              val collectionDescriptor = generatePrimitive(property, propertyType.raw, schemaDefinition)
+              descriptor.properties.put(property.name, collectionDescriptor)
+            case o: ObjectAnalyzer =>
+              val objectDescriptor = generateObject(property, propertyType, schemaDefinition, new JsonDescriptorsContext(context))
+              descriptor.properties.put(property.name, objectDescriptor)
+        } else {
+          descriptor.properties.put(property.name, generatePrimitive(property, classOf[String], schemaDefinition))
+        }
+      }
+    })
+
+    val jsonSubTypes = aClass.findDeclaredAnnotation(classOf[JsonSubTypes])
+    if (jsonSubTypes != null) {
+
+      val backReference = context.findClass(aClass.raw)
+
+      jsonSubTypes
+        .value()
+        .foreach(subType => descriptor.oneOf.add(JsonDescriptorsGenerator.generateObject(TypeResolver.resolve(subType.value()), schema, new JsonDescriptorsContext(context))))
     }
+
+    descriptor
 
   }
 
@@ -142,22 +120,22 @@ object JsonDescriptorsGenerator {
     }
   }
 
-  private def generatePrimitive(property: AbstractProperty, propertyType: Class[?], schemaDefinition: PropertyBuilder[?]) = {
+  private def generatePrimitive(property: AbstractProperty, propertyType: Class[?], schemaDefinition: ClassProperty) = {
     val nodeDescriptor = NodeDescriptor(
-      schemaDefinition.title,
-      schemaDefinition.description,
-      schemaDefinition.widget,
-      schemaDefinition.id,
-      schemaDefinition.naming,
-      schemaDefinition.hidden,
+      schemaDefinition.annotation.title,
+      schemaDefinition.annotation.description,
+      schemaDefinition.annotation.widget,
+      schemaDefinition.annotation.id,
+      schemaDefinition.annotation.naming,
+      schemaDefinition.annotation.hidden,
       propertyType.getSimpleName,
-      schemaDefinition.step,
-      schemaDefinition.links.asJava)
+      schemaDefinition.annotation.step,
+      schemaDefinition.getLinks)
     generateValidator(property, nodeDescriptor)
     nodeDescriptor
   }
 
-  private def generateEnum(property: AbstractProperty, schemaDefinition: PropertyBuilder[?]) = {
+  private def generateEnum(property: AbstractProperty, schemaDefinition: ClassProperty) = {
     val constants: Array[Enum[?]] = property.propertyType.raw.getEnumConstants.asInstanceOf[Array[Enum[?]]]
     val enums = constants.map(constant => {
       val enumClass = TypeResolver.resolve(constant.getClass)
@@ -171,48 +149,48 @@ object JsonDescriptorsGenerator {
       }
     })
     val enumDescriptor = EnumDescriptor(
-      schemaDefinition.title,
-      schemaDefinition.description,
-      schemaDefinition.widget,
-      schemaDefinition.id,
-      schemaDefinition.naming,
-      schemaDefinition.hidden,
+      schemaDefinition.annotation.title,
+      schemaDefinition.annotation.description,
+      schemaDefinition.annotation.widget,
+      schemaDefinition.annotation.id,
+      schemaDefinition.annotation.naming,
+      schemaDefinition.annotation.hidden,
       property.propertyType.raw.getSimpleName,
-      schemaDefinition.links.asJava,
+      schemaDefinition.getLinks,
       enums.toList.asJava
     )
     generateValidator(property, enumDescriptor)
     enumDescriptor
   }
 
-  private def generateObject(property: AbstractProperty, propertyType: ResolvedClass, schemaDefinition: PropertyBuilder[?], context: JsonDescriptorsContext): ObjectDescriptor = {
-    val objectDescriptor = generateObject(propertyType, schemaDefinition.schemaBuilder, new JsonDescriptorsContext(context))
-    objectDescriptor.title = schemaDefinition.title
-    objectDescriptor.description = schemaDefinition.description
-    objectDescriptor.widget = schemaDefinition.widget
-    objectDescriptor.id = schemaDefinition.id
-    objectDescriptor.name = schemaDefinition.naming
-    objectDescriptor.hidden = schemaDefinition.hidden
-    objectDescriptor.links = schemaDefinition.links.asJava
+  private def generateObject(property: AbstractProperty, propertyType: ResolvedClass, schemaDefinition: ClassProperty, context: JsonDescriptorsContext): ObjectDescriptor = {
+    val objectDescriptor = generateObject(propertyType, schemaDefinition.schemas, new JsonDescriptorsContext(context))
+    objectDescriptor.title = schemaDefinition.annotation.title
+    objectDescriptor.description = schemaDefinition.annotation.description
+    objectDescriptor.widget = schemaDefinition.annotation.widget
+    objectDescriptor.id = schemaDefinition.annotation.id
+    objectDescriptor.name = schemaDefinition.annotation.naming
+    objectDescriptor.hidden = schemaDefinition.annotation.hidden
+    objectDescriptor.links = schemaDefinition.getLinks
     generateValidator(property, objectDescriptor)
     objectDescriptor
   }
 
-  private def generateArray(property: AbstractProperty, propertyType: ResolvedClass, schemaDefinition: PropertyBuilder[?], context: JsonDescriptorsContext): CollectionDescriptor = {
+  private def generateArray(property: AbstractProperty, propertyType: ResolvedClass, schemaDefinition: ClassProperty, context: JsonDescriptorsContext): CollectionDescriptor = {
     val descriptor = new CollectionDescriptor
     val collectionType = propertyType.typeArguments.head
 
     context.descriptor = descriptor
 
-    descriptor.items = generateObject(collectionType, schemaDefinition.schemaBuilder, new JsonDescriptorsContext(context))
+    descriptor.items = generateObject(collectionType, schemaDefinition.schemas, new JsonDescriptorsContext(context))
     descriptor.`type` = property.propertyType.raw.getSimpleName
-    descriptor.title = schemaDefinition.title
-    descriptor.description = schemaDefinition.description
-    descriptor.widget = schemaDefinition.widget
-    descriptor.id = schemaDefinition.id
-    descriptor.name = schemaDefinition.naming
-    descriptor.hidden = schemaDefinition.hidden
-    descriptor.links = schemaDefinition.links.asJava
+    descriptor.title = schemaDefinition.annotation.title
+    descriptor.description = schemaDefinition.annotation.description
+    descriptor.widget = schemaDefinition.annotation.widget
+    descriptor.id = schemaDefinition.annotation.id
+    descriptor.name = schemaDefinition.annotation.naming
+    descriptor.hidden = schemaDefinition.annotation.hidden
+    descriptor.links = schemaDefinition.getLinks
     generateValidator(property, descriptor)
     descriptor
   }

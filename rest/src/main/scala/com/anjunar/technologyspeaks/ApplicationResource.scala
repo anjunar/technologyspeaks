@@ -25,7 +25,7 @@ class ApplicationResource {
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
-  def load(@Context event : RoutingContext): CompletionStage[Application] = {
+  def load(@Context session : Stage.Session, @Context event : RoutingContext): CompletionStage[Application] = {
     val user = event.user()
 
     if (user.get("username") == "Anonymous") {
@@ -37,16 +37,14 @@ class ApplicationResource {
       CompletableFuture.completedFuture(application)
     } else {
       val id = user.principal().getString("id")
-      sessionFactory.withSession(implicit session => {
-        session.createQuery("from User u join fetch u.emails where u.id = :id", classOf[User])
-          .setParameter("id", UUID.fromString(id))
-          .getSingleResult
-          .thenApply(user => {
-            val application = new Application
-            application.user = user
-            application
-          })
-      })
+      session.createQuery("from User u join fetch u.emails where u.id = :id", classOf[User])
+        .setParameter("id", UUID.fromString(id))
+        .getSingleResult
+        .thenApply(user => {
+          val application = new Application
+          application.user = user
+          application
+        })
     }
 
   }

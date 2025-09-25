@@ -31,9 +31,6 @@ class EntityParamReader extends ParamReader {
   var entityLoader : JsonEntityLoader = uninitialized
   
   @Inject
-  var sessionFactory : Stage.SessionFactory = uninitialized  
-  
-  @Inject
   var validator : Validator = uninitialized
   
   @Inject
@@ -54,7 +51,7 @@ class EntityParamReader extends ParamReader {
     }
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.SessionFactory): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, resolvedClass: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.Session): CompletionStage[Any] = {
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
 

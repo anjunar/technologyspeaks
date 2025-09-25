@@ -26,10 +26,11 @@ class ContextParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[Context])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory: Stage.SessionFactory): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory: Stage.Session): CompletionStage[Any] = {
     javaType.raw match {
       case clazz: Class[?] if clazz == classOf[RoutingContext] => CompletableFuture.completedFuture(ctx)
       case clazz: Class[?] if clazz == classOf[SessionHandler] => CompletableFuture.completedFuture(sessionHandler)
+      case clazz: Class[?] if clazz == classOf[Stage.Session] => CompletableFuture.completedFuture(factory)
       case _ => CompletableFuture.completedFuture(contextProviders
         .stream()
         .filter(provider => provider.canRead(javaType, annotations))

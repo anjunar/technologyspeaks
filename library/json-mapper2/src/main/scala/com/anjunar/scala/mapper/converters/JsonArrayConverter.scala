@@ -1,5 +1,6 @@
 package com.anjunar.scala.mapper.converters
 
+import com.anjunar.scala.mapper.helper.Futures
 import com.anjunar.scala.mapper.{IdProvider, JsonContext, UploadedFile}
 import com.anjunar.scala.mapper.intermediate.model.{JsonArray, JsonNode, JsonObject}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
@@ -50,7 +51,7 @@ class JsonArrayConverter extends JsonAbstractConverter(TypeResolver.resolve(clas
         result
       })
       
-      CompletableFuture.allOf(futures.toArray*)
+      Futures.combineAll(futures.toList)
         .thenApply(_ => {
           futures.foreach(future => {
             collection.add(future.join())

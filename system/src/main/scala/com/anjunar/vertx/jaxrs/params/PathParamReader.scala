@@ -23,27 +23,22 @@ import scala.compiletime.uninitialized
 @ApplicationScoped
 class PathParamReader extends ParamReader {
 
-  @Inject
-  var sessionFactory : Stage.SessionFactory = uninitialized
-
   override def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean = {
     annotations.exists(annotation => annotation.annotationType() == classOf[PathParam])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.SessionFactory): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.Session): CompletionStage[Any] = {
     val value = ctx.pathParam(annotations.find(annotation => annotation.annotationType() == classOf[PathParam]).get.asInstanceOf[PathParam].value())
 
     javaType.raw match {
       case clazz : Class[AnyRef] if classOf[IdProvider].isAssignableFrom(clazz) =>
-        sessionFactory.withTransaction(session => {
-          session.find(clazz, UUID.fromString(value))
-            .thenCompose(entity => {
-              JPAUtil.fetchEntityRecursively(entity, clazz, session)
-                .thenApply(_ => {
-                  entity.asInstanceOf[Any]
-                })
-            })
-        }).toCompletableFuture
+        factory.find(clazz, UUID.fromString(value))
+          .thenCompose(entity => {
+            JPAUtil.fetchEntityRecursively(entity, clazz, factory)
+              .thenApply(_ => {
+                entity.asInstanceOf[Any]
+              })
+          })
     }
   }
 }

@@ -1,16 +1,13 @@
 package com.anjunar.technologyspeaks.shared
 
-import com.anjunar.jpa.EntityContext
 import com.anjunar.scala.mapper.IdProvider
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import jakarta.persistence.*
 
+import java.lang
 import java.time.LocalDateTime
 import java.util.UUID
-import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
-
-import java.lang
 
 @MappedSuperclass
 abstract class AbstractEntity extends IdProvider {
@@ -28,7 +25,7 @@ abstract class AbstractEntity extends IdProvider {
 
   @Basic
   var modified: LocalDateTime = uninitialized
-  
+
 
   @PrePersist
   def onPersist(): Unit = {
@@ -47,7 +44,7 @@ abstract class AbstractEntity extends IdProvider {
   }
 
   override def hashCode(): Int = id.hashCode()
-  
+
 }
 
 

@@ -2,6 +2,7 @@ package com.anjunar.scala.mapper
 
 import com.anjunar.scala.mapper.loader.JsonEntityLoader
 import com.anjunar.scala.schema.builder.{PropertyBuilder, SchemaBuilder}
+import com.anjunar.scala.schema.builder2.Schemas
 import com.anjunar.scala.schema.model.Link
 import jakarta.validation.{ConstraintViolation, Validator}
 
@@ -14,7 +15,7 @@ case class JsonContext(parent : JsonContext,
                        noValidation : Boolean,
                        validator : Validator,
                        registry: JsonConverterRegistry,
-                       schema: SchemaBuilder,
+                       schema: Schemas,
                        loader: JsonEntityLoader) extends Context {
 
   var filter : Array[String] = Array()
@@ -23,7 +24,7 @@ case class JsonContext(parent : JsonContext,
 
 object JsonContext {
 
-  def apply(parent : JsonContext, propertyName: Any, noValidation : Boolean, propertySchema : SchemaBuilder, context: JsonContext): JsonContext = {
+  def apply(parent : JsonContext, propertyName: Any, noValidation : Boolean, propertySchema : Schemas, context: JsonContext): JsonContext = {
     val newContext = JsonContext(
       parent,
       propertyName,

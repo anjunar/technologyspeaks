@@ -7,20 +7,22 @@ import com.anjunar.technologyspeaks.control.User
 import com.anjunar.vertx.engine.{RequestContext, VisibilityRule}
 import org.hibernate.reactive.stage.Stage
 
-import java.util.UUID
+import java.util.{Objects, UUID}
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 
 case class ManagedRule[E <: OwnerProvider](entityClass : Class[?]) extends VisibilityRule[E] {
 
-  override def isVisible(entity: E, property: String, ctx: RequestContext, factory : Stage.SessionFactory): CompletionStage[Boolean] = {
-    if (entity.owner.id.toString == ctx.currentUser.get("id") || ctx.roles.contains("Administrator")) {
-      CompletableFuture.completedFuture(true)
+  override def isVisible(entity: E, property: String, ctx: RequestContext, session : Stage.Session): CompletionStage[Boolean] = {
+    if (! ctx.currentUser.principal().containsKey("id")) {
+      CompletableFuture.completedFuture(false)
     } else {
-      factory.withSession(implicit session => {
-        session.find(classOf[User], UUID.fromString(ctx.currentUser.get("id")))
+      if (entity.owner.id == ctx.currentUser.get("id") || ctx.roles.contains("Administrator")) {
+        CompletableFuture.completedFuture(true)
+      } else {
+        session.find(classOf[User], ctx.currentUser.get("id"))
           .thenCompose(currentUser =>
             val viewContext = TypeResolver.companionInstance(entityClass).asInstanceOf[ViewContext]
-            viewContext.findByUser(currentUser)
+            viewContext.findByUser(currentUser)(using session)
               .thenCompose(view => {
                 val opt = view.properties.stream()
                   .filter(p => p.value == property)
@@ -40,7 +42,7 @@ case class ManagedRule[E <: OwnerProvider](entityClass : Class[?]) extends Visib
                 }
               })
           )
-      })
+      }
     }
   }
 
@@ -55,7 +57,7 @@ case class ManagedRule[E <: OwnerProvider](entityClass : Class[?]) extends Visib
     visibleForAll || isInUsers || isInGroup
   }
 
-  override def isWriteable(entity: E, property: String, ctx: RequestContext, factory : Stage.SessionFactory): CompletionStage[Boolean] = {
+  override def isWriteable(entity: E, property: String, ctx: RequestContext, factory : Stage.Session): CompletionStage[Boolean] = {
     CompletableFuture.completedFuture(ctx.currentUser.get("id") == entity.owner.id.toString || ctx.roles.contains("Administrator"))
   }
 }

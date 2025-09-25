@@ -17,8 +17,15 @@ abstract class EntityView extends AbstractEntity with OwnerProvider {
   @ManyToOne(optional = false, targetEntity = classOf[User])
   var user : User = uninitialized
 
-  @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true, targetEntity = classOf[ManagedProperty])
+  @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true, targetEntity = classOf[ManagedProperty], fetch = FetchType.EAGER)
   var properties : util.Set[ManagedProperty] = new util.HashSet[ManagedProperty]()
+  
+  def findProperty(name : String): ManagedProperty = {
+    properties.stream()
+      .filter(property => property.value == name)  
+      .findFirst()
+      .orElse(null)
+  }
 
   override def owner: SecurityUser = user
 

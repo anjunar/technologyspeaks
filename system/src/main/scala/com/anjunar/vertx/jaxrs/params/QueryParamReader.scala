@@ -23,14 +23,11 @@ import java.util
 @ApplicationScoped
 class QueryParamReader extends ParamReader {
 
-  @Inject
-  var sessionFactory: Stage.SessionFactory = uninitialized
-
   override def canRead(ctx: RoutingContext, javaType: ResolvedClass, annotations: Array[Annotation]): Boolean = {
     annotations.exists(annotation => annotation.annotationType() == classOf[QueryParam])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.SessionFactory): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.Session): CompletionStage[Any] = {
     val value = ctx.queryParam(annotations.find(annotation => annotation.annotationType() == classOf[QueryParam]).get.asInstanceOf[QueryParam].value())
 
     if (value.isEmpty) {
@@ -40,23 +37,21 @@ class QueryParamReader extends ParamReader {
         case _ =>
           val option = annotations.find(annotation => annotation.annotationType() == classOf[DefaultValue])
           if (option.isDefined) {
-            buildValue(javaType, option.get.asInstanceOf[DefaultValue].value())
+            buildValue(javaType, option.get.asInstanceOf[DefaultValue].value(), factory)
           } else {
             CompletableFuture.completedFuture(null)
           }
       }
     } else {
       val first = value.getFirst
-      buildValue(javaType, first)
+      buildValue(javaType, first, factory)
     }
   }
 
-  private def buildValue(javaType: ResolvedClass, first: String) = {
+  private def buildValue(javaType: ResolvedClass, first: String, session : Stage.Session) = {
     javaType.raw match {
       case clazz: Class[Any] if classOf[IdProvider].isAssignableFrom(clazz) =>
-        sessionFactory.withSession(session => {
-          session.find(clazz, UUID.fromString(first))
-        }).toCompletableFuture
+        session.find(clazz, UUID.fromString(first))
       case clazz: Class[Any] if classOf[String].isAssignableFrom(clazz) =>
         CompletableFuture.completedFuture(first)
       case clazz: Class[Any] if classOf[Integer].isAssignableFrom(clazz) =>

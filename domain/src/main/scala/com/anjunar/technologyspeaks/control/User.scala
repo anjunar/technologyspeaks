@@ -4,10 +4,11 @@ import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.jpa.annotations.{PostgresIndex, PostgresIndices}
 import com.anjunar.jpa.{EntityContext, RepositoryContext}
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
+import com.anjunar.scala.schema.model.Link
 import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.document.Document
 import com.anjunar.technologyspeaks.shared.property.{EntityView, ManagedProperty, ManagedRule, ViewContext}
-import com.anjunar.vertx.engine.{EntitySchemaDef, Link, OwnerRule, RequestContext, SchemaProvider, SchemaView, VisibilityRule}
+import com.anjunar.vertx.engine.{EntitySchemaDef, OwnerRule, RequestContext, SchemaProvider, SchemaView, VisibilityRule}
 import io.smallrye.mutiny.Uni
 import jakarta.persistence.*
 import jakarta.validation.constraints.*
@@ -32,7 +33,7 @@ class User extends Identity with OwnerProvider with SecurityUser with EntityCont
   @Column(unique = true)
   @Basic
   @FormParam("nickName")
-  @NotBlank  
+  @NotBlank
   var nickName: String = uninitialized
 
   @OneToMany(cascade = Array(CascadeType.ALL), mappedBy = "user", orphanRemoval = true)
@@ -62,14 +63,74 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
       .forType(ctx => EMail.schema.buildType(classOf[EMail], ctx))
       .forInstance((emails, ctx, factory) => emails.asScala.map(elem => EMail.schema.build(elem, classOf[EMail], ctx, factory)).toSeq)
       .visibleWhen(ManagedRule(classOf[User]))
+      .withDynamicLinks((user, ctx, session) => {
+        User.findByUser(user)(using session)
+          .thenCompose(view => {
+            val property = view.findProperty("emails")
+            if (property == null) {
+              val newManagedProperty = new ManagedProperty()
+              newManagedProperty.value = "emails"
+              newManagedProperty.view = view
+
+              session.withTransaction(transaction => {
+                session.persist(newManagedProperty)
+                  .thenApply(_ => {
+                    Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
+                  })
+              })
+            } else {
+              CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))  
+            }
+          })
+      })
     val info = column[UserInfo]("info", views = Set("full", "application", "form", "table"))
       .forType(ctx => UserInfo.schema.buildType(classOf[UserInfo], ctx))
       .forInstance((userInfo, ctx, factory) => Seq(UserInfo.schema.build(userInfo, classOf[UserInfo], ctx, factory)))
       .visibleWhen(ManagedRule(classOf[User]))
+      .withDynamicLinks((user, ctx, session) => {
+        User.findByUser(user)(using session)
+          .thenCompose(view => {
+            val property = view.findProperty("info")
+            if (property == null) {
+              val newManagedProperty = new ManagedProperty()
+              newManagedProperty.value = "info"
+              newManagedProperty.view = view
+
+              session.withTransaction(transaction => {
+                session.persist(newManagedProperty)
+                  .thenApply(_ => {
+                    Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
+                  })
+              })
+            } else {
+              CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))
+            }
+          })
+      })
     val address = column[Address]("address", views = Set("full", "form"))
       .forType(ctx => Address.schema.buildType(classOf[Address], ctx))
       .forInstance((address, ctx, factory) => Seq(Address.schema.build(address, classOf[Address], ctx, factory)))
       .visibleWhen(ManagedRule(classOf[User]))
+      .withDynamicLinks((user, ctx, session) => {
+        User.findByUser(user)(using session)
+          .thenCompose(view => {
+            val property = view.findProperty("address")
+            if (property == null) {
+              val newManagedProperty = new ManagedProperty()
+              newManagedProperty.value = "address"
+              newManagedProperty.view = view
+
+              session.withTransaction(transaction => {
+                session.persist(newManagedProperty)
+                  .thenApply(_ => {
+                    Link(s"/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
+                  })
+              })
+            } else {
+              CompletableFuture.completedFuture(Link(s"/property/${property.id.toString}", "GET", "security", "Security"))
+            }
+          })
+      })
   }
 
   def findByEmail(email: String)(implicit session : Stage.Session): CompletionStage[User] = {
@@ -79,20 +140,24 @@ object User extends RepositoryContext[User](classOf[User]) with SchemaProvider[U
   }
 
   def findByUser(user: User)(implicit session: Stage.Session): CompletionStage[View] = {
-    session.createQuery("select v from UserView v where v.user = :user", classOf[View])
-      .setParameter("user", user)
-      .getSingleResultOrNull
-      .thenCompose(view => {
-        if (view != null) {
-          CompletableFuture.completedFuture(view)
-        } else {
-          val newView = new View()
-          newView.user = user
-          session.withTransaction(transaction => {
-            newView.persist().thenApply(_ => newView)
-          })
-        }
-      })
+    if (user == null) {
+      CompletableFuture.completedFuture(new View())
+    } else {
+      session.createQuery("select v from UserView v where v.user = :user", classOf[View])
+        .setParameter("user", user)
+        .getSingleResultOrNull
+        .thenCompose(view => {
+          if (view != null) {
+            CompletableFuture.completedFuture(view)
+          } else {
+            val newView = new View()
+            newView.user = user
+            session.withTransaction(transaction => {
+              newView.persist().thenApply(_ => newView)
+            })
+          }
+        })
+    }
   }
 
   @Entity(name = "UserView")

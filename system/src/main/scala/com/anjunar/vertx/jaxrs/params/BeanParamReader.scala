@@ -1,6 +1,7 @@
 package com.anjunar.vertx.jaxrs.params
 
 import com.anjunar.scala.introspector.DescriptionIntrospector
+import com.anjunar.scala.mapper.helper.Futures
 import com.anjunar.scala.universe.ResolvedClass
 import com.anjunar.scala.universe.members.ResolvedMethod
 import com.anjunar.vertx.fsm.StateDef
@@ -31,7 +32,7 @@ class BeanParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[BeanParam])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.SessionFactory): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.Session): CompletionStage[Any] = {
 
     val model = DescriptionIntrospector.create(javaType)
     val instance : AnyRef = model.underlying.findConstructor().underlying.newInstance()
@@ -53,7 +54,7 @@ class BeanParamReader extends ParamReader {
         .toCompletableFuture
     })
 
-    CompletableFuture.allOf(futures*)
+    Futures.combineAll(futures.toList)
       .thenApply(_ => instance)
   }
 }

@@ -4,6 +4,7 @@ import com.anjunar.technologyspeaks.control.User
 import com.anjunar.technologyspeaks.control.User.View
 import org.hibernate.reactive.stage.Stage
 
+import java.util.UUID
 import java.util.concurrent.CompletionStage
 
 trait ViewContext {
