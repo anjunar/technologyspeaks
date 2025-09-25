@@ -70,6 +70,21 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
         this.controls().splice(name as number, 1)
     }
 
+    override markAsNoError() {
+        this.dirty.set(false)
+        this.controls().forEach((control) => control.markAsNoError())
+    }
+
+    override markAsPristine() {
+        this.dirty.set(false)
+        this.controls().forEach((control) => control.markAsPristine())
+    }
+
+    override markAsDirty() {
+        this.dirty.set(false)
+        this.controls().forEach((control) => control.markAsDirty())
+    }
+
     ngOnInit(): void {
         this.form.addControl(this.name(), this)
         this.descriptor = (this.form.descriptor.properties[this.name()] as CollectionDescriptor).items

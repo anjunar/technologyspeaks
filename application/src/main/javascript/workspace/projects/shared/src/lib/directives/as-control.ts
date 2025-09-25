@@ -146,6 +146,13 @@ export abstract class AsControl {
         this.onTouched.push(fn)
     }
 
+    abstract markAsNoError() : void
+
+    abstract markAsPristine() : void
+
+    abstract markAsDirty() : void
+
+
 }
 
 @Directive()
@@ -173,6 +180,17 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
         this.form.removeControl(this.name(), this)
     }
 
+    override markAsNoError() {
+        this.errors.set([])
+    }
+
+    override markAsPristine() {
+        this.dirty.set(false)
+    }
+
+    override markAsDirty() {
+        this.dirty.set(true)
+    }
 }
 
 @Directive()
@@ -232,6 +250,20 @@ export abstract class AsControlSingleForm extends AsControlForm {
         }
     }
 
+    override markAsNoError() {
+        this.errors.set([])
+        this.controls.forEach((controls, key) => controls.forEach(control => control.markAsNoError()))
+    }
+
+    override markAsPristine() {
+        this.dirty.set(false)
+        this.controls.forEach((controls, key) => controls.forEach(control => control.markAsPristine()))
+    }
+
+    override markAsDirty() {
+        this.dirty.set(false)
+        this.controls.forEach((controls, key) => controls.forEach(control => control.markAsDirty()))
+    }
 }
 
 @Directive()
@@ -240,5 +272,7 @@ export abstract class AsControlArrayForm extends AsControlForm {
     model = value([])
 
     override descriptor: ObjectDescriptor
+
+
 
 }
