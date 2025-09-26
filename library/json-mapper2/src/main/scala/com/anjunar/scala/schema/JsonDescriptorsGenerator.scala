@@ -121,14 +121,14 @@ object JsonDescriptorsGenerator {
 
   private def generatePrimitive(property: AbstractProperty, propertyType: Class[?], schemaDefinition: ClassProperty) = {
     val nodeDescriptor = NodeDescriptor(
-      schemaDefinition.annotation.title,
-      schemaDefinition.annotation.description,
-      schemaDefinition.annotation.widget,
-      schemaDefinition.annotation.id,
-      schemaDefinition.annotation.naming,
-      schemaDefinition.annotation.hidden,
+      schemaDefinition.title,
+      schemaDefinition.description,
+      schemaDefinition.widget,
+      schemaDefinition.id,
+      schemaDefinition.naming,
+      schemaDefinition.hidden,
       propertyType.getSimpleName,
-      schemaDefinition.annotation.step,
+      schemaDefinition.step,
       schemaDefinition.getLinks)
     generateValidator(property, nodeDescriptor)
     nodeDescriptor
@@ -148,12 +148,12 @@ object JsonDescriptorsGenerator {
       }
     })
     val enumDescriptor = EnumDescriptor(
-      schemaDefinition.annotation.title,
-      schemaDefinition.annotation.description,
-      schemaDefinition.annotation.widget,
-      schemaDefinition.annotation.id,
-      schemaDefinition.annotation.naming,
-      schemaDefinition.annotation.hidden,
+      schemaDefinition.title,
+      schemaDefinition.description,
+      schemaDefinition.widget,
+      schemaDefinition.id,
+      schemaDefinition.naming,
+      schemaDefinition.hidden,
       property.propertyType.raw.getSimpleName,
       schemaDefinition.getLinks,
       enums.toList.asJava
@@ -164,12 +164,12 @@ object JsonDescriptorsGenerator {
 
   private def generateObject(property: AbstractProperty, propertyType: ResolvedClass, schemaDefinition: ClassProperty, context: JsonDescriptorsContext): ObjectDescriptor = {
     val objectDescriptor = generateObject(propertyType, schemaDefinition.schemas, new JsonDescriptorsContext(context))
-    objectDescriptor.title = schemaDefinition.annotation.title
-    objectDescriptor.description = schemaDefinition.annotation.description
-    objectDescriptor.widget = schemaDefinition.annotation.widget
-    objectDescriptor.id = schemaDefinition.annotation.id
-    objectDescriptor.name = schemaDefinition.annotation.naming
-    objectDescriptor.hidden = schemaDefinition.annotation.hidden
+    objectDescriptor.title = schemaDefinition.title
+    objectDescriptor.description = schemaDefinition.description
+    objectDescriptor.widget = schemaDefinition.widget
+    objectDescriptor.id = schemaDefinition.id
+    objectDescriptor.name = schemaDefinition.naming
+    objectDescriptor.hidden = schemaDefinition.hidden
     objectDescriptor.links = schemaDefinition.getLinks
     generateValidator(property, objectDescriptor)
     objectDescriptor
@@ -183,12 +183,12 @@ object JsonDescriptorsGenerator {
 
     descriptor.items = generateObject(collectionType, schemaDefinition.schemas, new JsonDescriptorsContext(context))
     descriptor.`type` = property.propertyType.raw.getSimpleName
-    descriptor.title = schemaDefinition.annotation.title
-    descriptor.description = schemaDefinition.annotation.description
-    descriptor.widget = schemaDefinition.annotation.widget
-    descriptor.id = schemaDefinition.annotation.id
-    descriptor.name = schemaDefinition.annotation.naming
-    descriptor.hidden = schemaDefinition.annotation.hidden
+    descriptor.title = schemaDefinition.title
+    descriptor.description = schemaDefinition.description
+    descriptor.widget = schemaDefinition.widget
+    descriptor.id = schemaDefinition.id
+    descriptor.name = schemaDefinition.naming
+    descriptor.hidden = schemaDefinition.hidden
     descriptor.links = schemaDefinition.getLinks
     generateValidator(property, descriptor)
     descriptor

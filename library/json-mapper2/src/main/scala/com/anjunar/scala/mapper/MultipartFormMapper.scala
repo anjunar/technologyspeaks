@@ -28,7 +28,7 @@ class MultipartFormMapper {
 
       if (propertyBuilder.isDefined) {
 
-        if (propertyBuilder.get.writable) {
+        if (propertyBuilder.get.writeable) {
           val converter = registry.find(property.propertyType)
 
           if (converter == null && ! classOf[File].isAssignableFrom(property.propertyType.raw)) {

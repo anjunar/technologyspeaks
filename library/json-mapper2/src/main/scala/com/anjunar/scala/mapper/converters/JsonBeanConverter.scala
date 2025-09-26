@@ -101,7 +101,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
             mutable.LinkedHashMap(
               "$type" -> JsonString("PropDescriptor"),
               "visible" -> JsonBoolean(propertySchema.visible),
-              "writeable" -> JsonBoolean(propertySchema.annotation.writeable)
+              "writeable" -> JsonBoolean(propertySchema.writeable)
             )
           )
 
@@ -224,7 +224,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
 
         if (option.isDefined || ignoreFilter != null) {
           val value = option.get
-          value.annotation.writeable
+          value.writeable
         } else {
           false
         }
