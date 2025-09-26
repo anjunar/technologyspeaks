@@ -59,8 +59,7 @@ class EntityWriter extends MessageBodyWriter {
         val tableType = resolvedClass.typeArguments(0).raw.asInstanceOf[Class[AnyRef]]
         val entitySchemaDef = Table.schema(tableType, state.view)
         val schemaBuilder = entitySchemaDef.build(entity.asInstanceOf[Table[AnyRef]], resolvedClass.raw.asInstanceOf[Class[Table[AnyRef]]], RequestContext(user, roles), factory, state.view)
-        val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Table[AnyRef]]], RequestContext(user, roles), state.view)
-        
+
         schemaBuilder.thenCompose(schemaBuilder => {
 
           val tableLinks = transitions
@@ -80,12 +79,11 @@ class EntityWriter extends MessageBodyWriter {
             itemSchema.links.addAll(entityLinks)
           })
           
-          write2(entity, resolvedClass, schemaBuilder, schemaBuilderType, factory)
+          write2(entity, resolvedClass, schemaBuilder, factory)
         })
       case _ =>
         val entitySchemaDef = TypeResolver.companionInstance(resolvedClass.raw).asInstanceOf[SchemaProvider[Any]].schema
         val schemaBuilder = entitySchemaDef.build(entity, entity.getClass.asInstanceOf[Class[Any]], RequestContext(user, roles), factory, state.view)
-        val schemaBuilderType = entitySchemaDef.buildType(resolvedClass.raw.asInstanceOf[Class[Any]], RequestContext(user, roles), state.view)
 
         schemaBuilder.thenCompose(schemaBuilder => {
 
@@ -96,20 +94,20 @@ class EntityWriter extends MessageBodyWriter {
           
           classSchema.links.addAll(entityLinks)
 
-          write2(entity, resolvedClass, schemaBuilder, schemaBuilderType, factory)
+          write2(entity, resolvedClass, schemaBuilder, factory)
         })
         
     }
   }
 
-  def write2(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: Schemas, schemaBuilderType: Schemas, session : Stage.Session): CompletionStage[String] = {
+  def write2(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: Schemas, session : Stage.Session): CompletionStage[String] = {
     val jsonMapper = JsonMapper()
 
     val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, null)
 
     jsonMapper.toJson(entity.asInstanceOf[AnyRef], resolvedClass, context)
       .thenCompose(jsonObject => {
-        val objectDescriptor = JsonDescriptorsGenerator.generateObject(resolvedClass, schemaBuilderType, JsonDescriptorsContext(null))
+        val objectDescriptor = JsonDescriptorsGenerator.generateObject(resolvedClass, schemaBuilder, JsonDescriptorsContext(null))
 
         jsonMapper.toJson(objectDescriptor, TypeResolver.resolve(classOf[ObjectDescriptor]), context)
           .thenCompose(descriptors => {

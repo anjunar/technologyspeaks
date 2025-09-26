@@ -123,14 +123,21 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
     }
 
     if (typeMapping != null) {
-      val links = new mutable.LinkedHashMap[String, JsonNode]
-      meta.put("links", JsonObject(links))
+      val links = meta.getOrElseUpdate("links", JsonObject(mutable.LinkedHashMap[String, JsonNode]())).asInstanceOf[JsonObject]
 
-      val registry = context.registry
+      generateLinks(typeMapping.links.toSeq, instance, context, links.value, context.registry)
 
-      generateLinks(typeMapping.links, instance, context, links, registry)
+      properties.foreach((name, node) => {
+        val classPropertyOption = typeMapping.properties.get(name)
+        if (classPropertyOption.isDefined) {
+          val classProperty = classPropertyOption.get
+          val instance = meta("instance").asInstanceOf[JsonObject]
+          val jsonNode = instance.value(name).asInstanceOf[JsonObject]
+          generateLinks(classProperty.links, instance, context, jsonNode.value, context.registry)
+        }
+      })
 
-      if links.isEmpty then meta.remove("links")
+      if links.value.isEmpty then meta.remove("links")
     }
 
     if meta.isEmpty then properties.remove("$meta") else meta.put("$type", JsonString("Meta"))
@@ -169,7 +176,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
 
   }
 
-  private def generateLinks(linkBuffer : mutable.Buffer[Link], instance: Any, context: JsonContext, links: mutable.LinkedHashMap[String, JsonNode], registry: JsonConverterRegistry): Unit = {
+  private def generateLinks(linkBuffer : Seq[Link], instance: Any, context: JsonContext, links: mutable.Map[String, JsonNode], registry: JsonConverterRegistry): Unit = {
     for (link <- linkBuffer) {
       val converter = registry.find(TypeResolver.resolve(classOf[Link]))
       val node = converter.toJson(link, TypeResolver.resolve(classOf[Link]), JsonContext(context, link._1, context.noValidation, context.schema, context))

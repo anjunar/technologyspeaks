@@ -42,10 +42,11 @@ object JsonDescriptorsGenerator {
     val descriptor = new ObjectDescriptor
     descriptor.`type` = aClass.raw.getSimpleName
     context.descriptor = descriptor
+    val classSchema = schema.types(aClass.raw)
 
     beanModel.properties.foreach(property => {
 
-      val typeMapping = schema.types(aClass.raw).properties.get(property.name)
+      val typeMapping = classSchema.properties.get(property.name)
 
       val option = if (typeMapping.isDefined) {
         val propertySchema = typeMapping.get

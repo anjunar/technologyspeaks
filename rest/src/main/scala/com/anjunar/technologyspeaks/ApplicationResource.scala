@@ -19,9 +19,6 @@ import scala.compiletime.uninitialized
 @Path("/")
 class ApplicationResource {
 
-  @Inject
-  var sessionFactory: Stage.SessionFactory = uninitialized
-
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
