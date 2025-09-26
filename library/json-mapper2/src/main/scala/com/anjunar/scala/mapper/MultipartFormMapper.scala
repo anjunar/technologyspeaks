@@ -22,13 +22,13 @@ class MultipartFormMapper {
 
     model.properties.foreach(property => {
 
-      val mapping = context.schema.findTypeMapping(aType.underlying)
+      val mapping = context.schema.types(aType.raw)
 
-      val propertyBuilder = mapping.get(property.name)
+      val propertyBuilder = mapping.properties.get(property.name)
 
       if (propertyBuilder.isDefined) {
 
-        if (propertyBuilder.get.writeable) {
+        if (propertyBuilder.get.writable) {
           val converter = registry.find(property.propertyType)
 
           if (converter == null && ! classOf[File].isAssignableFrom(property.propertyType.raw)) {
@@ -39,7 +39,7 @@ class MultipartFormMapper {
               value = context.loader.load(Map.empty, property.propertyType, Array())
             }
 
-            toJava(value, fields, files, property.propertyType, MultipartFormContext(context, property.name, context.noValidation, propertyBuilder.get.schemaBuilder, context))
+            toJava(value, fields, files, property.propertyType, MultipartFormContext(context, property.name, context.noValidation, propertyBuilder.get.schemas, context))
 
           } else {
 

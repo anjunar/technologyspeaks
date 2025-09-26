@@ -4,8 +4,7 @@ import com.anjunar.scala.i18n.I18nResolver
 import com.anjunar.scala.introspector.DescriptionIntrospector
 import com.anjunar.scala.mapper.annotations.Converter
 import com.anjunar.scala.schema.analyzer.*
-import com.anjunar.scala.schema.builder.{PropertyBuilder, SchemaBuilder}
-import com.anjunar.scala.schema.builder2.{ClassProperty, Schemas}
+import com.anjunar.scala.schema.builder.{ClassProperty, Schemas}
 import com.anjunar.scala.schema.model.validators.{NotBlankValidator, NotNullValidator, SizeValidator}
 import com.anjunar.scala.schema.model.{CollectionDescriptor, EnumDescriptor, NodeDescriptor, ObjectDescriptor}
 import com.anjunar.scala.universe.introspector.{AbstractProperty, BeanIntrospector}

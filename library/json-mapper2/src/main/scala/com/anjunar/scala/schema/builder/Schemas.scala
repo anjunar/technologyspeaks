@@ -1,4 +1,4 @@
-package com.anjunar.scala.schema.builder2
+package com.anjunar.scala.schema.builder
 
 import com.anjunar.scala.universe.ResolvedClass
 

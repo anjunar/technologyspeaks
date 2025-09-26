@@ -6,8 +6,7 @@ import com.anjunar.scala.mapper.helper.Futures
 import com.anjunar.scala.mapper.helper.JPAHelper.resolveMappings
 import com.anjunar.scala.mapper.intermediate.model.{JsonBoolean, JsonNode, JsonObject, JsonString}
 import com.anjunar.scala.mapper.{JsonContext, JsonConverterRegistry}
-import com.anjunar.scala.schema.builder.{LinkContext, SchemaBuilder}
-import com.anjunar.scala.schema.builder2.Schemas
+import com.anjunar.scala.schema.builder.Schemas
 import com.anjunar.scala.schema.model.{Link, NodeDescriptor}
 import com.anjunar.scala.universe.introspector.AbstractProperty
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}

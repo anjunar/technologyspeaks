@@ -3,7 +3,6 @@ package com.anjunar.scala.mapper
 import com.anjunar.scala.mapper.intermediate.generator.JsonGenerator
 import com.anjunar.scala.mapper.intermediate.model.{JsonNode, JsonObject}
 import com.anjunar.scala.mapper.intermediate.parser.{Parser, Tokenizer}
-import com.anjunar.scala.schema.builder.EntitySchemaBuilder
 import com.anjunar.scala.schema.model.validators.SizeValidator
 import com.anjunar.scala.schema.model.*
 import com.anjunar.scala.universe.ResolvedClass

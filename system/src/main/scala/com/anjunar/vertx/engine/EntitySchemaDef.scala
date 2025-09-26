@@ -3,8 +3,7 @@ package com.anjunar.vertx.engine
 import com.anjunar.scala.introspector.DescriptionIntrospector
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.scala.mapper.helper.Futures
-import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
-import com.anjunar.scala.schema.builder2.{ClassProperty, ClassSchema, Schemas}
+import com.anjunar.scala.schema.builder.{ClassProperty, ClassSchema, Schemas}
 import com.anjunar.scala.schema.model.Link
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import org.hibernate.reactive.stage.Stage

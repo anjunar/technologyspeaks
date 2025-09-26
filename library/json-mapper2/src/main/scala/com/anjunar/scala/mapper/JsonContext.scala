@@ -1,8 +1,7 @@
 package com.anjunar.scala.mapper
 
 import com.anjunar.scala.mapper.loader.JsonEntityLoader
-import com.anjunar.scala.schema.builder.{PropertyBuilder, SchemaBuilder}
-import com.anjunar.scala.schema.builder2.Schemas
+import com.anjunar.scala.schema.builder.Schemas
 import com.anjunar.scala.schema.model.Link
 import jakarta.validation.{ConstraintViolation, Validator}
 

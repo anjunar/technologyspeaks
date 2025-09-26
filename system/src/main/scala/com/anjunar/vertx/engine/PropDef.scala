@@ -1,8 +1,7 @@
 package com.anjunar.vertx.engine
 
 import com.anjunar.scala.introspector.DescriptorsModel
-import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
-import com.anjunar.scala.schema.builder2.Schemas
+import com.anjunar.scala.schema.builder.Schemas
 import com.anjunar.scala.schema.model.Link
 import com.anjunar.scala.universe.introspector.BeanModel
 import org.hibernate.reactive.stage.Stage

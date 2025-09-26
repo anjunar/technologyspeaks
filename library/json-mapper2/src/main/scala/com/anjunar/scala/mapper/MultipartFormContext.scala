@@ -1,7 +1,7 @@
 package com.anjunar.scala.mapper
 
-import com.anjunar.scala.mapper.loader.{JsonEntityLoader, FormEntityLoader}
-import com.anjunar.scala.schema.builder.{PropertyBuilder, SchemaBuilder}
+import com.anjunar.scala.mapper.loader.{FormEntityLoader, JsonEntityLoader}
+import com.anjunar.scala.schema.builder.Schemas
 import com.anjunar.scala.schema.model.Link
 import jakarta.validation.{ConstraintViolation, Validator}
 
@@ -14,7 +14,7 @@ case class MultipartFormContext(parent : Context,
                        noValidation : Boolean,
                        validator : Validator,
                        registry: MultipartFormConverterRegistry,
-                       schema: SchemaBuilder,
+                       schema: Schemas,
                        links : mutable.Buffer[Link],
                        loader: FormEntityLoader) extends Context {
 
@@ -24,7 +24,7 @@ case class MultipartFormContext(parent : Context,
 
 object MultipartFormContext {
 
-  def apply(parent : Context, propertyName: String, noValidation : Boolean, propertySchema : SchemaBuilder, context: MultipartFormContext): MultipartFormContext = {
+  def apply(parent : Context, propertyName: String, noValidation : Boolean, propertySchema : Schemas, context: MultipartFormContext): MultipartFormContext = {
     val newContext = MultipartFormContext(
       parent,
       propertyName,

@@ -3,8 +3,7 @@ package com.anjunar.vertx.jaxrs.message
 import com.anjunar.jaxrs.types.Table
 import com.anjunar.scala.mapper.intermediate.model
 import com.anjunar.scala.mapper.{IdProvider, JsonContext, JsonMapper}
-import com.anjunar.scala.schema.builder.{EntitySchemaBuilder, SchemaBuilder}
-import com.anjunar.scala.schema.builder2.Schemas
+import com.anjunar.scala.schema.builder.Schemas
 import com.anjunar.scala.schema.model.{Link, ObjectDescriptor}
 import com.anjunar.scala.schema.{JsonDescriptorsContext, JsonDescriptorsGenerator}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
