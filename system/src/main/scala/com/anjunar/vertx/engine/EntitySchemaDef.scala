@@ -41,7 +41,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
 
     val model = DescriptionIntrospector.createWithType(entityClass)
 
-    val futures = props.filter(prop => prop.views.contains(view)).map { prop =>
+    val futures = props.filter(prop => prop.views.contains(view)).map { prop => () =>
       prop.visibility.isVisible(entity, prop.name, ctx, session)
         .thenCompose { visibility =>
           prop.visibility.isWriteable(entity, prop.name, ctx, session)
@@ -69,7 +69,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
                   val instanceFutures = typedInstanceHandler(value, ctx, session).toList
 
                   Futures.combineAll(instanceFutures).thenCompose { instances =>
-                    Futures.combineAll(prop.dynamicLinks.map(link => link(entity, ctx, session)).toList)
+                    Futures.combineAllSerial(prop.dynamicLinks.map(link => () => link(entity, ctx, session)).toList)
                       .thenApply { links =>
                         val aggregated = instances.foldLeft(Schemas()) { (acc, nextSchema) =>
                           acc.instances.addAll(nextSchema.instances)
@@ -100,7 +100,7 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
         }
     }
 
-    Futures.combineAll(futures.toList).thenApply { (props: Seq[ClassProperty]) =>
+    Futures.combineAllSerial(futures.toList).thenApply { (props: Seq[ClassProperty]) =>
       val typedSchema = buildType(entityClass, ctx, view)
       val classSchema = ClassSchema(model.underlying)
       val schemas = Schemas()
