@@ -59,8 +59,6 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
     isDisabled = model(false, {alias : "disabled"})
 
     addControl(name: string | number, control: AsControl): void {
-        control.descriptor = this.descriptor;
-        this.newInstance = findClass(this.descriptor.$type)
         if (control instanceof AsArrayForm) {
             control.writeValue(this.model()[name as number]);
             this.controls().splice(name as number, 0, control)
@@ -89,7 +87,6 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     ngOnInit(): void {
         this.form.addControl(this.name(), this)
-        this.descriptor = (this.form.descriptor.properties[this.name()] as CollectionDescriptor).items
     }
 
     ngOnDestroy(): void {
@@ -111,13 +108,13 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     addItem() {
         let ctor = this.newInstance
-        this.model.update(arr => [...arr, this.form.model().$instance(ctor)]);
+        this.model.update((arr : any[]) => [...arr, this.form.model().$instance(ctor)]);
         this.form.model()[this.name()] = this.model()
         this.renderItems();
     }
 
     removeItem(index: number) {
-        this.model.update(arr => arr.filter((_, i) => i !== index));
+        this.model.update((arr : any[]) => arr.filter((_ : any, i : number) => i !== index));
         this.form.model()[this.name()] = this.model()
         this.renderItems();
     }
@@ -126,7 +123,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
         if (!this.itemTemplate()) return;
 
         this.vcr().clear();
-        this.model().forEach((item, index) => {
+        this.model().forEach((item : any, index : number) => {
             this.vcr().createEmbeddedView(this.itemTemplate(), {$implicit: item, index}, index);
         });
     }

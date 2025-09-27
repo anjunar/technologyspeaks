@@ -61,7 +61,7 @@ export class AsInputContainer {
                     this.dirty.set(value);
                 })
 
-                let controlSubscription = control.model.subscribe(value => {
+                let controlSubscription = control.model.subscribe((value : any) => {
                     this.isEmpty.set(!value);
                     this.placeholder.set(control.placeholder());
                 })

@@ -1,63 +1,8 @@
 import {ControlValueAccessor} from "@angular/forms";
-import PropDescriptor from "../domain/descriptors/PropDescriptor";
-import {
-    Directive,
-    effect,
-    inject,
-    input,
-    model,
-    ModelSignal,
-    OnDestroy,
-    OnInit,
-    Signal,
-    signal,
-    Type
-} from "@angular/core";
-import {NodeDescriptor, ObjectDescriptor} from "../domain/descriptors";
+import {Directive, effect, inject, input, model, ModelSignal, OnDestroy, OnInit, Signal, Type} from "@angular/core";
 import {MetaSignal} from "../meta-signal/meta-signal";
-import {Subject, Subscription} from "rxjs";
 import Validator from "../domain/descriptors/validators/Validator";
-import {findClass} from "../mapper";
-import {PropertiesContainer} from "../domain/container/ActiveObject";
-
-export function value<T>(initial?: T): ModelSignal<T> {
-    const _signal = signal<T | null>(initial ?? null);
-    const _subject = new Subject<T>();
-    const subscriptions: Subscription[] = [];
-
-    const fn = (() => _signal()) as {
-        (): T | null;
-        set(value: T): void;
-        update(update : (value : any) => any) : void
-        subscribe(callback: (value: T) => void): Subscription;
-        destroy(): void;
-    };
-
-    fn.set = (value: T) => {
-        _signal.set(value);
-        _subject.next(value);
-    };
-
-    fn.update = (update : (value : any) => any) => {
-        let value = update(_signal());
-        _signal.set(value)
-        _subject.next(value);
-    }
-
-    fn.subscribe = (callback: (value: T) => void) => {
-        const sub = _subject.subscribe(callback);
-        subscriptions.push(sub);
-        return sub;
-    };
-
-    fn.destroy = () => {
-        subscriptions.forEach(sub => sub.unsubscribe());
-        subscriptions.length = 0;
-    };
-
-
-    return fn as unknown as ModelSignal<T>;
-}
+import {value} from "../meta-signal/value-signal";
 
 function bindSignals<T>(target: ModelSignal<T>, source: ModelSignal<T>) {
     const sub1 = source.subscribe(val => {
@@ -98,8 +43,6 @@ export abstract class AsControl {
 
     placeholder = model<string>()
 
-    abstract descriptor: NodeDescriptor
-
     abstract controlAdded(): void
 
     abstract setDisabledState(isDisabled: boolean): void
@@ -107,7 +50,7 @@ export abstract class AsControl {
     abstract get model(): ModelSignal<any>
     abstract set model(model: ModelSignal<any>)
 
-    abstract el : HTMLElement
+    abstract el: HTMLElement
 
     status = value("INITIAL")
 
@@ -150,6 +93,10 @@ export abstract class AsControl {
         })
     }
 
+    addValidator(validator: Validator) {
+        this.validators.push(validator)
+    }
+
     abstract writeValue(obj: any): void
 
     registerOnChange(fn: (name: string, value: any) => void): void {
@@ -165,11 +112,11 @@ export abstract class AsControl {
         this.onTouched.push(fn)
     }
 
-    abstract markAsNoError() : void
+    abstract markAsNoError(): void
 
-    abstract markAsPristine() : void
+    abstract markAsPristine(): void
 
-    abstract markAsDirty() : void
+    abstract markAsDirty(): void
 
 
 }
@@ -179,19 +126,11 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 
     name = input<string>("", {alias: "property"})
 
-    model = value<any>()
+    model = value<any>(null)
 
     form = inject(AsControlForm)
 
-    instance: PropDescriptor
-
-    override descriptor: NodeDescriptor
-
     abstract writeDefaultValue(obj: any): void
-
-    addValidator(validator: Validator) {
-        this.validators.push(validator)
-    }
 
     ngOnInit(): void {
         this.form.addControl(this.name(), this)
@@ -221,8 +160,6 @@ export abstract class AsControlForm extends AsControl {
 
     abstract form: AsControlForm
 
-    instance: PropertiesContainer
-
     abstract addControl(name: string | number, control: AsControl): void
 
     abstract removeControl(name: string | number, control: AsControl): void
@@ -232,8 +169,6 @@ export abstract class AsControlForm extends AsControl {
 export abstract class AsControlSingleForm extends AsControlForm {
 
     controls: Map<string, AsControl[]> = new Map()
-
-    override descriptor: ObjectDescriptor
 
     model = model<any>({}, {alias: "asModel"})
 
@@ -246,8 +181,6 @@ export abstract class AsControlSingleForm extends AsControlForm {
         } else {
             this.controls.set(name as string, [control])
         }
-        control.descriptor = this.descriptor.properties[name];
-        this.newInstance = findClass(this.descriptor.type)
         const model = this.model();
         if (model) {
             const metaSignal: MetaSignal<any> = model[name];
@@ -259,7 +192,6 @@ export abstract class AsControlSingleForm extends AsControlForm {
                 let value = metaSignal()
                 control.writeValue(value)
                 if (control instanceof AsControlInput) {
-                    control.instance = metaSignal.instance;
                     control.writeDefaultValue(value);
                 }
             }
@@ -296,9 +228,5 @@ export abstract class AsControlSingleForm extends AsControlForm {
 export abstract class AsControlArrayForm extends AsControlForm {
 
     model = value([])
-
-    override descriptor: ObjectDescriptor
-
-
 
 }

@@ -74,9 +74,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
         });
     }
 
-    controlAdded(): void {
-        this.placeholder.set(this.descriptor.title)
-    }
+    controlAdded(): void {}
 
     openWindow() {
         if (! this.disabledImage()) {

@@ -25,6 +25,9 @@ export * from './lib/components/layout/as-view-port/as-view-port'
 export * from './lib/components/modal/as-window/as-window'
 export * from './lib/components/modal/as-window/service/window-manager-service'
 
+export * from './lib/directives/input/as-configured/as-configured'
+export * from './lib/directives/input/as-configured/as-configured'
+
 export * from './lib/directives/input/as-form/as-form'
 
 export * from './lib/directives/input/as-input/as-input'
@@ -46,5 +49,6 @@ export * from './lib/domain/Persistence'
 export * from './lib/mapper'
 
 export * from './lib/meta-signal/meta-signal'
+export * from './lib/meta-signal/value-signal'
 
 export * from './lib/pattern-match'

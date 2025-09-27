@@ -3,12 +3,12 @@ import {match} from "../pattern-match/PatternMatching";
 import ObjectDescriptor from "../domain/descriptors/ObjectDescriptor";
 import CollectionDescriptor from "../domain/descriptors/CollectionDescriptor";
 import {NodeDescriptor} from "../domain/descriptors";
-import PropDescriptor from "../domain/descriptors/PropDescriptor";
+import PropertyDescriptor from "../domain/descriptors/PropertyDescriptor";
 import JSONDeserializer from "./JSONDeserializer";
 import JSONSerializer from "./JSONSerializer";
 import {findType} from "./Registry";
 
-export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: PropDescriptor) {
+export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: PropertyDescriptor) {
 
     if (object instanceof Function) {
         object.descriptor = schema

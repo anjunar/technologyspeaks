@@ -50,10 +50,7 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
             if (this.form instanceof AsForm) {
                 this.form.addControl(this.name(), this)
             }
-        } else {
-            this.descriptor = this.model().$meta.descriptors
         }
-        this.instance = this.model().$meta.instance
     }
 
     ngOnDestroy(): void {

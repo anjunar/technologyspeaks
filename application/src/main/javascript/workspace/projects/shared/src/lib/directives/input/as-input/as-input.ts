@@ -35,11 +35,6 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
     }
 
     controlAdded(): void {
-        this.el.type = this.descriptor.widget
-        this.placeholder.set(this.descriptor.title)
-        Object.values(this.descriptor.validators || {}).forEach(validator => {
-            this.addValidator(validator)
-        })
     }
 
     setDisabledState(isDisabled: boolean): void {

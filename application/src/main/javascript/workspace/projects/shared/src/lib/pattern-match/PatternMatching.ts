@@ -40,7 +40,7 @@ export function match<T, O>(object: T): Matcher<T, O> {
 }
 
 interface Matcher<T, O> {
-    withObject<E extends T>(clazz: new (...args: any[]) => E, callback: (value: E) => O): Matcher<T, O>;
+    withObject<E extends T>(clazz: abstract new (...args: any[]) => E, callback: (value: E) => O): Matcher<T, O>;
     withType<E extends T>(type: string, callback: (value: E) => O): Matcher<T, O>;
     exhaustive(): O;
     nonExhaustive(): O;

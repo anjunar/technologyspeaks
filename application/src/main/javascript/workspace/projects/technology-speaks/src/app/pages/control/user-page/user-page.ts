@@ -1,7 +1,7 @@
 import {Component, model, ViewEncapsulation} from '@angular/core';
 import User from "../../../domain/control/User";
 import {
-    AsArrayForm,
+    AsArrayForm, AsConfigured,
     AsForm,
     AsFormArray,
     AsIcon,
@@ -15,7 +15,7 @@ import {SecuredProperty} from "../../../components/security/secured-property/sec
 
 @Component({
     selector: 'user-page',
-    imports: [AsForm, AsInput, AsSubmit, AsInputContainer, AsImage, AsFormArray, AsArrayForm, AsIcon, AsMenu, SecuredProperty],
+    imports: [AsForm, AsInput, AsSubmit, AsInputContainer, AsImage, AsFormArray, AsArrayForm, AsIcon, AsMenu, SecuredProperty, AsConfigured],
     templateUrl: './user-page.html',
     styleUrl: './user-page.css',
     encapsulation: ViewEncapsulation.None

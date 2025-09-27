@@ -22,7 +22,7 @@ import ObjectDescriptor from "./descriptors/ObjectDescriptor";
 import QueryTable from "./container/QueryTable";
 import Sort from "./container/Sort";
 import TupleTable from "./container/TupleTable";
-import PropDescriptor from "./descriptors/PropDescriptor";
+import PropertyDescriptor from "./descriptors/PropertyDescriptor";
 import {Meta} from "./container/ActiveObject";
 import Media from "./types/Media";
 import Thumbnail from "./types/Thumbnail";
@@ -40,7 +40,7 @@ export function init() {
     registerEntity(EnumDescriptor)
     registerEntity(NodeDescriptor)
     registerEntity(ObjectDescriptor)
-    registerEntity(PropDescriptor)
+    registerEntity(PropertyDescriptor)
     registerEntity(Meta)
 
     registerEntity(NotBlankValidator)

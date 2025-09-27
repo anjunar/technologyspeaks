@@ -1,7 +1,8 @@
-import {Component, effect, inject, input, ViewEncapsulation} from '@angular/core';
+import {Component, effect, inject, Injector, input, Type, ViewEncapsulation} from '@angular/core';
 import {AsIcon} from "../../../../../../shared/src/lib/components/layout/as-icon/as-icon";
 import {AsForm} from "../../../../../../shared/src/lib/directives/input/as-form/as-form";
 import {
+    AsConfigured, Link,
     Mapper,
     WindowManagerService
 } from "shared";
@@ -25,8 +26,20 @@ export class SecuredProperty {
 
     http = inject(HttpClient)
 
+    injector = inject(Injector)
+
+    getDirectivesFor<T>(instance: T, injector: Injector, directiveTypes: Type<any>[]): any[] {
+        return directiveTypes
+            .map(dirType => injector.get(dirType, null))
+            .filter(Boolean);
+    }
+
     open() {
-        let link = this.form().instance[this.property()].security
+        const directives = this.getDirectivesFor(this.form(), this.injector, [AsForm]);
+
+        let configured = directives.find(directive => directive instanceof AsConfigured);
+
+        let link = configured.instance.security as Link
 
         this.http.get(link.url)
             .subscribe(response => {

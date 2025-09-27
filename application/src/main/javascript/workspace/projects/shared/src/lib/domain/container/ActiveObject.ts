@@ -2,7 +2,7 @@ import Basic from "../../mapper/annotations/Basic";
 import LinkContainer from "./LinkContainer";
 import ObjectDescriptor from "../descriptors/ObjectDescriptor";
 import NodeDescriptor from "../descriptors/NodeDescriptor";
-import PropDescriptor from "../descriptors/PropDescriptor";
+import PropertyDescriptor from "../descriptors/PropertyDescriptor";
 import Link from "./Link";
 import {Entity} from "../../mapper";
 import {Signal} from "@angular/core";
@@ -21,7 +21,7 @@ export class Meta {
 }
 
 export interface PropertiesContainer {
-    [key: string]: PropDescriptor
+    [key: string]: PropertyDescriptor
 }
 
 export type Constructor<T> = new (...args: any[]) => T;

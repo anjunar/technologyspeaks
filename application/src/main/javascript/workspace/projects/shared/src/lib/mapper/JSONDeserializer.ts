@@ -1,8 +1,5 @@
-import { findClass, findConverter, findProperties } from "./Registry";
-import ActiveObject from "../domain/container/ActiveObject";
-import JSONSerializer from "./JSONSerializer";
-import { signal } from "@angular/core";
-import {value} from "../directives/as-control";
+import {findClass, findConverter, findProperties} from "./Registry";
+import {value} from "../meta-signal/value-signal";
 
 function isPlainObject(obj: any): obj is Record<string, any> {
     if (obj === null || typeof obj !== 'object') return false;
