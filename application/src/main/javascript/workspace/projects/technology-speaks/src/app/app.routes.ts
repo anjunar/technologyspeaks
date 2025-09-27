@@ -11,6 +11,7 @@ import {UsersPage} from "./pages/control/users-page/users-page";
 import {UserPage} from "./pages/control/user-page/user-page";
 import {AppService} from "./app.service";
 import {LogoutPage} from "./pages/security/logout-page/logout-page";
+import {RegisterPage} from "./pages/security/register-page/register-page";
 
 export const routes: Routes = [
     {
@@ -35,6 +36,10 @@ export const routes: Routes = [
             {
                 path : "security/login",
                 component : LoginPage
+            },
+            {
+                path : "security/register",
+                component : RegisterPage
             },
             {
                 path : "control/users/search",

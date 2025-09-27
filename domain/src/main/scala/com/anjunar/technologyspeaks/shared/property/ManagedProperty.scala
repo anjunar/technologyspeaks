@@ -59,11 +59,14 @@ object ManagedProperty extends RepositoryContext[ManagedProperty](classOf[Manage
       val newManagedProperty = new ManagedProperty()
       newManagedProperty.value = propertyName
       newManagedProperty.view = view
+      view.properties.add(newManagedProperty)
 
-      session.persist(newManagedProperty)
-        .thenApply(_ => {
-          Link(s"/service/security/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
-        })
+      session.withTransaction(transaction => {
+        session.persist(newManagedProperty)
+          .thenApply(_ => {
+            Link(s"/service/security/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
+          })
+      })
     } else {
       CompletableFuture.completedFuture(Link(s"/service/security/property/${property.id.toString}", "GET", "security", "Security"))
     }

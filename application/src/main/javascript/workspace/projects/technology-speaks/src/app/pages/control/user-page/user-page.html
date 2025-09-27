@@ -1,4 +1,4 @@
-<form [(asModel)]="user" (asSubmit)="onSubmit($event)" configured #root="AsForm">
+<form [(asModel)]="user" (asSubmit)="onSubmit($event)" configured>
     <div class="container">
         <div class="image">
             <fieldset property="info" #image="AsForm" configured>
@@ -29,7 +29,7 @@
                         <button type="button" (click)="info.toggleDisabled()">
                             <as-icon value="shield_toggle">Disable</as-icon>
                         </button>
-                         <secured-property [form]="root" property="info">Visibility</secured-property>
+                         <secured-property>Visibility</secured-property>
                     </as-menu>
                 </legend>
                 <as-input-container>
@@ -48,7 +48,7 @@
                         <button type="button" (click)="address.toggleDisabled()">
                             <as-icon value="shield_toggle">Disable</as-icon>
                         </button>
-                        <secured-property [form]="root" property="address">Visibility</secured-property>
+                        <secured-property>Visibility</secured-property>
                     </as-menu>
                 </legend>
                 <as-input-container>

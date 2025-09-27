@@ -1,11 +1,11 @@
 import {Component, model, ViewEncapsulation} from '@angular/core';
 import ManagedProperty from "../../../../domain/shared/ManagedProperty";
-import {AsForm, AsInput, AsInputContainer} from "shared";
+import {AsConfigured, AsForm, AsInput, AsInputContainer} from "shared";
 
 @Component({
     selector: 'app-secured-form',
     imports: [
-        AsForm, AsInput, AsInputContainer
+        AsForm, AsInput, AsInputContainer, AsConfigured
     ],
     templateUrl: './secured-form.html',
     styleUrl: './secured-form.css',

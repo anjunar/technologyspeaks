@@ -8,6 +8,8 @@ import {
 } from "shared";
 import {SecuredForm} from "./secured-form/secured-form";
 import {HttpClient} from "@angular/common/http";
+import {AsControlForm} from "../../../../../../shared/src/lib/directives/as-control";
+import {PropertiesContainer} from "../../../../../../shared/src/lib/domain/container/ActiveObject";
 
 @Component({
   selector: 'secured-property',
@@ -18,28 +20,24 @@ import {HttpClient} from "@angular/common/http";
 })
 export class SecuredProperty {
 
-    form = input.required<AsForm>()
-
-    property = input.required<string>()
-
     service = inject(WindowManagerService)
 
     http = inject(HttpClient)
 
-    injector = inject(Injector)
-
-    getDirectivesFor<T>(instance: T, injector: Injector, directiveTypes: Type<any>[]): any[] {
-        return directiveTypes
-            .map(dirType => injector.get(dirType, null))
-            .filter(Boolean);
-    }
+    configurable = inject(AsConfigured)
 
     open() {
-        const directives = this.getDirectivesFor(this.form(), this.injector, [AsForm]);
 
-        let configured = directives.find(directive => directive instanceof AsConfigured);
+        let configurable = this.configurable
+        while (configurable) {
+            if (configurable.parent) {
+                configurable = configurable.parent
+            } else {
+                break
+            }
+        }
 
-        let link = configured.instance.security as Link
+        let link = (configurable.instance as PropertiesContainer)[this.configurable.control.name()].security as Link
 
         this.http.get(link.url)
             .subscribe(response => {
