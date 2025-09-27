@@ -209,10 +209,12 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
   private def processEntity(aType: ResolvedClass, context: JsonContext, beanModel: DescriptorsModel, entity: AnyRef, jsonObject : JsonObject) : CompletionStage[Any] = {
     val schema = context.schema
 
-    var propertyMapping = schema.instances(entity)
+    val propertyMappingOptional = schema.instances.get(entity)
 
-    if (propertyMapping.properties.isEmpty) {
-      propertyMapping = schema.types(aType.raw)
+    val propertyMapping = if (propertyMappingOptional.isEmpty) {
+      schema.types(aType.raw)
+    } else {
+      propertyMappingOptional.get
     }
 
     if (!(aType <:< TypeResolver.resolve(classOf[NodeDescriptor]))) {

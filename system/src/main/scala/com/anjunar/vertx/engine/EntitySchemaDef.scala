@@ -4,8 +4,7 @@ import com.anjunar.scala.introspector.DescriptionIntrospector
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.scala.mapper.helper.Futures
 import com.anjunar.scala.schema.builder.{ClassProperty, ClassSchema, Schemas}
-import com.anjunar.scala.schema.model.Link
-import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
+import com.anjunar.scala.universe.TypeResolver
 import org.hibernate.reactive.stage.Stage
 
 import java.util
@@ -40,63 +39,65 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
 
     val model = DescriptionIntrospector.createWithType(entityClass)
 
-    val futures = props.filter(prop => prop.views.contains(view)).map { prop => () =>
-      prop.visibility.isVisible(entity, prop.name, ctx, session)
-        .thenCompose { visibility =>
-          prop.visibility.isWriteable(entity, prop.name, ctx, session)
-            .thenCompose { writeableProperty =>
-              val descriptorProperty = model.findProperty(prop.name)
-              val entityType = descriptorProperty.propertyType.raw.asInstanceOf[Class[E]]
-              val annotation = descriptorProperty.findAnnotation(classOf[PropertyDescriptor])
+    val futures = props.filter(prop => prop.views.contains(view)).map { prop =>
+      () =>
+        prop.visibility.isVisible(entity, prop.name, ctx, session)
+          .thenCompose { visibility =>
+            prop.visibility.isWriteable(entity, prop.name, ctx, session)
+              .thenCompose { writeableProperty =>
+                val descriptorProperty = model.findProperty(prop.name)
+                val entityType = descriptorProperty.propertyType.raw.asInstanceOf[Class[E]]
+                val annotation = descriptorProperty.findAnnotation(classOf[PropertyDescriptor])
 
-              val writeable = descriptorProperty.propertyType.raw match {
-                case clazz: Class[?] if classOf[util.Collection[?]].isAssignableFrom(clazz) => writeableProperty
-                case clazz: Class[?] if classOf[util.Map[?, ?]].isAssignableFrom(clazz) => writeableProperty
-                case _ => descriptorProperty.isWriteable && writeableProperty
-              }
-
-              val typedLinks = prop.staticLinks.map(link => link())
-
-              if (prop.instanceHandler.isDefined) {
-                val instanceHandler = prop.instanceHandler.get
-                val typedInstanceHandler = instanceHandler.asInstanceOf[(Any, RequestContext, Stage.Session) => Seq[CompletionStage[Schemas]]]
-                val value = descriptorProperty.get(entity.asInstanceOf[AnyRef])
-
-                if (value == null) {
-                  CompletableFuture.completedFuture(ClassProperty(descriptorProperty, writeable, visibility, null, typedLinks, annotation))
-                } else {
-                  val instanceFutures = typedInstanceHandler(value, ctx, session).toList
-
-                  Futures.combineAll(instanceFutures).thenCompose { instances =>
-                    Futures.combineAllSerial(prop.dynamicLinks.map(link => () => link(entity, ctx, session)).toList)
-                      .thenApply { links =>
-                        val aggregated = instances.foldLeft(Schemas()) { (acc, nextSchema) =>
-                          acc.instances.addAll(nextSchema.instances)
-                          acc.types.addAll(nextSchema.types)
-                          acc
-                        }
-
-                        val schemas = if (prop.typeHandler.isDefined) {
-                          val typeHandler = prop.typeHandler.get
-                          typeHandler(ctx)
-                        } else {
-                          null
-                        }
-                        aggregated.types.addAll(schemas.types)
-
-                        ClassProperty(descriptorProperty, writeable, visibility, aggregated, links ++ typedLinks, annotation)
-                      }
-                  }
+                val writeable = descriptorProperty.propertyType.raw match {
+                  case clazz: Class[?] if classOf[util.Collection[?]].isAssignableFrom(clazz) => writeableProperty
+                  case clazz: Class[?] if classOf[util.Map[?, ?]].isAssignableFrom(clazz) => writeableProperty
+                  case _ => descriptorProperty.isWriteable && writeableProperty
                 }
 
-              } else {
-                Futures.combineAll(prop.dynamicLinks.map(link => link(entity, ctx, session)).toList)
-                  .thenApply { links =>
-                    ClassProperty(descriptorProperty, writeable, visibility, null, links ++ typedLinks, annotation)
+                val typedLinks = prop.staticLinks.map(link => link())
+
+                val typedSchemas = if (prop.typeHandler.isDefined) {
+                  val typeHandler = prop.typeHandler.get
+                  typeHandler(ctx)
+                } else {
+                  null
+                }
+
+                if (prop.instanceHandler.isDefined) {
+                  val instanceHandler = prop.instanceHandler.get
+                  val typedInstanceHandler = instanceHandler.asInstanceOf[(Any, RequestContext, Stage.Session) => Seq[CompletionStage[Schemas]]]
+                  val value = descriptorProperty.get(entity.asInstanceOf[AnyRef])
+
+                  if (value == null) {
+                    CompletableFuture.completedFuture(ClassProperty(descriptorProperty, writeable, visibility, typedSchemas, typedLinks, annotation))
+                  } else {
+                    val instanceFutures = typedInstanceHandler(value, ctx, session).toList
+
+                    Futures.combineAll(instanceFutures).thenCompose { instances =>
+                      Futures.combineAllSerial(prop.dynamicLinks.map(link => () => link(entity, ctx, session)).toList)
+                        .thenApply { links =>
+                          val aggregated = instances.foldLeft(Schemas()) { (acc, nextSchema) =>
+                            acc.instances.addAll(nextSchema.instances)
+                            acc.types.addAll(nextSchema.types)
+                            acc
+                          }
+
+                          aggregated.types.addAll(typedSchemas.types)
+
+                          ClassProperty(descriptorProperty, writeable, visibility, aggregated, links ++ typedLinks, annotation)
+                        }
+                    }
                   }
+
+                } else {
+                  Futures.combineAll(prop.dynamicLinks.map(link => link(entity, ctx, session)).toList)
+                    .thenApply { links =>
+                      ClassProperty(descriptorProperty, writeable, visibility, typedSchemas, links ++ typedLinks, annotation)
+                    }
+                }
               }
-            }
-        }
+          }
     }
 
     Futures.combineAllSerial(futures.toList).thenApply { (props: Seq[ClassProperty]) =>
@@ -111,10 +112,6 @@ abstract class EntitySchemaDef[E](val entityName: Class[E]) {
   }
 
   def buildType(entityType: Class[E], ctx: RequestContext, view: String = "full"): Schemas = {
-    buildType2(entityType, ctx, props, view)
-  }
-
-  def buildType2(entityType: Class[E], ctx: RequestContext, props : mutable.ListBuffer[PropDef[E, ?]], view: String = "full"): Schemas = {
     val model = DescriptionIntrospector.createWithType(entityType)
 
     val properties = props

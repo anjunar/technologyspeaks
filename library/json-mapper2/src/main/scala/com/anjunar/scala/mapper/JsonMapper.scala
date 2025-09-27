@@ -14,17 +14,13 @@ class JsonMapper {
   val registry = new JsonConverterRegistry
 
   def toJsonObjectForJson(jsonObject: JsonObject): CompletionStage[String] = {
-    CompletableFuture.supplyAsync(() => {
-      JsonGenerator.generate(jsonObject)
-    })
+    CompletableFuture.completedFuture(JsonGenerator.generate(jsonObject))
   }
 
   def toJson(entity: AnyRef, aType: ResolvedClass, context: JsonContext): CompletionStage[JsonObject] = {
-    CompletableFuture.supplyAsync(() => {
-      val converter = registry.find(aType)
-      val jsonObject = converter.toJson(entity, aType, context).asInstanceOf[JsonObject]
-      jsonObject
-    })
+    val converter = registry.find(aType)
+    val jsonObject = converter.toJson(entity, aType, context).asInstanceOf[JsonObject]
+    CompletableFuture.completedFuture(jsonObject)
   }
 
   def toJava(jsonNode: JsonNode, instance : Any, aType : ResolvedClass, context: JsonContext): CompletionStage[AnyRef] = {
@@ -33,9 +29,7 @@ class JsonMapper {
   }
 
   def toJsonObjectForJava(value: String) : CompletionStage[JsonObject] = {
-    CompletableFuture.supplyAsync(() => {
-      val tokens = Tokenizer.tokenize(value)
-      Parser.parse(tokens.listIterator()).asInstanceOf[JsonObject]
-    })
+    val tokens = Tokenizer.tokenize(value)
+    CompletableFuture.completedFuture(Parser.parse(tokens.listIterator()).asInstanceOf[JsonObject])
   }
 }
