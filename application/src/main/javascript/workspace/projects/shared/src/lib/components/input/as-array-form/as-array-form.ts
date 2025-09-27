@@ -30,7 +30,7 @@ import {AsFormArray} from "../as-form-array/as-form-array";
         },
     ]
 })
-export class AsArrayForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit, OnDestroy {
+export class AsArrayForm extends AsControlSingleForm<any> implements AsControlValueAccessor, OnInit, OnDestroy {
 
     form: AsFormArray = inject(AsFormArray)
 

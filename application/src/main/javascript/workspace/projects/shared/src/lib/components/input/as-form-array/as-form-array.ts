@@ -1,9 +1,9 @@
 import {
     AfterContentInit,
     Component,
-    contentChild, ElementRef,
+    contentChild,
+    ElementRef,
     inject,
-    input,
     model,
     OnDestroy,
     OnInit,
@@ -14,13 +14,10 @@ import {
     ViewEncapsulation
 } from '@angular/core';
 import {AsControl, AsControlArrayForm, AsControlForm, AsControlValueAccessor} from "../../../directives/as-control";
-import {CollectionDescriptor} from "../../../domain/descriptors";
 import {AsForm} from "../../../directives/input/as-form/as-form";
-import {Constructor} from "../../../domain/container/ActiveObject";
-import {NG_VALUE_ACCESSOR, NgControl} from "@angular/forms";
+import {NG_VALUE_ACCESSOR} from "@angular/forms";
 import {AsIcon} from "../../layout/as-icon/as-icon";
 import {AsArrayForm} from "../as-array-form/as-array-form";
-import {findClass} from "../../../mapper";
 
 @Component({
     selector: 'form-array',
@@ -42,7 +39,7 @@ import {findClass} from "../../../mapper";
         }
     ]
 })
-export class AsFormArray extends AsControlArrayForm implements AsControlValueAccessor, AfterContentInit, OnInit, OnDestroy {
+export class AsFormArray extends AsControlArrayForm<any[]> implements AsControlValueAccessor, AfterContentInit, OnInit, OnDestroy {
 
     el = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>).nativeElement
 
@@ -52,13 +49,13 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     controls = signal<AsArrayForm[]>([])
 
-    newInstance : Function
+    newInstance: Function
 
     vcr = viewChild("container", {read: ViewContainerRef})
 
-    isDisabled = model(false, {alias : "disabled"})
+    isDisabled = model(false, {alias: "disabled"})
 
-    addControl(name: string | number, control: AsControl): void {
+    addControl(name: string | number, control: AsControl<any>): void {
         if (control instanceof AsArrayForm) {
             control.writeValue(this.model()[name as number]);
             this.controls().splice(name as number, 0, control)
@@ -66,7 +63,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
         }
     }
 
-    removeControl(name: string | number, control: AsControl): void {
+    removeControl(name: string | number, control: AsControl<any>): void {
         this.controls().splice(name as number, 1)
     }
 
@@ -108,13 +105,13 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
 
     addItem() {
         let ctor = this.newInstance
-        this.model.update((arr : any[]) => [...arr, this.form.model().$instance(ctor)]);
+        this.model.update((arr: any[]) => [...arr, this.form.model().$instance(ctor)]);
         this.form.model()[this.name()] = this.model()
         this.renderItems();
     }
 
     removeItem(index: number) {
-        this.model.update((arr : any[]) => arr.filter((_ : any, i : number) => i !== index));
+        this.model.update((arr: any[]) => arr.filter((_: any, i: number) => i !== index));
         this.form.model()[this.name()] = this.model()
         this.renderItems();
     }
@@ -123,7 +120,7 @@ export class AsFormArray extends AsControlArrayForm implements AsControlValueAcc
         if (!this.itemTemplate()) return;
 
         this.vcr().clear();
-        this.model().forEach((item : any, index : number) => {
+        this.model().forEach((item: any, index: number) => {
             this.vcr().createEmbeddedView(this.itemTemplate(), {$implicit: item, index}, index);
         });
     }

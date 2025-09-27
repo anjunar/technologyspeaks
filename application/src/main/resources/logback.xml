@@ -5,8 +5,7 @@
         </encoder>
     </appender>
 
-    <!-- Weld Debug -->
-<!--    <logger name="org.jboss.weld" level="DEBUG"/>-->
+    <logger name="com.anjunar" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

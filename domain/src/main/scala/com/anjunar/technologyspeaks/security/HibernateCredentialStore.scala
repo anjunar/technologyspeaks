@@ -40,7 +40,7 @@ class HibernateCredentialStore extends CredentialStore {
     })
   }
 
-  override def saveRecord(email: String, record: WebAuthnCredentialRecord): CompletionStage[Void] = {
+  override def saveRecord(email: String, nickName : String, record: WebAuthnCredentialRecord): CompletionStage[Void] = {
     val roleAction = sessionFactory.openSession().thenCompose(implicit session => {
       Role.query("name" -> "Guest")
         .whenComplete((_, _) => session.close())
@@ -62,6 +62,7 @@ class HibernateCredentialStore extends CredentialStore {
               val mail = new EMail
               mail.value = email
               val user = new control.User
+              user.nickName = nickName
               user.emails.add(mail)
               mail.user = user
               user.persist().thenApply(_ => mail)

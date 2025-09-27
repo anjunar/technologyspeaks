@@ -19,6 +19,8 @@ export class RegisterPage {
 
     email = model<string>()
 
+    nickName = model<string>()
+
     router = inject(Router);
 
     service = inject(AppService)
@@ -42,6 +44,7 @@ export class RegisterPage {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username : this.email(),
+                nickName : this.nickName(),
                 publicKeyCredential
             })
         });

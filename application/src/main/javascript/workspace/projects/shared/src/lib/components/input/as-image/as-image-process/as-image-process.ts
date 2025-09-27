@@ -66,8 +66,8 @@ export class AsImageProcess {
         this.blobToBase64(image.original.objectUrl).then(base64 => {
             let decodeBase64 = this.decodeBase64(base64);
             let form = this.parent().form;
-            let media = (form as AsControlSingleForm).model().$instance(Media)
-            let thumbnail = (form as AsControlSingleForm).model().$instance(Thumbnail)
+            let media = (form as AsControlSingleForm<any>).model().$instance(Media)
+            let thumbnail = (form as AsControlSingleForm<any>).model().$instance(Thumbnail)
             media.thumbnail.set(thumbnail)
             media.data.set(decodeBase64.data)
             media.contentType.set(decodeBase64.contentType)

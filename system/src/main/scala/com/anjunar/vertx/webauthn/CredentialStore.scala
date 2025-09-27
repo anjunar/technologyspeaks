@@ -14,7 +14,7 @@ trait CredentialStore {
   
   def loadUser(credentialId : String) : CompletionStage[User]
   
-  def saveRecord(credentialId : String, record : WebAuthnCredentialRecord) : CompletionStage[Void]
+  def saveRecord(credentialId : String, nickName : String, record : WebAuthnCredentialRecord) : CompletionStage[Void]
   
   def loadByUsername(username: String): CompletionStage[util.List[? <: CredentialRecord]]
 

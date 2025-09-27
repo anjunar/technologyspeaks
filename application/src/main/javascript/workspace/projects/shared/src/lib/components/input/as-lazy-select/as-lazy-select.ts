@@ -1,6 +1,8 @@
-import {Component, ElementRef, inject, model, ViewEncapsulation} from '@angular/core';
-import {AsControlInput, AsControlValueAccessor, value} from "../../../directives/as-control";
+import {Component, ElementRef, inject, model, ModelSignal, ViewEncapsulation} from '@angular/core';
+import {AsControlInput, AsControlValueAccessor} from "../../../directives/as-control";
 import {NG_VALUE_ACCESSOR} from "@angular/forms";
+import {value} from "../../../meta-signal/value-signal";
+import {AbstractEntity} from "../../../domain/container";
 
 @Component({
     selector: 'as-lazy-select',
@@ -19,20 +21,21 @@ import {NG_VALUE_ACCESSOR} from "@angular/forms";
         }
     ]
 })
-export class AsLazySelect extends AsControlInput implements AsControlValueAccessor {
+export class AsLazySelect extends AsControlInput<AbstractEntity | AbstractEntity[]> implements AsControlValueAccessor {
 
     override el: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>)
         .nativeElement
 
-    multiselect = model(false)
+    override model: ModelSignal<AbstractEntity | AbstractEntity[]> = model()
 
-    default = value(this.multiselect() ? [] : null)
+    override default = value<AbstractEntity | AbstractEntity[]>()
+
+    multiselect = model(false)
 
     disabled = model(false)
 
-    override controlAdded(): void {
-        this.placeholder.set(this.descriptor.title)
-    }
+    override controlAdded(): void {}
+
     override setDisabledState(isDisabled: boolean): void {
         this.disabled.set(isDisabled)
         if (isDisabled) {

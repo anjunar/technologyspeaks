@@ -1,18 +1,6 @@
-import {
-    Component,
-    computed,
-    effect,
-    ElementRef,
-    inject,
-    input,
-    OnDestroy,
-    OnInit,
-    signal,
-    ViewEncapsulation
-} from '@angular/core';
-import {AbstractControl, NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
+import {Component, computed, effect, ElementRef, inject, ModelSignal, signal, model, ViewEncapsulation} from '@angular/core';
+import {NG_VALUE_ACCESSOR} from "@angular/forms";
 import {AsControlInput, AsControlValueAccessor} from "../../../directives/as-control";
-import {AsForm} from "../../../directives/input/as-form/as-form";
 import Media from "../../../domain/types/Media";
 import {AsImageProcess} from "./as-image-process/as-image-process";
 import {CropperPosition} from "ngx-image-cropper";
@@ -36,7 +24,11 @@ import {WindowManagerService} from "../../modal/as-window/service/window-manager
         }
     ]
 })
-export class AsImage extends AsControlInput implements AsControlValueAccessor {
+export class AsImage extends AsControlInput<Media> implements AsControlValueAccessor {
+
+    override model = model<Media>()
+
+    override default = model<Media>()
 
     windowService = inject(WindowManagerService)
 
@@ -62,9 +54,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
         return null
     })
 
-    default = signal<Media>(null)
-
-    disabledImage = signal(false)
+    disabled = signal(false)
 
     constructor() {
         super();
@@ -74,10 +64,11 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
         });
     }
 
-    controlAdded(): void {}
+    controlAdded(): void {
+    }
 
     openWindow() {
-        if (! this.disabledImage()) {
+        if (!this.disabled()) {
             this.windowService.open({
                 id: "image-processor",
                 title: "Image Processor",
@@ -97,23 +88,7 @@ export class AsImage extends AsControlInput implements AsControlValueAccessor {
     }
 
     setDisabledState(isDisabled: boolean): void {
-        this.disabledImage.set(isDisabled)
-    }
-
-    writeValue(obj: any): void {
-        if (obj) {
-            this.model.set(obj)
-        } else {
-            this.model.set(null)
-        }
-    }
-
-    writeDefaultValue(obj: any): void {
-        if (obj) {
-            this.default.set(obj)
-        } else {
-            this.default.set(null)
-        }
+        this.disabled.set(isDisabled)
     }
 
 }

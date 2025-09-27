@@ -31,6 +31,8 @@ class ResourceMethodInvoker {
 
   def invoke(ctx: RoutingContext, sessionHandler: SessionHandler, state: StateDef, transitions: Seq[StateDef], instance: AnyRef): CompletionStage[(String, String)] = {
     sessionFactory.openSession.thenCompose(session => {
+      log.debug("Resource Method invoker begin, Session begin " + state)
+
       val futures = state.method.parameters
         .map(parameter => {
           val paramReader = paramReaders.stream()
@@ -62,6 +64,7 @@ class ResourceMethodInvoker {
                 .thenApply(body => (bodyWriter.contentType, body))
                 .whenComplete((_,_) => {
                   session.close()
+                  log.debug("Resource Method invoker Session Close " + state)
                 })
             })
         })

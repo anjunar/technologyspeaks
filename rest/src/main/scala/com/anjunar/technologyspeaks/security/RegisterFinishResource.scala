@@ -40,6 +40,7 @@ class RegisterFinishResource extends WebAuthnService {
     val publicKeyCredential = body.getJsonObject("publicKeyCredential")
     val credentialId = publicKeyCredential.getString("id")
     val username = body.getString("username")
+    val nickName = body.getString("nickName")
 
     webAuthnManager.parseRegistrationResponseJSON(publicKeyCredential.encode())
       .thenCompose { registrationData =>
@@ -68,7 +69,7 @@ class RegisterFinishResource extends WebAuthnService {
                 )
 
 
-                store.saveRecord(username, webAuthnCredentialRecord)
+                store.saveRecord(username, nickName, webAuthnCredentialRecord)
                   .thenApply(_ => {
                     new JsonObject()
                       .put("status", "success")

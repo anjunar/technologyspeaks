@@ -2,7 +2,6 @@ import {ControlValueAccessor} from "@angular/forms";
 import {Directive, effect, inject, input, model, ModelSignal, OnDestroy, OnInit, Signal, Type} from "@angular/core";
 import {MetaSignal} from "../meta-signal/meta-signal";
 import Validator from "../domain/descriptors/validators/Validator";
-import {value} from "../meta-signal/value-signal";
 
 function bindSignals<T>(target: ModelSignal<T>, source: ModelSignal<T>) {
     const sub1 = source.subscribe(val => {
@@ -30,7 +29,7 @@ export interface AsControlValueAccessor extends ControlValueAccessor {
 }
 
 @Directive()
-export abstract class AsControl {
+export abstract class AsControl<E> {
 
     onChange: ((name: string, value: any, defaultValue: any, el: HTMLElement) => void)[] = []
     onTouched: ((el: HTMLElement) => void)[] = []
@@ -39,7 +38,7 @@ export abstract class AsControl {
 
     dirty = model(false)
 
-    errors = model<Validator[]>([])
+    errors = model<Validator<any>[]>([])
 
     placeholder = model<string>()
 
@@ -47,14 +46,11 @@ export abstract class AsControl {
 
     abstract setDisabledState(isDisabled: boolean): void
 
-    abstract get model(): ModelSignal<any>
-    abstract set model(model: ModelSignal<any>)
+    abstract model: ModelSignal<E>
 
     abstract el: HTMLElement
 
-    status = value("INITIAL")
-
-    validators: Validator[] = []
+    validators: Validator<any>[] = []
 
     constructor() {
 
@@ -93,7 +89,7 @@ export abstract class AsControl {
         })
     }
 
-    addValidator(validator: Validator) {
+    addValidator(validator: Validator<any>) {
         this.validators.push(validator)
     }
 
@@ -122,15 +118,15 @@ export abstract class AsControl {
 }
 
 @Directive()
-export abstract class AsControlInput extends AsControl implements OnInit, OnDestroy {
+export abstract class AsControlInput<E> extends AsControl<E> implements OnInit, OnDestroy, AsControlValueAccessor {
+
+    override model: ModelSignal<E> = model()
+
+    default: ModelSignal<E> = model()
 
     name = input<string>("", {alias: "property"})
 
-    model = value<any>(null)
-
     form = inject(AsControlForm)
-
-    abstract writeDefaultValue(obj: any): void
 
     ngOnInit(): void {
         this.form.addControl(this.name(), this)
@@ -151,30 +147,39 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
     override markAsDirty() {
         this.dirty.set(true)
     }
+
+    writeValue(obj: any): void {
+        this.model.set(obj)
+    }
+
+    writeDefaultValue(obj: any): void {
+        this.default.set(obj)
+    }
+
 }
 
 @Directive()
-export abstract class AsControlForm extends AsControl {
+export abstract class AsControlForm<E> extends AsControl<E> {
 
     name = input<string>(null, {alias: 'property'});
 
-    abstract form: AsControlForm
+    abstract form: AsControlForm<any>
 
-    abstract addControl(name: string | number, control: AsControl): void
+    abstract addControl(name: string | number, control: AsControl<any>): void
 
-    abstract removeControl(name: string | number, control: AsControl): void
+    abstract removeControl(name: string | number, control: AsControl<any>): void
 }
 
 @Directive()
-export abstract class AsControlSingleForm extends AsControlForm {
+export abstract class AsControlSingleForm<E> extends AsControlForm<E> {
 
-    controls: Map<string, AsControl[]> = new Map()
+    controls: Map<string, AsControl<any>[]> = new Map()
 
     model = model<any>({}, {alias: "asModel"})
 
     newInstance: Type<any>
 
-    addControl(name: string | number, control: AsControl) {
+    addControl(name: string | number, control: AsControl<any>) {
         let controls = this.controls.get(name as string);
         if (controls) {
             controls.push(control)
@@ -200,7 +205,7 @@ export abstract class AsControlSingleForm extends AsControlForm {
         control.controlAdded();
     }
 
-    removeControl(name: string | number, control: AsControl) {
+    removeControl(name: string | number, control: AsControl<any>) {
         let controls = this.controls.get(name as string);
         if (controls) {
             let indexOf = controls.indexOf(control);
@@ -225,8 +230,8 @@ export abstract class AsControlSingleForm extends AsControlForm {
 }
 
 @Directive()
-export abstract class AsControlArrayForm extends AsControlForm {
+export abstract class AsControlArrayForm<E> extends AsControlForm<E> {
 
-    model = value([])
+    override model = model<E>()
 
 }

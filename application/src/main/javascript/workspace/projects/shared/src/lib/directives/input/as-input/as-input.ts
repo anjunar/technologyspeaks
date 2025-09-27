@@ -1,6 +1,7 @@
-import {Directive, effect, ElementRef, inject} from '@angular/core';
+import {Directive, effect, ElementRef, inject, ModelSignal, model} from '@angular/core';
 import {NG_VALUE_ACCESSOR} from "@angular/forms";
 import {AsControlInput, AsControlValueAccessor} from "../../as-control";
+import {LocalDate, LocalDateTime} from "@js-joda/core";
 
 @Directive({
     selector: 'input[property]',
@@ -15,7 +16,7 @@ import {AsControlInput, AsControlValueAccessor} from "../../as-control";
         }
     ]
 })
-export class AsInput extends AsControlInput implements AsControlValueAccessor {
+export class AsInput extends AsControlInput<string | number | LocalDate | LocalDateTime>  {
 
     el = inject<ElementRef<HTMLInputElement>>(ElementRef<HTMLInputElement>).nativeElement
 
@@ -30,8 +31,23 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
         });
 
         effect(() => {
-            this.writeValue(this.model())
+            let model = this.model() as string;
+            if (model) {
+                this.el.value = model
+            } else {
+                this.el.value = ""
+            }
         });
+
+        effect(() => {
+            let model = this.model() as string;
+            if (model) {
+                this.el.defaultValue = model
+            } else {
+                this.el.defaultValue = ""
+            }
+        });
+
     }
 
     controlAdded(): void {
@@ -39,22 +55,6 @@ export class AsInput extends AsControlInput implements AsControlValueAccessor {
 
     setDisabledState(isDisabled: boolean): void {
         this.el.disabled = isDisabled
-    }
-
-    writeValue(obj: any): void {
-        if (obj) {
-            this.el.value = obj
-        } else {
-            this.el.value = ""
-        }
-    }
-
-    writeDefaultValue(obj: any): void {
-        if (obj) {
-            this.el.defaultValue = obj
-        } else {
-            this.el.defaultValue = ""
-        }
     }
 
 }

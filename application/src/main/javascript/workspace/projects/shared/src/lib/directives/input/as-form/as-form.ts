@@ -1,4 +1,14 @@
-import {AfterViewInit, Directive, effect, ElementRef, forwardRef, inject, OnDestroy, OnInit} from '@angular/core';
+import {
+    AfterViewInit,
+    Directive,
+    effect,
+    ElementRef,
+    forwardRef,
+    inject, model,
+    ModelSignal,
+    OnDestroy,
+    OnInit
+} from '@angular/core';
 import {NG_VALUE_ACCESSOR} from "@angular/forms";
 import {AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccessor} from "../../as-control";
 
@@ -17,12 +27,15 @@ import {AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccess
         }
     ]
 })
-export class AsForm extends AsControlSingleForm implements AsControlValueAccessor, OnInit, OnDestroy, AfterViewInit {
+export class AsForm extends AsControlSingleForm<any> implements AsControlValueAccessor, OnInit, OnDestroy, AfterViewInit {
+
+    override model: ModelSignal<any> = model(null, {alias : "asModel"})
 
     form = inject(AsControlForm, {skipSelf: true, optional: true})
 
     el = inject<ElementRef<HTMLFormElement | HTMLFieldSetElement>>(ElementRef<HTMLFormElement | HTMLFieldSetElement>)
         .nativeElement
+
 
     constructor() {
         super();
@@ -102,11 +115,11 @@ export class AsForm extends AsControlSingleForm implements AsControlValueAccesso
                         control.writeDefaultValue(value)
                     }
                 } else {
-                    control.model.set(null)
+                    control.model.set(undefined)
                     control.setDisabledState(isDisabled)
 
                     if (control instanceof AsControlInput) {
-                        control.writeDefaultValue(null)
+                        control.writeDefaultValue(undefined)
                     }
                 }
             })

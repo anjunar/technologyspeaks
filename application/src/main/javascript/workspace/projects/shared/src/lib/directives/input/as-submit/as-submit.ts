@@ -1,13 +1,11 @@
 import {Directive, ElementRef, inject, output} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpRequest, HttpResponse} from "@angular/common/http";
-import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {AsForm} from "../as-form/as-form";
 import {ActiveObject} from "../../../domain/container";
 import {Mapper} from "../../../mapper";
-import {AsControl, AsControlArrayForm, AsControlForm, AsControlInput, AsControlSingleForm} from "../../as-control";
-import Validator, {ServerValidator} from "../../../domain/descriptors/validators/Validator";
+import {AsControl, AsControlInput, AsControlSingleForm} from "../../as-control";
+import {ServerValidator} from "../../../domain/descriptors/validators/Validator";
 import {AsFormArray} from "../../../components/input/as-form-array/as-form-array";
-import {AsArrayForm} from "../../../components/input/as-array-form/as-array-form";
 
 export interface AsResponse<E> {
     name: string
@@ -29,7 +27,7 @@ export class AsSubmit {
     submit = output<AsResponse<any>>({alias: "asSubmit"})
 
 
-    setServerError(path : any[], message : string, control: AsControl) {
+    setServerError(path: any[], message: string, control: AsControl<any>) {
         if (control instanceof AsControlInput) {
             control.markAsDirty()
             control.errors.set([...control.errors(), new ServerValidator(message)])
