@@ -3,16 +3,20 @@ package com.anjunar.technologyspeaks.shared.property
 import com.anjunar.jaxrs.types.OwnerProvider
 import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
+import com.anjunar.scala.schema.model.Link
 import com.anjunar.security.SecurityUser
 import com.anjunar.technologyspeaks.control.{Group, User}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
+import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaProvider}
 import io.smallrye.mutiny.Uni
 import jakarta.persistence.{Basic, Column, Entity, ManyToMany, ManyToOne}
 import jakarta.validation.constraints.Size
 import org.hibernate.reactive.mutiny.Mutiny
+import org.hibernate.reactive.stage.Stage
 
 import java.util
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 
@@ -45,43 +49,24 @@ class ManagedProperty extends AbstractEntity with OwnerProvider {
   override def toString = s"ManagedProperty($value, $visibleForAll)"
 }
 
-object ManagedProperty extends RepositoryContext[ManagedProperty](classOf[ManagedProperty]) {
+object ManagedProperty extends RepositoryContext[ManagedProperty](classOf[ManagedProperty]) with SchemaProvider[ManagedProperty] {
 
-  def manageReactive(session: Mutiny.Session, currentUser: User, isOwnedOrAdmin: Boolean, view: EntityView, name: String): Uni[(Boolean, UUID)] = {
-    if (view == null) {
-      return Uni.createFrom().item((true, null.asInstanceOf[UUID]))
-    }
+  override val schema = EntitySchemaDef(classOf[ManagedProperty])
 
-    val propertyOpt = view.properties.stream()
-      .filter(_.value == name)
-      .findFirst()
+  def managedView(session: Stage.Session, view: EntityView, propertyName: String) = {
+    val property = view.findProperty(propertyName)
+    if (property == null) {
+      val newManagedProperty = new ManagedProperty()
+      newManagedProperty.value = propertyName
+      newManagedProperty.view = view
 
-    val propertyUni: Uni[ManagedProperty] = if (propertyOpt.isPresent) {
-      Uni.createFrom().item(propertyOpt.get)
+      session.persist(newManagedProperty)
+        .thenApply(_ => {
+          Link(s"/service/security/property/${newManagedProperty.id.toString}", "GET", "security", "Security")
+        })
     } else {
-      val property = new ManagedProperty()
-      property.value = name
-      property.view = view
-      session.persist(property).map(_ => {
-        view.properties.add(property)
-        property
-      })
-    }
-
-    propertyUni.map { managedProperty =>
-      if (isOwnedOrAdmin) {
-        (true, managedProperty.id)
-      } else {
-        if (managedProperty.visibleForAll) {
-          (true, null)
-        } else {
-          val canSee = managedProperty.users.contains(currentUser) ||
-            managedProperty.groups.stream().anyMatch(_.users.contains(currentUser))
-          (canSee, null)
-        }
-      }
+      CompletableFuture.completedFuture(Link(s"/service/security/property/${property.id.toString}", "GET", "security", "Security"))
     }
   }
-
 
 }

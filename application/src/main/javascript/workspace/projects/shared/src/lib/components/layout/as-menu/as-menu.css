@@ -3,6 +3,7 @@ as-menu {
     position: relative;
 
     .menu {
+        background-color: var(--color-background-primary);
         width: 150px;
         border: 1px solid var(--color-background-secondary);
         position: absolute;

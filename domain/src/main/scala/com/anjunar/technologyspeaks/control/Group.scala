@@ -6,6 +6,7 @@ import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.security.SecurityUser
 import jakarta.persistence.{Basic, Entity, ManyToMany, ManyToOne, Table}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
+import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaProvider}
 import jakarta.validation.constraints.{NotEmpty, Size}
 
 import scala.beans.BeanProperty
@@ -40,4 +41,8 @@ class Group extends AbstractEntity with OwnerProvider {
   override def toString = s"Group($name, $description)"
 }
 
-object Group extends RepositoryContext[Group](classOf[Group])
+object Group extends RepositoryContext[Group](classOf[Group]) with SchemaProvider[Group] {
+
+  override val schema = EntitySchemaDef(classOf[Group]) 
+    
+}

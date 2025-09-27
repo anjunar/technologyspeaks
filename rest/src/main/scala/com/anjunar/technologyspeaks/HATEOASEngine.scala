@@ -4,7 +4,7 @@ import com.anjunar.jaxrs.types.Table
 import com.anjunar.technologyspeaks.control.{User, UserResource, UsersResource}
 import com.anjunar.technologyspeaks.document.Document
 import com.anjunar.technologyspeaks.documents.{DocumentResource, DocumentsResource}
-import com.anjunar.technologyspeaks.security.{LoginFinishResource, LoginOptionsResource, LogoutResource, RegisterFinishResource, RegisterOptionsResource}
+import com.anjunar.technologyspeaks.security.{LoginFinishResource, LoginOptionsResource, LogoutResource, ManagedPropertyResource, RegisterFinishResource, RegisterOptionsResource}
 import com.anjunar.vertx.fsm.{FSMBuilder, FSMEngine, StateDef}
 import jakarta.enterprise.context.ApplicationScoped
 import org.hibernate.boot.model.process.internal.UserTypeResolution
@@ -120,6 +120,12 @@ class HATEOASEngine extends FSMEngine {
                   resource = classOf[UserResource.Read]
                 ), read => Seq(
                   fsm.transition(
+                    StateDef(
+                      rel = "security",
+                      name = "Secured Property",
+                      resource = classOf[ManagedPropertyResource]
+                    ), update => Seq()),
+                fsm.transition(
                     StateDef(
                       rel = "update",
                       name = "Update",

@@ -22,7 +22,7 @@ case class ManagedRule[E <: OwnerProvider](entityClass : Class[?]) extends Visib
         session.find(classOf[User], ctx.currentUser.get("id"))
           .thenCompose(currentUser =>
             val viewContext = TypeResolver.companionInstance(entityClass).asInstanceOf[ViewContext]
-            viewContext.findByUser(currentUser)(using session)
+            viewContext.findViewByUser(currentUser)(using session)
               .thenCompose(view => {
                 val opt = view.properties.stream()
                   .filter(p => p.value == property)

@@ -9,6 +9,6 @@ import java.util.concurrent.CompletionStage
 
 trait ViewContext {
 
-  def findByUser(user: User)(implicit session : Stage.Session): CompletionStage[View]
+  def findViewByUser(user: User)(implicit session : Stage.Session): CompletionStage[View]
   
 }

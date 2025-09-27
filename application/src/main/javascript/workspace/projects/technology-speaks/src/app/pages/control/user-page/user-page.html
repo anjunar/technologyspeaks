@@ -1,10 +1,14 @@
-<form [(asModel)]="user" (asSubmit)="onSubmit($event)">
+<form [(asModel)]="user" (asSubmit)="onSubmit($event)" #root="AsForm">
     <div class="container">
         <div class="image">
             <fieldset property="info" #image="AsForm">
                 <as-image style="width: 300px; height: 300px" property="image"/>
             </fieldset>
-            <button type="button" (click)="image.toggleDisabled()"><as-icon value="shield_toggle"/></button>
+            <as-menu>
+                <button type="button" (click)="image.toggleDisabled()">
+                    <as-icon value="shield_toggle">Disable</as-icon>
+                </button>
+            </as-menu>
         </div>
         <div>
             <as-input-container>
@@ -20,7 +24,14 @@
                 </ng-template>
             </form-array>
             <fieldset property="info" #info="AsForm">
-                <legend>User Info<button type="button" (click)="info.toggleDisabled()"><as-icon value="shield_toggle"/></button></legend>
+                <legend>User Info
+                     <as-menu>
+                        <button type="button" (click)="info.toggleDisabled()">
+                            <as-icon value="shield_toggle">Disable</as-icon>
+                        </button>
+                         <secured-property [form]="root" property="info">Visibility</secured-property>
+                    </as-menu>
+                </legend>
                 <as-input-container>
                     <input property="firstName"/>
                 </as-input-container>
@@ -32,7 +43,14 @@
                 </as-input-container>
             </fieldset>
             <fieldset property="address" #address="AsForm">
-                <legend>Address<button type="button" (click)="address.toggleDisabled()"><as-icon value="shield_toggle"/></button></legend>
+                <legend>Address
+                    <as-menu>
+                        <button type="button" (click)="address.toggleDisabled()">
+                            <as-icon value="shield_toggle">Disable</as-icon>
+                        </button>
+                        <secured-property [form]="root" property="address">Visibility</secured-property>
+                    </as-menu>
+                </legend>
                 <as-input-container>
                     <input property="street"/>
                 </as-input-container>

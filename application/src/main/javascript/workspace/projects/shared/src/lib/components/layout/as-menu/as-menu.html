@@ -1,6 +1,6 @@
-<button type="button" (click)="toggle()"><as-icon value="menu"/></button>
+<button type="button" (click)="toggle($event)"><as-icon value="menu"/></button>
 @if (open()) {
-    <div class="menu">
+    <div class="menu" (click)="onMenuClick($event)">
         <ng-content/>
     </div>
 }

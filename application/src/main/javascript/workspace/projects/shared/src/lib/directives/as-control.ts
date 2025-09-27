@@ -18,6 +18,7 @@ import {MetaSignal} from "../meta-signal/meta-signal";
 import {Subject, Subscription} from "rxjs";
 import Validator from "../domain/descriptors/validators/Validator";
 import {findClass} from "../mapper";
+import {PropertiesContainer} from "../domain/container/ActiveObject";
 
 export function value<T>(initial?: T): ModelSignal<T> {
     const _signal = signal<T | null>(initial ?? null);
@@ -88,8 +89,6 @@ export abstract class AsControl {
 
     onChange: ((name: string, value: any, defaultValue: any, el: HTMLElement) => void)[] = []
     onTouched: ((el: HTMLElement) => void)[] = []
-
-    instance: PropDescriptor
 
     abstract get name(): Signal<string>
 
@@ -184,6 +183,8 @@ export abstract class AsControlInput extends AsControl implements OnInit, OnDest
 
     form = inject(AsControlForm)
 
+    instance: PropDescriptor
+
     override descriptor: NodeDescriptor
 
     abstract writeDefaultValue(obj: any): void
@@ -220,6 +221,8 @@ export abstract class AsControlForm extends AsControl {
 
     abstract form: AsControlForm
 
+    instance: PropertiesContainer
+
     abstract addControl(name: string | number, control: AsControl): void
 
     abstract removeControl(name: string | number, control: AsControl): void
@@ -249,7 +252,6 @@ export abstract class AsControlSingleForm extends AsControlForm {
         if (model) {
             const metaSignal: MetaSignal<any> = model[name];
             if (metaSignal) {
-                control.instance = metaSignal.instance;
                 control.model.set(metaSignal())
 
                 bindSignals(metaSignal, control.model)
@@ -257,6 +259,7 @@ export abstract class AsControlSingleForm extends AsControlForm {
                 let value = metaSignal()
                 control.writeValue(value)
                 if (control instanceof AsControlInput) {
+                    control.instance = metaSignal.instance;
                     control.writeDefaultValue(value);
                 }
             }

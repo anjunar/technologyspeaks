@@ -7,14 +7,15 @@ import {
     AsIcon,
     AsImage,
     AsInput,
-    AsInputContainer,
+    AsInputContainer, AsMenu,
     AsResponse,
     AsSubmit
 } from "shared";
+import {SecuredProperty} from "../../../components/security/secured-property/secured-property";
 
 @Component({
     selector: 'user-page',
-    imports: [AsForm, AsInput, AsSubmit, AsInputContainer, AsImage, AsFormArray, AsArrayForm, AsIcon],
+    imports: [AsForm, AsInput, AsSubmit, AsInputContainer, AsImage, AsFormArray, AsArrayForm, AsIcon, AsMenu, SecuredProperty],
     templateUrl: './user-page.html',
     styleUrl: './user-page.css',
     encapsulation: ViewEncapsulation.None
