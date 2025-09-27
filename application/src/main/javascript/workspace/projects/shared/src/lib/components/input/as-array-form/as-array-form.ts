@@ -1,21 +1,13 @@
-import {Component, effect, ElementRef, inject, input, model, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
-import {
-    AsControl,
-    AsControlArrayForm,
-    AsControlForm, AsControlInput,
-    AsControlSingleForm,
-    AsControlValueAccessor
-} from "../../../directives/as-control";
-import {NG_VALUE_ACCESSOR, NgControl, ValidationErrors} from "@angular/forms";
-import {AsIcon} from "../../layout/as-icon/as-icon";
+import {Component, effect, ElementRef, inject, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {AsControlForm, AsControlSingleForm, AsControlValueAccessor} from "../../../directives/as-control";
+import {NG_VALUE_ACCESSOR} from "@angular/forms";
 import {AsFormArray} from "../as-form-array/as-form-array";
+import {AsIcon} from "../../layout/as-icon/as-icon";
 
 @Component({
     selector: 'array-form',
-    imports: [
-        AsIcon
-    ],
     templateUrl: './as-array-form.html',
+    imports : [AsIcon],
     styleUrl: './as-array-form.css',
     encapsulation: ViewEncapsulation.None,
     providers: [
@@ -73,8 +65,8 @@ export class AsArrayForm extends AsControlSingleForm<any> implements AsControlVa
         // this.controls.forEach(control => control.setDisabledState(isDisabled))
     }
 
-    controlAdded(): void {}
-
+    controlAdded(): void {
+    }
 
 
 }

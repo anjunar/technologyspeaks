@@ -10,7 +10,13 @@ import {
     OnInit
 } from '@angular/core';
 import {NG_VALUE_ACCESSOR} from "@angular/forms";
-import {AsControlForm, AsControlInput, AsControlSingleForm, AsControlValueAccessor} from "../../as-control";
+import {
+    AsControlForm,
+    AsControlInput,
+    AsControlSingleForm,
+    AsControlValueAccessor,
+    bindSignals
+} from "../../as-control";
 
 @Directive({
     selector: 'form[asModel], fieldset[property]',
@@ -108,6 +114,9 @@ export class AsForm extends AsControlSingleForm<any> implements AsControlValueAc
                 let model = this.model();
                 if (model) {
                     let value = model[control.name()]();
+
+                    bindSignals(model[control.name()], control.model)
+
                     control.model.set(value)
                     control.setDisabledState(isDisabled)
 

@@ -1,8 +1,8 @@
-<form [(asModel)]="user" (asSubmit)="onSubmit($event)" configured>
+<form [(asModel)]="user" (asSubmit)="onSubmit($event)">
     <div class="container">
         <div class="image">
-            <fieldset property="info" #image="AsForm" configured>
-                <as-image style="width: 300px; height: 300px" property="image" configured/>
+            <fieldset property="info" #image="AsForm">
+                <as-image style="width: 300px; height: 300px" property="image"/>
             </fieldset>
             <as-menu>
                 <button type="button" (click)="image.toggleDisabled()">
@@ -12,18 +12,18 @@
         </div>
         <div>
             <as-input-container>
-                <input property="nickName" configured/>
+                <input property="nickName"/>
             </as-input-container>
-            <form-array property="emails" configured>
+            <form-array property="emails">
                 <ng-template let-item>
-                    <array-form [asModel]="item" configured>
+                    <array-form [asModel]="item">
                         <as-input-container>
-                            <input property="value" configured/>
+                            <input property="value"/>
                         </as-input-container>
                     </array-form>
                 </ng-template>
             </form-array>
-            <fieldset property="info" #info="AsForm" configured>
+            <fieldset property="info" #info="AsForm">
                 <legend>User Info
                      <as-menu>
                         <button type="button" (click)="info.toggleDisabled()">
@@ -33,16 +33,16 @@
                     </as-menu>
                 </legend>
                 <as-input-container>
-                    <input property="firstName" configured/>
+                    <input property="firstName"/>
                 </as-input-container>
                 <as-input-container>
-                    <input property="lastName" configured/>
+                    <input property="lastName"/>
                 </as-input-container>
                 <as-input-container>
-                    <input property="birthDate" configured/>
+                    <input property="birthDate"/>
                 </as-input-container>
             </fieldset>
-            <fieldset property="address" #address="AsForm" configured>
+            <fieldset property="address" #address="AsForm">
                 <legend>Address
                     <as-menu>
                         <button type="button" (click)="address.toggleDisabled()">
@@ -52,16 +52,16 @@
                     </as-menu>
                 </legend>
                 <as-input-container>
-                    <input property="street" configured/>
+                    <input property="street"/>
                 </as-input-container>
                 <as-input-container>
-                    <input property="number" configured/>
+                    <input property="number"/>
                 </as-input-container>
                 <as-input-container>
-                    <input property="zipCode" configured/>
+                    <input property="zipCode"/>
                 </as-input-container>
                 <as-input-container>
-                    <input property="country" configured/>
+                    <input property="country"/>
                 </as-input-container>
             </fieldset>
         </div>

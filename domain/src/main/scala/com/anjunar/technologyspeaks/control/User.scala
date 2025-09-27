@@ -40,11 +40,11 @@ class User extends Identity with OwnerProvider with SecurityUser with EntityCont
   @PropertyDescriptor(title = "Emails", widget = "form-array")
   val emails: util.Set[EMail] = new util.HashSet[EMail]()
 
-  @OneToOne(cascade = Array(CascadeType.ALL), orphanRemoval = true, targetEntity = classOf[UserInfo])
+  @OneToOne(cascade = Array(CascadeType.ALL), orphanRemoval = true, targetEntity = classOf[UserInfo], mappedBy = "user")
   @PropertyDescriptor(title = "Info", naming = true)
   var info: UserInfo = uninitialized
 
-  @OneToOne(cascade = Array(CascadeType.ALL), orphanRemoval = true, targetEntity = classOf[Address])
+  @OneToOne(cascade = Array(CascadeType.ALL), orphanRemoval = true, targetEntity = classOf[Address], mappedBy = "user")
   @PropertyDescriptor(title = "Address")
   var address: Address = uninitialized
 

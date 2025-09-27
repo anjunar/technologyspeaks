@@ -10,6 +10,8 @@ export * from './lib/components/input/as-image/as-image'
 
 export * from './lib/components/input/as-input-container/as-input-container'
 
+export * from './lib/components/input/as-lazy-select/as-lazy-select'
+
 export * from './lib/components/layout/as-menu/as-menu'
 
 export * from './lib/components/layout/as-icon/as-icon'
@@ -25,8 +27,8 @@ export * from './lib/components/layout/as-view-port/as-view-port'
 export * from './lib/components/modal/as-window/as-window'
 export * from './lib/components/modal/as-window/service/window-manager-service'
 
-export * from './lib/directives/input/as-configured/as-configured'
-export * from './lib/directives/input/as-configured/as-configured'
+export * from './lib/directives/input/as-configured/as-abstract-configured-form'
+export * from './lib/directives/input/as-configured/as-abstract-configured-form'
 
 export * from './lib/directives/input/as-form/as-form'
 
@@ -52,3 +54,5 @@ export * from './lib/meta-signal/meta-signal'
 export * from './lib/meta-signal/value-signal'
 
 export * from './lib/pattern-match'
+
+export * from './lib/property-forms/property-forms-module'

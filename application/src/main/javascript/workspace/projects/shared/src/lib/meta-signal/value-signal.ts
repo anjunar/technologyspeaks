@@ -11,10 +11,10 @@ import {
 import {ModelSignal} from "@angular/core";
 
 export function value<T>(
-    initialValue: T,
+    initialValue?: T,
 ): ModelSignal<T> {
     const node: SignalNode<T> = Object.create(SIGNAL_NODE);
-    node.value = initialValue;
+    node.value = initialValue ?? null;
     node.equal = defaultEquals;
 
     const _subject = new Subject<T>();

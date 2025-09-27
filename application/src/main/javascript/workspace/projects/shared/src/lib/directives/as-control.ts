@@ -3,7 +3,7 @@ import {Directive, effect, inject, input, model, ModelSignal, OnDestroy, OnInit,
 import {MetaSignal} from "../meta-signal/meta-signal";
 import Validator from "../domain/descriptors/validators/Validator";
 
-function bindSignals<T>(target: ModelSignal<T>, source: ModelSignal<T>) {
+export function bindSignals<T>(target: ModelSignal<T>, source: ModelSignal<T>) {
     const sub1 = source.subscribe(val => {
         if (target() !== val) {
             target.set(val);

@@ -16,14 +16,12 @@ import {
 import {AsControl, AsControlArrayForm, AsControlForm, AsControlValueAccessor} from "../../../directives/as-control";
 import {AsForm} from "../../../directives/input/as-form/as-form";
 import {NG_VALUE_ACCESSOR} from "@angular/forms";
-import {AsIcon} from "../../layout/as-icon/as-icon";
 import {AsArrayForm} from "../as-array-form/as-array-form";
+import {AsIcon} from "../../layout/as-icon/as-icon";
 
 @Component({
     selector: 'form-array',
-    imports: [
-        AsIcon
-    ],
+    imports: [AsIcon],
     templateUrl: './as-form-array.html',
     styleUrl: './as-form-array.css',
     encapsulation: ViewEncapsulation.None,

@@ -15,7 +15,7 @@ import scala.compiletime.uninitialized
 @Entity
 class Address extends AbstractEntity with EntityContext[Address] with OwnerProvider {
 
-  @OneToOne(mappedBy = "address", targetEntity = classOf[User])
+  @OneToOne(targetEntity = classOf[User])
   var user: User = uninitialized
 
   @Basic

@@ -1,22 +1,23 @@
-import {Component, effect, inject, Injector, input, Type, ViewEncapsulation} from '@angular/core';
-import {AsIcon} from "../../../../../../shared/src/lib/components/layout/as-icon/as-icon";
-import {AsForm} from "../../../../../../shared/src/lib/directives/input/as-form/as-form";
+import {Component, inject, ViewEncapsulation} from '@angular/core';
 import {
-    AsConfigured, Link,
+    AsAbstractConfiguredForm,
+    AsForm,
+    AsIcon, AsInputContainer, AsSubmit,
+    Link,
     Mapper,
+    PropertyFormsModule,
     WindowManagerService
 } from "shared";
 import {SecuredForm} from "./secured-form/secured-form";
 import {HttpClient} from "@angular/common/http";
-import {AsControlForm} from "../../../../../../shared/src/lib/directives/as-control";
 import {PropertiesContainer} from "../../../../../../shared/src/lib/domain/container/ActiveObject";
 
 @Component({
-  selector: 'secured-property',
-  imports: [AsIcon],
-  templateUrl: './secured-property.html',
-  styleUrl: './secured-property.css',
-  encapsulation : ViewEncapsulation.None
+    selector: 'secured-property',
+    imports: [PropertyFormsModule, AsIcon],
+    templateUrl: './secured-property.html',
+    styleUrl: './secured-property.css',
+    encapsulation: ViewEncapsulation.None
 })
 export class SecuredProperty {
 
@@ -24,14 +25,14 @@ export class SecuredProperty {
 
     http = inject(HttpClient)
 
-    configurable = inject(AsConfigured)
+    configurable = inject(AsAbstractConfiguredForm)
 
     open() {
 
         let configurable = this.configurable
         while (configurable) {
             if (configurable.parent) {
-                configurable = configurable.parent
+                configurable = configurable.parent as AsAbstractConfiguredForm
             } else {
                 break
             }
@@ -42,11 +43,11 @@ export class SecuredProperty {
         this.http.get(link.url)
             .subscribe(response => {
                 this.service.open({
-                    id : "securityForm",
-                    title : "Visibility",
-                    component : SecuredForm,
-                    inputs : {
-                        form : Mapper.domain(response)
+                    id: "securityForm",
+                    title: "Visibility",
+                    component: SecuredForm,
+                    inputs: {
+                        form: Mapper.domain(response)
                     }
                 })
             })

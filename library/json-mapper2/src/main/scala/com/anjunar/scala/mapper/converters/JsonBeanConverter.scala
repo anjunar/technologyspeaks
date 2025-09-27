@@ -286,7 +286,10 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
                 underlyingMap.putAll(map)
               case _ => property.set(entity, propertyValue)
 
-            resolveMappings(entity, property, propertyValue)
+            if (propertyValue != null) {
+              resolveMappings(entity, property, propertyValue)
+            }
+
             CompletableFuture.completedFuture(propertyValue)
           } else {
             context.violations.addAll(violations)

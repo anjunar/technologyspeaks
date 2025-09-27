@@ -25,7 +25,7 @@ import scala.compiletime.uninitialized
 ))
 class UserInfo extends AbstractEntity with OwnerProvider {
 
-  @OneToOne(mappedBy = "info", targetEntity = classOf[User])
+  @OneToOne(targetEntity = classOf[User])
   var user : User = uninitialized
 
   @Size(min = 3, max = 80)
