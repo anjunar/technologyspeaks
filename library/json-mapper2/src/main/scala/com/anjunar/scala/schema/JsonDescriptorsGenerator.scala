@@ -5,19 +5,19 @@ import com.anjunar.scala.introspector.DescriptionIntrospector
 import com.anjunar.scala.mapper.annotations.Converter
 import com.anjunar.scala.schema.analyzer.*
 import com.anjunar.scala.schema.builder.{ClassProperty, Schemas}
-import com.anjunar.scala.schema.model.validators.{NotBlankValidator, NotNullValidator, SizeValidator}
+import com.anjunar.scala.schema.model.validators.{EmailValidator, NotBlankValidator, NotNullValidator, PastValidator, PatternValidator, SizeValidator}
 import com.anjunar.scala.schema.model.{CollectionDescriptor, EnumDescriptor, NodeDescriptor, ObjectDescriptor}
 import com.anjunar.scala.universe.introspector.{AbstractProperty, BeanIntrospector}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonValue}
 import jakarta.enterprise.inject.spi.CDI
 import jakarta.persistence.Tuple
-import jakarta.validation.constraints.{NotBlank, NotNull, Size}
+import jakarta.validation.constraints.{Email, NotBlank, NotNull, Past, Pattern, Size}
 
 import scala.jdk.CollectionConverters.*
 
 object JsonDescriptorsGenerator {
-  
+
   private val analyzers: Array[AbstractAnalyzer] = Array(
     new PrimitiveAnalyser,
     new CollectionAnalyzer,
@@ -25,15 +25,6 @@ object JsonDescriptorsGenerator {
     new EnumAnalyzer,
     new ObjectAnalyzer
   )
-
-  private def findAnalyzer(aClass: ResolvedClass): AbstractAnalyzer = {
-    val option = analyzers.find(analyzer => analyzer.analyze(aClass))
-    if (option.isDefined) {
-      option.get
-    } else {
-      throw new IllegalStateException("no Analyzer found : " + aClass.raw.getName)
-    }
-  }
 
   def generateObject(aClass: ResolvedClass, schema: Schemas, context: JsonDescriptorsContext): ObjectDescriptor = {
 
@@ -108,6 +99,15 @@ object JsonDescriptorsGenerator {
 
   }
 
+  private def findAnalyzer(aClass: ResolvedClass): AbstractAnalyzer = {
+    val option = analyzers.find(analyzer => analyzer.analyze(aClass))
+    if (option.isDefined) {
+      option.get
+    } else {
+      throw new IllegalStateException("no Analyzer found : " + aClass.raw.getName)
+    }
+  }
+
   private def generateValidator(property: AbstractProperty, descriptor: NodeDescriptor): Unit = {
     property.annotations.foreach {
       case size: Size =>
@@ -116,6 +116,12 @@ object JsonDescriptorsGenerator {
         descriptor.validators.put("NotBlank", NotBlankValidator())
       case notNull: NotNull =>
         descriptor.validators.put("NotNull", NotNullValidator())
+      case email : Email =>
+        descriptor.validators.put("Email", EmailValidator())
+      case past : Past =>
+        descriptor.validators.put("Past", PastValidator())
+      case pattern : Pattern =>
+        descriptor.validators.put("Pattern", PatternValidator(pattern.regexp()))
       case _ => {}
     }
   }

@@ -1,6 +1,5 @@
 import { Directive, inject, OnInit } from '@angular/core';
 import {
-    AsControlArrayForm,
     AsControlForm,
     AsControlInput,
     AsControlSingleForm
@@ -12,6 +11,7 @@ import { AsFormArray } from "../../../components/input/as-form-array/as-form-arr
 import { AsArrayForm } from "../../../components/input/as-array-form/as-array-form";
 import { AsInput } from "../as-input/as-input";
 import {match} from "../../../pattern-match";
+import {findClass} from "../../../mapper";
 
 @Directive({
     selector: '[configured]'
@@ -31,7 +31,9 @@ export class AsConfigured implements OnInit {
 
         match(this.control)
             .withObject(AsControlSingleForm, control => {
-                this.instance = model.$meta.instance;
+                if (model?.$meta?.instance) {
+                    this.instance = model.$meta.instance;
+                }
 
                 if (!control.form) {
                     this.descriptor = model.$meta.descriptors;
@@ -42,13 +44,21 @@ export class AsConfigured implements OnInit {
                         this.descriptor = (this.parent.descriptor as ObjectDescriptor).properties[name];
                     }
                 }
+
+                control.newInstance = findClass(this.descriptor.type)
+
             })
             .withObject(AsFormArray, control => {
-                this.descriptor = (this.parent.descriptor as ObjectDescriptor).properties[name] as CollectionDescriptor;
+                let element = (this.parent.descriptor as ObjectDescriptor).properties[name] as CollectionDescriptor;
+                this.descriptor = element;
+                control.newInstance = findClass(element.items.type)
             })
             .withObject(AsControlInput, control => {
                 this.descriptor = (this.parent.descriptor as ObjectDescriptor).properties[name];
-                this.instance = (this.parent.instance as PropertiesContainer)[name];
+
+                if (this.parent.instance) {
+                    this.instance = (this.parent.instance as PropertiesContainer)[name];
+                }
 
                 control.placeholder.set(this.descriptor.title);
 
