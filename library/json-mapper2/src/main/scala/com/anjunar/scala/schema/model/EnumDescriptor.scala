@@ -32,7 +32,7 @@ object EnumDescriptor {
     descriptor.name = name
     descriptor.hidden = hidden
     descriptor.`type` = aType
-    descriptor.links = links
+    descriptor.links.putAll(links)
     descriptor.enums = enums
     descriptor
   }

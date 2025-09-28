@@ -7,6 +7,9 @@ as-lazy-select {
     }
 
     .overlay {
+        border: 1px solid var(--color-background-secondary);
+        background-color: var(--color-background-primary);
+        min-width: 200px;
         position: absolute;
         left: 10px;
         top: 20px;

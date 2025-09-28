@@ -9,9 +9,9 @@ export default class PastValidator implements Validator<LocalDateTime | LocalDat
     validate(control: AsControl<LocalDateTime | LocalDate>): boolean {
         let model = control.model();
         if (model instanceof LocalDateTime) {
-            return LocalDateTime.now().isBefore(model)
+            return model.isBefore(LocalDateTime.now())
         } else {
-            return LocalDate.now().isBefore(model)
+            return model.isBefore(LocalDate.now())
         }
     }
 

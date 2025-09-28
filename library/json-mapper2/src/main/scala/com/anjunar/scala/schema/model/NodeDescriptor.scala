@@ -37,7 +37,7 @@ class NodeDescriptor {
   var step : String = uninitialized
 
   @PropertyDescriptor(title = "Links")
-  var links: util.Map[String, Link] = new util.LinkedHashMap[String, Link]()
+  val links: util.Map[String, Link] = new util.LinkedHashMap[String, Link]()
 
   @PropertyDescriptor(title = "Validators")
   var validators : util.Map[String, Validator] = new util.HashMap[String, Validator]()
@@ -55,7 +55,7 @@ object NodeDescriptor {
     descriptor.hidden = hidden
     descriptor.`type` = aType
     descriptor.step = step
-    descriptor.links = links
+    descriptor.links.putAll(links)
     descriptor
   }
 }

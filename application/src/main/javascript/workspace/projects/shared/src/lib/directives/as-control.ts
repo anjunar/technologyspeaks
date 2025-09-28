@@ -78,7 +78,6 @@ export abstract class AsControl<E> {
             }
 
             this.writeValue(value)
-            this.model.set(value)
 
             let errors = this.validators.filter(validator => !validator.validate(this));
             this.errors.set(errors)

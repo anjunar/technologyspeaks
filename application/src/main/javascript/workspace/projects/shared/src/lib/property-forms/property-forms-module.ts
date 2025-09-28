@@ -3,6 +3,7 @@ import {AsConfiguredForm} from "../directives/input/as-configured/as-configured-
 import {AsConfiguredArray} from "../directives/input/as-configured/as-configured-array";
 import {AsConfiguredArrayForm} from "../directives/input/as-configured/as-configured-array-form";
 import {AsConfiguredInput} from "../directives/input/as-configured/as-configured-input";
+import {AsConfiguredLazySelect} from "../directives/input/as-configured/as-configured-lazy-select";
 
 
 @NgModule({
@@ -11,12 +12,14 @@ import {AsConfiguredInput} from "../directives/input/as-configured/as-configured
         AsConfiguredArrayForm,
         AsConfiguredForm,
         AsConfiguredInput,
+        AsConfiguredLazySelect
     ],
     exports: [
         AsConfiguredArray,
         AsConfiguredArrayForm,
         AsConfiguredForm,
-        AsConfiguredInput
+        AsConfiguredInput,
+        AsConfiguredLazySelect
     ]
 })
 export class PropertyFormsModule {

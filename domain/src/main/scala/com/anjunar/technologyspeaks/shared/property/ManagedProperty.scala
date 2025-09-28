@@ -5,7 +5,7 @@ import com.anjunar.jpa.RepositoryContext
 import com.anjunar.scala.mapper.annotations.PropertyDescriptor
 import com.anjunar.scala.schema.model.Link
 import com.anjunar.security.SecurityUser
-import com.anjunar.technologyspeaks.control.{Group, User}
+import com.anjunar.technologyspeaks.control.{EMail, Group, User}
 import com.anjunar.technologyspeaks.shared.AbstractEntity
 import com.anjunar.vertx.engine.{EntitySchemaDef, SchemaProvider}
 import io.smallrye.mutiny.Uni
@@ -19,6 +19,7 @@ import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
+import scala.jdk.CollectionConverters.*
 
 @Entity
 class ManagedProperty extends AbstractEntity with OwnerProvider {
@@ -51,7 +52,17 @@ class ManagedProperty extends AbstractEntity with OwnerProvider {
 
 object ManagedProperty extends RepositoryContext[ManagedProperty](classOf[ManagedProperty]) with SchemaProvider[ManagedProperty] {
 
-  override val schema = EntitySchemaDef(classOf[ManagedProperty])
+  override val schema = new EntitySchemaDef(classOf[ManagedProperty]) {
+    val id = column[UUID]("id")
+    val visibleForAll = column[Boolean]("visibleForAll")
+    val groups = column[util.Set[Group]]("groups")
+      .forInstance((groups, ctx, session) => groups.asScala.map(elem => Group.schema.build(elem, classOf[Group], ctx, session)).toSeq)
+      .forType(ctx => Group.schema.buildType(classOf[Group], ctx))
+    val users = column[util.Set[User]]("users", views = Set("application"))
+      .forInstance((users, ctx, session) => users.asScala.map(elem => User.schema.build(elem, classOf[User], ctx, session)).toSeq)
+      .forType(ctx => User.schema.buildType(classOf[User], ctx))
+      .withStaticLinks(() => Link("/service/control/users", "GET", "list", "Users"))
+  }
 
   def managedView(session: Stage.Session, view: EntityView, propertyName: String) = {
     val property = view.findProperty(propertyName)

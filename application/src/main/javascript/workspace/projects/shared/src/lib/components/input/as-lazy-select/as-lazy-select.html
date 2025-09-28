@@ -1,6 +1,6 @@
-<div class="input" (click)="open.set(true)"></div>
+<div class="input" (click)="openOverlay()"></div>
 @if (open()) {
-    <div class="overlay">
+    <div class="overlay" (click)="clickOverlay($event)">
         <ng-container #container></ng-container>
     </div>
 }

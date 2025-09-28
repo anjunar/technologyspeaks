@@ -1,6 +1,8 @@
 <form [(asModel)]="form">
     <as-input-container>
         <input property="visibleForAll">
+    </as-input-container>
+    <as-input-container>
         <as-lazy-select property="users">
             <ng-template let-item >
                 @let user = item | userType;

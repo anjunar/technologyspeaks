@@ -1,21 +1,26 @@
 import {Directive, inject, OnInit} from '@angular/core';
 import {AsAbstractConfiguredForm} from "./as-abstract-configured-form";
-import {AsControlInput} from "../../as-control";
 import {NodeDescriptor, ObjectDescriptor} from "../../../domain/descriptors";
-import {PropertiesContainer} from "../../../domain/container/ActiveObject";
 import PropertyDescriptor from "../../../domain/descriptors/PropertyDescriptor";
+import {PropertiesContainer} from "../../../domain/container/ActiveObject";
 import {AsInput} from "../as-input/as-input";
 import {AsAbstractConfigured} from "./as-abstract-configured";
+import {AsLazySelect} from "../../../components/input/as-lazy-select/as-lazy-select";
+import {HttpClient, HttpRequest} from "@angular/common/http";
+import {Mapper} from "../../../mapper";
+import {Table} from "../../../domain/container";
 
 @Directive({
-    selector: 'input[property], as-image[property]',
-    standalone : false,
+    selector: 'as-lazy-select[property]',
+    standalone: false
 })
-export class AsConfiguredInput extends AsAbstractConfigured implements OnInit {
+export class AsConfiguredLazySelect extends AsAbstractConfigured implements OnInit {
 
-    override control = inject(AsControlInput, {self: true});
+    override control = inject(AsLazySelect, {self: true});
 
     override parent = inject(AsAbstractConfiguredForm, {skipSelf: true});
+
+    http = inject(HttpClient)
 
     descriptor: NodeDescriptor;
     instance: PropertyDescriptor;
@@ -32,11 +37,16 @@ export class AsConfiguredInput extends AsAbstractConfigured implements OnInit {
         this.control.placeholder.set(this.descriptor.title);
 
         if (this.control instanceof AsInput) {
-            this.control.type.set(this.descriptor.widget);
+            this.control.el.type = this.descriptor.widget;
         }
 
         Object.values(this.descriptor.validators || {})
             .forEach(validator => this.control.addValidator(validator))
+
+        this.control.loader.set((query) => {
+            let link = this.descriptor.links["list"];
+            return this.http.get(`${link.url}?index=${query.index}&limit=${query.limit}&search=${query.search}`)
+        })
 
     }
 

@@ -177,7 +177,7 @@ object JsonDescriptorsGenerator {
     objectDescriptor.id = schemaDefinition.id
     objectDescriptor.name = schemaDefinition.naming
     objectDescriptor.hidden = schemaDefinition.hidden
-    objectDescriptor.links = schemaDefinition.getLinks
+    objectDescriptor.links.putAll(schemaDefinition.getLinks) 
     generateValidator(property, objectDescriptor)
     objectDescriptor
   }
@@ -196,7 +196,7 @@ object JsonDescriptorsGenerator {
     descriptor.id = schemaDefinition.id
     descriptor.name = schemaDefinition.naming
     descriptor.hidden = schemaDefinition.hidden
-    descriptor.links = schemaDefinition.getLinks
+    descriptor.links.putAll(schemaDefinition.getLinks)
     generateValidator(property, descriptor)
     descriptor
   }
