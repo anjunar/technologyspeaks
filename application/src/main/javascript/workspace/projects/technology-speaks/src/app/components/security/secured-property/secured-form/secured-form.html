@@ -6,7 +6,7 @@
         <as-lazy-select property="users">
             <ng-template let-item >
                 @let user = item | userType;
-                <div>
+                <div class="user">
                     {{user.nickName()}}
                 </div>
             </ng-template>

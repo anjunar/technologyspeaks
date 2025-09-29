@@ -4,6 +4,10 @@ as-lazy-select {
 
     .input {
         height: 16px;
+
+        .placeholder {
+            padding: 1px 2px;
+        }
     }
 
     .overlay {

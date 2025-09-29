@@ -72,9 +72,22 @@ export class AsInput extends AsControlInput<string | number | LocalDate | LocalD
 
     constructor() {
         super()
-        this.el.addEventListener("input", () => this.onChange.forEach(callback => callback(this.name(), this.converter.fromView(this.el.value), this.converter.fromView(this.el.defaultValue), this.el)))
-        this.el.addEventListener("blur", () => this.onTouched.forEach(callback => callback(this.el)))
-        this.el.addEventListener("focus", () => this.el.classList.add("focus"))
+        this.el.addEventListener("input", () => {
+            if (this.el.type === "checkbox") {
+                this.isEmpty.set(false)
+            } else {
+                this.isEmpty.set(! this.el.value)
+            }
+            this.onChange.forEach(callback => callback(this.name(), this.converter.fromView(this.el.value), this.converter.fromView(this.el.defaultValue), this.el))
+        })
+        this.el.addEventListener("blur", () => {
+            this.focus.set(false)
+            this.onTouched.forEach(callback => callback(this.el))
+        })
+        this.el.addEventListener("focus", () => {
+            this.focus.set(true)
+            this.el.classList.add("focus")
+        })
 
 
         effect(() => {
@@ -114,8 +127,7 @@ export class AsInput extends AsControlInput<string | number | LocalDate | LocalD
 
     }
 
-    controlAdded(): void {
-    }
+    controlAdded(): void {}
 
     setDisabledState(isDisabled: boolean): void {
         this.el.disabled = isDisabled

@@ -33,6 +33,13 @@ export class AsConfiguredInput extends AsAbstractConfigured implements OnInit {
 
         if (this.control instanceof AsInput) {
             this.control.type.set(this.descriptor.widget);
+
+
+            if (this.control.type() === "checkbox") {
+                this.control.isEmpty.set(false)
+            } else {
+                this.control.isEmpty.set(! this.control.model())
+            }
         }
 
         Object.values(this.descriptor.validators || {})

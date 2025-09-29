@@ -80,6 +80,7 @@ export class AsLazySelect extends AsControlInput<AbstractEntity | AbstractEntity
 
     overlayClose = () => {
         this.open.set(false)
+        this.focus.set(false)
     }
 
     constructor() {
@@ -115,6 +116,7 @@ export class AsLazySelect extends AsControlInput<AbstractEntity | AbstractEntity
         this.loader()({index: this.index(), limit: this.limit(), search: this.search()})
             .subscribe(value => {
                 let table : Table<any> = Mapper.domain(value)
+                this.focus.set(true)
                 this.open.set(true)
                 this.window.set(table.rows)
             })

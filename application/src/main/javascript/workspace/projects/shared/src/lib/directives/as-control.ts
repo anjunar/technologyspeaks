@@ -1,9 +1,21 @@
 import {ControlValueAccessor} from "@angular/forms";
-import {Directive, effect, inject, input, model, ModelSignal, OnDestroy, OnInit, Signal, Type} from "@angular/core";
+import {
+    Directive,
+    effect,
+    inject,
+    input,
+    model,
+    ModelSignal,
+    OnDestroy,
+    OnInit,
+    output,
+    Signal,
+    Type
+} from "@angular/core";
 import {MetaSignal} from "../meta-signal/meta-signal";
 import Validator from "../domain/descriptors/validators/Validator";
 
-export function bindSignals<T>(target: ModelSignal<T>, source: ModelSignal<T>) {
+export function bindSignals<T>(target: ModelSignal<T>, source: ModelSignal<T>) : () => void {
     const sub1 = source.subscribe(val => {
         if (target() !== val) {
             target.set(val);
@@ -33,6 +45,8 @@ export abstract class AsControl<E> {
 
     onChange: ((name: string, value: any, defaultValue: any, el: HTMLElement) => void)[] = []
     onTouched: ((el: HTMLElement) => void)[] = []
+
+    unsubscribe : () => void
 
     abstract get name(): Signal<string>
 
@@ -125,6 +139,10 @@ export abstract class AsControlInput<E> extends AsControl<E> implements OnInit, 
 
     name = input<string>("", {alias: "property"})
 
+    isEmpty = model<boolean>(true)
+
+    focus = model<boolean>(false)
+
     form = inject(AsControlForm)
 
     ngOnInit(): void {
@@ -191,7 +209,7 @@ export abstract class AsControlSingleForm<E> extends AsControlForm<E> {
             if (metaSignal) {
                 control.model.set(metaSignal())
 
-                bindSignals(metaSignal, control.model)
+                control.unsubscribe = bindSignals(metaSignal, control.model)
 
                 let value = metaSignal()
                 control.writeValue(value)
@@ -205,6 +223,9 @@ export abstract class AsControlSingleForm<E> extends AsControlForm<E> {
     }
 
     removeControl(name: string | number, control: AsControl<any>) {
+        if (control.unsubscribe) {
+            control.unsubscribe()
+        }
         let controls = this.controls.get(name as string);
         if (controls) {
             let indexOf = controls.indexOf(control);

@@ -31,11 +31,11 @@ export class AsInputContainer {
 
         toObservable(this.control)
             .subscribe((control) => {
-                let model = ! control.model();
+                let isEmpty = control.isEmpty()
                 let dirty = control.dirty();
                 let placeholder = control.placeholder();
 
-                this.isEmpty.set(model);
+                this.isEmpty.set(isEmpty);
                 this.dirty.set(dirty);
                 this.placeholder.set(placeholder);
 
@@ -62,14 +62,23 @@ export class AsInputContainer {
                 })
 
                 let controlSubscription = control.model.subscribe((value : any) => {
-                    this.isEmpty.set(!value);
                     this.placeholder.set(control.placeholder());
+                })
+
+                let isEmptySubscription = control.isEmpty.subscribe(value => {
+                    this.isEmpty.set(value)
+                })
+
+                let focusSubscription = control.focus.subscribe(value => {
+                    this.focus.set(value)
                 })
 
                 return () => {
                     dirtySubscription.unsubscribe()
                     errorSubscription.unsubscribe()
                     controlSubscription.unsubscribe()
+                    isEmptySubscription.unsubscribe()
+                    focusSubscription.unsubscribe()
                 }
             })
 

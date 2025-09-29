@@ -1,3 +1,12 @@
 secured-form {
     display: block;
+
+    .user {
+        padding: 12px;
+
+        &:hover {
+            background-color: var(--color-selected);
+            color: var(--color-background-primary);
+        }
+    }
 }

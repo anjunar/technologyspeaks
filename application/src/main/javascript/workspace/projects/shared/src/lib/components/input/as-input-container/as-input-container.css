@@ -1,23 +1,27 @@
 as-input-container {
     display: block;
 
-    .placeholder {
-        height: 8px;
-        font-size: xx-small;
+    >div {
+        >.placeholder {
+            height: 8px;
+            font-size: xx-small;
+            margin-bottom: 2px;
+            margin-top: 2px;
 
-        .focus {
-            color: var(--color-selected);
+            .focus {
+                color: var(--color-selected);
+            }
+
+            .dirty {
+                color: var(--color-warning);
+            }
+
+            .error {
+                color: var(--color-error);
+            }
+
+
         }
-
-        .dirty {
-            color: var(--color-warning);
-        }
-
-        .error {
-            color: var(--color-error);
-        }
-
-
     }
 
     hr.focus {

@@ -1,4 +1,8 @@
-<div class="input" (click)="openOverlay()"></div>
+<div class="input" (click)="openOverlay()">
+    @if (isEmpty()) {
+        <span class="placeholder">{{placeholder()}}</span>
+    }
+</div>
 @if (open()) {
     <div class="overlay" (click)="clickOverlay($event)">
         <ng-container #container></ng-container>

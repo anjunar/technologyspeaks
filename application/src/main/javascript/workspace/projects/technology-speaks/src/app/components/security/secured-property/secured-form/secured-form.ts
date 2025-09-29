@@ -1,11 +1,10 @@
 import {Component, model, ViewEncapsulation} from '@angular/core';
 import ManagedProperty from "../../../../domain/shared/ManagedProperty";
-import {AsForm, AsInput, AsInputContainer, AsLazySelect, AsSubmit, PropertyFormsModule} from "shared";
-import User from "../../../../domain/control/User";
+import {AsForm, AsInput, AsInputContainer, AsLazySelect, PropertyFormsModule} from "shared";
 import {UserPipe} from "../../../../pipes/control/user/user-pipe";
 
 @Component({
-    selector: 'app-secured-form',
+    selector: 'secured-form',
     imports: [
         AsInputContainer, AsInput, AsLazySelect, UserPipe, PropertyFormsModule, AsForm
     ],
@@ -17,6 +16,4 @@ export class SecuredForm {
 
     form = model<ManagedProperty>()
 
-    protected readonly model = model;
-    protected readonly User = User;
 }

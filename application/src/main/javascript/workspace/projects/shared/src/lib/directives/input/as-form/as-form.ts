@@ -115,7 +115,7 @@ export class AsForm extends AsControlSingleForm<any> implements AsControlValueAc
                 if (model) {
                     let value = model[control.name()]();
 
-                    bindSignals(model[control.name()], control.model)
+                    control.unsubscribe = bindSignals(model[control.name()], control.model)
 
                     control.model.set(value)
                     control.setDisabledState(isDisabled)
@@ -126,6 +126,7 @@ export class AsForm extends AsControlSingleForm<any> implements AsControlValueAc
                 } else {
                     control.model.set(undefined)
                     control.setDisabledState(isDisabled)
+                    control.unsubscribe()
 
                     if (control instanceof AsControlInput) {
                         control.writeDefaultValue(undefined)
