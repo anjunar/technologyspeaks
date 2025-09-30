@@ -1,83 +1,95 @@
 import Converter from "./converters/Converter";
-import Basic from "./annotations/Basic";
-import BasicConfiguration = Basic.Configuration;
 import {Type} from "@angular/core";
 
 const entityRegistry = new Set<Type<any>>();
-
-const propertyRegistry = new Map<Function, PropertyDescriptor[]>()
-
-const schemaPropertyRegistry = new Map<Function, PropertyDescriptor[]>()
 
 const classRegistry = new Map<string, Type<any>>()
 
 const converterRegistry = new Map<any, Converter<any, any>>()
 
-export class PropertyDescriptor {
+export const annotationMapping = new Map<Function, Type<AbstractPropertyDescriptor>>()
 
-    name : string
+export interface StandardConfiguration {
+    signal?: boolean
+}
 
-    type : any
+export interface RelationConfiguration extends StandardConfiguration {
+    targetEntity: (Type<any>) | (() => Type<any>)
+}
 
-    configuration : BasicConfiguration
+export abstract class AbstractPropertyDescriptor {
 
-    constructor(name: string, type : any, configuration: BasicConfiguration) {
+    name: string
+
+    abstract configuration: StandardConfiguration
+
+    protected constructor(name: string) {
         this.name = name;
-        this.type = type
-        this.configuration = configuration;
     }
 }
 
-export function registerEntity(clazz : Type<any>) {
+
+export function createProperty(
+    target: any,
+    propertyKey: string,
+    type: any,
+    annotation: Function,
+    configuration: StandardConfiguration
+) {
+    const constructor = target.constructor
+
+    if (!Object.prototype.hasOwnProperty.call(constructor, "properties")) {
+        constructor.properties = {}
+    }
+
+    const properties = constructor.properties
+
+    let property = properties[propertyKey]
+    if (!property) {
+        property = properties[propertyKey] = {
+            annotations: new Map<Function, StandardConfiguration>()
+        }
+    }
+
+    property.annotations.set(annotation, configuration)
+    property.type = type
+
+    return constructor
+}
+
+export function registerEntity(clazz: Type<any>) {
     entityRegistry.add(clazz)
 }
 
-export function registerProperty(clazz : Function, name : string, type : any, configuration : BasicConfiguration) {
-    let element = propertyRegistry.get(clazz);
-    if (element) {
-        element.push(new PropertyDescriptor(name, type, configuration))
-    } else {
-        element = [new PropertyDescriptor(name, type, configuration)]
-        propertyRegistry.set(clazz, element)
-    }
-    return element
-}
-
-export function registerSchemaProperty(clazz : Function, name : string, type : any, configuration : BasicConfiguration) {
-    let element = schemaPropertyRegistry.get(clazz);
-    if (element) {
-        element.push(new PropertyDescriptor(name, type, configuration))
-    } else {
-        element = [new PropertyDescriptor(name, type, configuration)]
-        schemaPropertyRegistry.set(clazz, element)
-    }
-    return element
-}
-
-
-export function registerClass(name : string, clazz : Type<any>) {
+export function registerClass(name: string, clazz: Type<any>) {
     classRegistry.set(name, clazz)
 }
 
-export function registerConverter(clazz : any, converter : Converter<any, any>) {
+export function registerConverter(clazz: any, converter: Converter<any, any>) {
     converterRegistry.set(clazz, converter)
 }
 
-export function findClass(name : string) {
+export function findClass(name: string) {
     return classRegistry.get(name)
 }
 
-export function findType(clazz : Type<any>) : string {
+export function findType(clazz: Type<any>): string {
     return Array.from(classRegistry.entries()).find(([key, value]) => value === clazz)[0]
 }
 
-export function findProperties(clazz : Function) : PropertyDescriptor[] {
-
-    let propertyDescriptors = propertyRegistry.get(clazz);
+export function findProperties(clazz: Function): AbstractPropertyDescriptor[] {
 
     if (clazz.name === "") {
         return []
     }
+
+    let propertyDescriptors = Object.entries((clazz as any).properties || {}).flatMap(([key, value]: [key: string, value: any]) => {
+        let annotations: Map<Function, any> = value.annotations;
+        return Array.from(annotations.entries()).map(([annotation, configuration]) => {
+            let descriptorType = annotationMapping.get(annotation);
+            return new descriptorType(key, configuration)
+        })
+    })
 
     let prototypeOf = Object.getPrototypeOf(clazz);
 
@@ -87,31 +99,9 @@ export function findProperties(clazz : Function) : PropertyDescriptor[] {
         return findProperties(prototypeOf)
     }
 
-    return []
-
 }
 
-export function findSchemaProperties(clazz : Function) : PropertyDescriptor[] {
-
-    let propertyDescriptors = schemaPropertyRegistry.get(clazz);
-
-    if (clazz.name === "") {
-        return []
-    }
-
-    let prototypeOf = Object.getPrototypeOf(clazz);
-
-    if (propertyDescriptors) {
-        return propertyDescriptors.concat(findSchemaProperties(prototypeOf))
-    } else {
-        return findSchemaProperties(prototypeOf)
-    }
-
-    return []
-
-}
-
-export function findConverter(clazz : any) {
+export function findConverter(clazz: any) {
     return converterRegistry.get(clazz)
 }
 

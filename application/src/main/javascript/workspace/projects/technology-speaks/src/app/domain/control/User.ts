@@ -3,25 +3,27 @@ import UserInfo from "./UserInfo";
 import Address from "./Address";
 import {Basic, Entity, MetaSignal} from "shared";
 import EMail from "./EMail";
+import OneToOne from "../../../../../shared/src/lib/mapper/annotations/OneToOne";
+import OneToMany from "../../../../../shared/src/lib/mapper/annotations/OneToMany";
 
 @Entity("User")
 export default class User extends Identity {
 
     override $type = "User"
 
-    @Basic({signal: true})
+    @Basic({signal: true, type: "string"})
     nickName: MetaSignal<string>
 
-    @Basic({signal: true})
+    @OneToMany({signal: true, targetEntity: EMail})
     emails: MetaSignal<EMail[]>
 
-    @Basic({signal: true})
+    @OneToOne({signal: true, targetEntity : UserInfo})
     info: MetaSignal<UserInfo>
 
-    @Basic({signal: true})
+    @OneToOne({signal: true, targetEntity : Address})
     address: MetaSignal<Address>
 
-    @Basic({signal: true})
+    @Basic({signal: true, type: "number"})
     score: MetaSignal<number>
 
 }

@@ -6,11 +6,12 @@ import PropertyDescriptor from "../descriptors/PropertyDescriptor";
 import Link from "./Link";
 import {Entity} from "../../mapper";
 import {Signal} from "@angular/core";
+import OneToOne from "../../mapper/annotations/OneToOne";
 
 @Entity("Meta")
 export class Meta {
 
-    @Basic()
+    @OneToOne()
     descriptors : ObjectDescriptor
 
     @Basic()
@@ -28,7 +29,7 @@ export type Constructor<T> = new (...args: any[]) => T;
 
 export default abstract class ActiveObject {
 
-    @Basic()
+    @OneToOne()
     $meta : Meta
 
     @Basic()

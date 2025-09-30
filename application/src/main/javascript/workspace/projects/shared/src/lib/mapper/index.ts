@@ -1,7 +1,6 @@
 export {default as Basic} from "./annotations/Basic"
 export {default as Entity} from "./annotations/Entity"
 export {default as MappedSuperclass} from "./annotations/MappedSuperclass"
-export {default as Schema} from "./annotations/Schema"
 
 export type {default as Converter} from "./converters/Converter"
 export {default as DateConverter} from "./converters/DateConverter"

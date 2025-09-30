@@ -102,9 +102,9 @@ export class AsForm extends AsControlSingleForm<any> implements AsControlValueAc
                 if (newInstance) {
                     let instance = (this.form as any).model().$instance(newInstance);
                     this.model.set(instance)
-                    this.setControls(isDisabled);
                 }
             }
+            this.setControls(isDisabled);
         }
     }
 

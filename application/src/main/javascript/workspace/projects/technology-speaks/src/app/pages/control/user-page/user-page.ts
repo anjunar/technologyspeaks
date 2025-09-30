@@ -1,4 +1,4 @@
-import {Component, model, ViewEncapsulation} from '@angular/core';
+import {Component, effect, model, ViewEncapsulation} from '@angular/core';
 import User from "../../../domain/control/User";
 import {
     AsArrayForm,
@@ -22,6 +22,12 @@ import {SecuredProperty} from "../../../components/security/secured-property/sec
 export class UserPage {
 
     user = model<User>()
+
+    constructor() {
+        effect(() => {
+            console.log(this.user())
+        });
+    }
 
     onSubmit(response: AsResponse<User>) {
 

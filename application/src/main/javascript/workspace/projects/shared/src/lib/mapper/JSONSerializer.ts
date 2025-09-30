@@ -1,4 +1,12 @@
-import { findConverter, findProperties } from "./Registry";
+import {
+    findConverter, findProperties
+} from "./Registry";
+import {match} from "../pattern-match";
+import ManyToMany from "./annotations/ManyToMany";
+import OneToOne from "./annotations/OneToOne";
+import Basic from "./annotations/Basic";
+import ManyToOne from "./annotations/ManyToOne";
+import OneToMany from "./annotations/OneToMany";
 
 function isPlainObject(obj: any): obj is Record<string, any> {
     if (obj === null || typeof obj !== 'object') return false;
@@ -35,31 +43,51 @@ export default function JSONSerializer(entity: any): any {
                 return prev;
             }
 
-            if (Array.isArray(value)) {
-                prev[prop.name] = value.map(item => JSONSerializer(item));
-                return prev;
-            }
+            match(prop)
+                .withObject(Basic.PropertyDescriptor, prop => {
 
-            const propConverter = findConverter(prop.configuration?.type);
-            if (propConverter) {
-                prev[prop.name] = propConverter.toJson(value);
-                return prev;
-            }
+                    const propConverter = findConverter(prop.configuration?.type);
+                    if (propConverter) {
+                        prev[prop.name] = propConverter.toJson(value);
+                        return prev;
+                    }
 
-            if (value.$type) {
-                prev[prop.name] = JSONSerializer(value);
-                return prev;
-            }
+                    if (isPlainObject(value)) {
+                        prev[prop.name] = Object.entries(value).reduce((acc, [k, v]) => {
+                            acc[k] = JSONSerializer(v);
+                            return acc;
+                        }, {} as any);
+                        return prev;
+                    }
 
-            if (isPlainObject(value)) {
-                prev[prop.name] = Object.entries(value).reduce((acc, [k, v]) => {
-                    acc[k] = JSONSerializer(v);
-                    return acc;
-                }, {} as any);
-                return prev;
-            }
+                    prev[prop.name] = value;
+                })
+                .withObject(ManyToMany.PropertyDescriptor, prop => {
+                    if (Array.isArray(value)) {
+                        prev[prop.name] = value.map(item => JSONSerializer(item));
+                        return prev;
+                    }
+                })
+                .withObject(ManyToOne.PropertyDescriptor, prop => {
+                    if (value.$type) {
+                        prev[prop.name] = JSONSerializer(value);
+                        return prev;
+                    }
+                })
+                .withObject(OneToMany.PropertyDescriptor, prop => {
+                    if (Array.isArray(value)) {
+                        prev[prop.name] = value.map(item => JSONSerializer(item));
+                        return prev;
+                    }
+                })
+                .withObject(OneToOne.PropertyDescriptor, prop => {
+                    if (value.$type) {
+                        prev[prop.name] = JSONSerializer(value);
+                        return prev;
+                    }
+                })
 
-            prev[prop.name] = value;
+
 
             return prev;
         }, {} as any);

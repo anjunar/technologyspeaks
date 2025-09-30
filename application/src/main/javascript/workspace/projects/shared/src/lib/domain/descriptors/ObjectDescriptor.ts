@@ -1,6 +1,7 @@
 import NodeDescriptor from "./NodeDescriptor";
 import Basic from "../../mapper/annotations/Basic";
 import Entity from "../../mapper/annotations/Entity";
+import ManyToOne from "../../mapper/annotations/ManyToOne";
 
 interface PropertiesContainer {
     [key: string]: NodeDescriptor
@@ -14,10 +15,10 @@ export default class ObjectDescriptor extends NodeDescriptor {
     @Basic()
     properties: PropertiesContainer
 
-    @Basic()
-    oneOf : ObjectDescriptor[] = []
+    @ManyToOne()
+    oneOf: ObjectDescriptor[] = []
 
-    allProperties(type : string) : PropertiesContainer {
+    allProperties(type: string): PropertiesContainer {
         let objectDescriptor = this.oneOf.find(one => one.type === type);
         return Object.assign({}, this.properties, objectDescriptor?.properties)
     }

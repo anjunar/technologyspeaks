@@ -1,15 +1,21 @@
-import {AbstractEntity, Basic, Entity} from "shared";
+import {AbstractEntity, Basic, Entity, MetaSignal} from "shared";
 import Group from "../control/Group";
+import User from "../control/User";
+import ManyToMany from "../../../../../shared/src/lib/mapper/annotations/ManyToMany";
 
 @Entity("ManagedProperty")
 export default class ManagedProperty extends AbstractEntity {
 
     override $type = "ManagedProperty"
 
-    @Basic()
-    visibleForAll : boolean
+    @Basic({signal : true})
+    visibleForAll : MetaSignal<boolean>
 
-    @Basic()
-    groups : Group[]
+    @ManyToMany({signal : true, targetEntity : Group})
+    groups : MetaSignal<Group[]>
+
+    @ManyToMany({signal : true, targetEntity : User})
+    users : MetaSignal<User[]>
+
 
 }

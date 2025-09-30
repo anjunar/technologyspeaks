@@ -1,34 +1,36 @@
 import 'reflect-metadata'
-import {registerProperty} from "../Registry";
-import NodeDescriptor from "../../domain/descriptors/NodeDescriptor";
+import {createProperty, AbstractPropertyDescriptor, StandardConfiguration, annotationMapping} from "../Registry";
+import ManyToMany from "./ManyToMany";
 
-function Basic(configuration? : Basic.Configuration) {
-    return function (target : any, propertyKey: string) {
-        registerProperty(target.constructor, propertyKey, null, configuration)
+function Basic(configuration?: Basic.Configuration) {
+    return function (target: any, propertyKey: string) {
+        const type = Reflect.getMetadata("design:type", target, propertyKey);
+
+        createProperty(target, propertyKey, type, Basic, configuration);
     }
 }
 
 namespace Basic {
-    export interface Configuration {
+    export interface Configuration extends StandardConfiguration {
 
-        default? : any
+        type?: any
 
-        schema? : NodeDescriptor
-
-        inSyncWith? : SyncWith
-
-        signal? : boolean
-
-        type? : any
+        default?: any
 
     }
 
-    export interface SyncWith {
-        property : string
-        trigger? : string
-        from?(instance : any) : any
-        to?(instance : any) : any
+    export class PropertyDescriptor extends AbstractPropertyDescriptor {
+
+        override configuration : Basic.Configuration
+
+        constructor(name: string, configuration: Basic.Configuration) {
+            super(name);
+            this.configuration = configuration;
+        }
     }
+
 }
 
 export default Basic
+
+annotationMapping.set(Basic, Basic.PropertyDescriptor)
