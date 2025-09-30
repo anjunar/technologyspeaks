@@ -1,8 +1,4 @@
-import {
-    findClass,
-    findConverter,
-    findProperties
-} from "./Registry";
+import {findClass, findConverter, findProperties} from "./Registry";
 import {value} from "../meta-signal/value-signal";
 import {match} from "../pattern-match";
 import ManyToMany from "./annotations/ManyToMany";
@@ -10,6 +6,7 @@ import OneToOne from "./annotations/OneToOne";
 import Basic from "./annotations/Basic";
 import ManyToOne from "./annotations/ManyToOne";
 import OneToMany from "./annotations/OneToMany";
+import {Type} from "@angular/core";
 
 function isPlainObject(obj: any): obj is Record<string, any> {
     if (obj === null || typeof obj !== 'object') return false;
@@ -17,13 +14,16 @@ function isPlainObject(obj: any): obj is Record<string, any> {
     return proto === Object.prototype || proto === null;
 }
 
-export default function JSONDeserializer<T>(object: any, buildObjectGraph = false): T {
+export default function JSONDeserializer<T>(object: any, Class : Type<any> = null): T {
     if (!(object instanceof Object)) {
         return object;
     }
 
     const type = object.$type;
-    const Class: any = findClass(type);
+
+    if (! Class) {
+        Class = findClass(type);
+    }
 
     if (!Class) {
         throw new Error("No Class registered for Type: " + type);
@@ -54,7 +54,7 @@ export default function JSONDeserializer<T>(object: any, buildObjectGraph = fals
 
                 if (isPlainObject(element)) {
                     const mapped = Object.entries(element).reduce((prev, [key, value]) => {
-                        prev[key] = JSONDeserializer(value, buildObjectGraph);
+                        prev[key] = JSONDeserializer(value, property.configuration?.type);
                         return prev;
                     }, {} as any);
                     instance[name] = property.configuration?.signal ? value(mapped) : mapped;
@@ -65,25 +65,25 @@ export default function JSONDeserializer<T>(object: any, buildObjectGraph = fals
             })
             .withObject(ManyToMany.PropertyDescriptor, property => {
                 if (Array.isArray(element)) {
-                    const mapped = element.map(item => JSONDeserializer(item, buildObjectGraph));
+                    const mapped = element.map(item => JSONDeserializer(item, property.configuration.targetEntity));
                     instance[name] = property.configuration?.signal ? value(mapped) : mapped;
                 }
             })
             .withObject(ManyToOne.PropertyDescriptor, property => {
                 if (element && element.$type) {
-                    const valueObject = JSONDeserializer(element, buildObjectGraph);
+                    const valueObject = JSONDeserializer(element, property.configuration.targetEntity);
                     instance[name] = property.configuration?.signal ? value(valueObject) : valueObject;
                 }
             })
             .withObject(OneToMany.PropertyDescriptor, property => {
                 if (Array.isArray(element)) {
-                    const mapped = element.map(item => JSONDeserializer(item, buildObjectGraph));
+                    const mapped = element.map(item => JSONDeserializer(item, property.configuration.targetEntity));
                     instance[name] = property.configuration?.signal ? value(mapped) : mapped;
                 }
             })
             .withObject(OneToOne.PropertyDescriptor, property => {
                 if (element && element.$type) {
-                    const valueObject = JSONDeserializer(element, buildObjectGraph);
+                    const valueObject = JSONDeserializer(element, property.configuration.targetEntity);
                     instance[name] = property.configuration?.signal ? value(valueObject) : valueObject;
                 }
             })

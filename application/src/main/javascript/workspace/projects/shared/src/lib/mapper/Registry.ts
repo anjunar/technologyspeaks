@@ -14,7 +14,7 @@ export interface StandardConfiguration {
 }
 
 export interface RelationConfiguration extends StandardConfiguration {
-    targetEntity: (Type<any>) | (() => Type<any>)
+    targetEntity: Type<any>
 }
 
 export abstract class AbstractPropertyDescriptor {

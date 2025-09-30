@@ -15,7 +15,7 @@ export default class ObjectDescriptor extends NodeDescriptor {
     @Basic()
     properties: PropertiesContainer
 
-    @ManyToOne()
+    @ManyToOne({targetEntity : ObjectDescriptor})
     oneOf: ObjectDescriptor[] = []
 
     allProperties(type: string): PropertiesContainer {

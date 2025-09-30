@@ -11,7 +11,7 @@ import OneToOne from "../../mapper/annotations/OneToOne";
 @Entity("Meta")
 export class Meta {
 
-    @OneToOne()
+    @OneToOne({targetEntity : ObjectDescriptor})
     descriptors : ObjectDescriptor
 
     @Basic()
@@ -29,7 +29,7 @@ export type Constructor<T> = new (...args: any[]) => T;
 
 export default abstract class ActiveObject {
 
-    @OneToOne()
+    @OneToOne({targetEntity : Meta})
     $meta : Meta
 
     @Basic()

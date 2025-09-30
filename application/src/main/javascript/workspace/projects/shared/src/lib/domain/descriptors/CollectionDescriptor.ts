@@ -8,7 +8,7 @@ export default class CollectionDescriptor extends NodeDescriptor {
 
     override $type = "CollectionDescriptor"
 
-    @ManyToOne()
+    @ManyToOne({targetEntity : ObjectDescriptor})
     items: ObjectDescriptor
 
 }

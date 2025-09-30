@@ -1,8 +1,7 @@
 import 'reflect-metadata'
 import {createProperty, AbstractPropertyDescriptor, RelationConfiguration, annotationMapping} from "../Registry";
-import {Type} from "@angular/core";
 
-function OneToOne(configuration?: OneToOne.Configuration) {
+function OneToOne(configuration: OneToOne.Configuration) {
     return function (target: any, propertyKey: string) {
         const type = Reflect.getMetadata("design:type", target, propertyKey);
 

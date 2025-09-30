@@ -19,7 +19,6 @@ import CollectionDescriptor from "./descriptors/CollectionDescriptor";
 import EnumDescriptor from "./descriptors/EnumDescriptor";
 import NodeDescriptor from "./descriptors/NodeDescriptor";
 import ObjectDescriptor from "./descriptors/ObjectDescriptor";
-import QueryTable from "./container/QueryTable";
 import Sort from "./container/Sort";
 import TupleTable from "./container/TupleTable";
 import PropertyDescriptor from "./descriptors/PropertyDescriptor";
@@ -32,7 +31,6 @@ export function init() {
     registerEntity(Table)
     registerEntity(TupleTable)
     registerEntity(Sort)
-    registerEntity(QueryTable)
     registerEntity(Row)
     registerEntity(Link)
 

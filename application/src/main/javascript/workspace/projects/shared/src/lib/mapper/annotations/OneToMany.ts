@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import {createProperty, AbstractPropertyDescriptor, RelationConfiguration, annotationMapping} from "../Registry";
 
-function OneToMany(configuration?: OneToMany.Configuration) {
+function OneToMany(configuration: OneToMany.Configuration) {
     return function (target: any, propertyKey: string) {
         const type = Reflect.getMetadata("design:type", target, propertyKey);
 

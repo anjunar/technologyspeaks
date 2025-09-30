@@ -1,8 +1,7 @@
 import 'reflect-metadata'
-import {createProperty, AbstractPropertyDescriptor, RelationConfiguration, annotationMapping} from "../Registry";
-import ManyToOne from "./ManyToOne";
+import {AbstractPropertyDescriptor, annotationMapping, createProperty, RelationConfiguration} from "../Registry";
 
-function ManyToMany(configuration?: ManyToMany.Configuration) {
+function ManyToMany(configuration: ManyToMany.Configuration) {
     return function (target: any, propertyKey: string) {
         const type = Reflect.getMetadata("design:type", target, propertyKey);
 
