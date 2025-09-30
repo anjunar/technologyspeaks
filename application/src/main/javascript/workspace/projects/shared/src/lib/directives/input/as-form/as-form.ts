@@ -113,9 +113,10 @@ export class AsForm extends AsControlSingleForm<any> implements AsControlValueAc
             controls.forEach(control => {
                 let model = this.model();
                 if (model) {
-                    let value = model[control.name()]();
+                    let name = control.name();
+                    let value = model[name]();
 
-                    control.unsubscribe = bindSignals(model[control.name()], control.model)
+                    control.unsubscribe = bindSignals(model[name], control.model)
 
                     control.model.set(value)
                     control.setDisabledState(isDisabled)

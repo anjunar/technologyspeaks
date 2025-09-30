@@ -36,6 +36,8 @@ class EntityWriter extends MessageBodyWriter {
 
   override val contentType: String = MediaType.APPLICATION_JSON
 
+  val jsonMapper = JsonMapper()
+
   override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
     val companion = TypeResolver.companionInstance(javaType.raw)
     if (companion == null) {
@@ -101,20 +103,11 @@ class EntityWriter extends MessageBodyWriter {
   }
 
   def write2(entity: Any, resolvedClass: ResolvedClass, schemaBuilder: Schemas, session : Stage.Session): CompletionStage[String] = {
-    val jsonMapper = JsonMapper()
-
     val context = JsonContext(null, null, false, validator, jsonMapper.registry, schemaBuilder, null)
 
     jsonMapper.toJson(entity.asInstanceOf[AnyRef], resolvedClass, context)
       .thenCompose(jsonObject => {
-        val objectDescriptor = JsonDescriptorsGenerator.generateObject(resolvedClass, schemaBuilder, JsonDescriptorsContext(null))
-
-        jsonMapper.toJson(objectDescriptor, TypeResolver.resolve(classOf[ObjectDescriptor]), context)
-          .thenCompose(descriptors => {
-            jsonObject.value("$meta").asInstanceOf[model.JsonObject].value.put("descriptors", descriptors)
-
-            jsonMapper.toJsonObjectForJson(jsonObject)
-          })
+        jsonMapper.toJsonObjectForJson(jsonObject)
       })
   }
 }

@@ -11,6 +11,7 @@ export const annotationMapping = new Map<Function, Type<any>>()
 
 export interface StandardConfiguration {
     signal?: boolean
+    default?: any
 }
 
 export interface RelationConfiguration extends StandardConfiguration {

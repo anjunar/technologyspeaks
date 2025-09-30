@@ -13,8 +13,6 @@ function OneToMany(configuration: OneToMany.Configuration) {
 namespace OneToMany {
     export interface Configuration extends RelationConfiguration {
 
-        default?: any
-
         signal?: boolean
 
         type?: any

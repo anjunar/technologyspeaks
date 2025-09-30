@@ -12,8 +12,6 @@ function ManyToOne(configuration: ManyToOne.Configuration) {
 namespace ManyToOne {
     export interface Configuration extends RelationConfiguration {
 
-        default?: any
-
         signal?: boolean
 
         type?: any

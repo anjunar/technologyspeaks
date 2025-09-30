@@ -13,8 +13,6 @@ function ManyToMany(configuration: ManyToMany.Configuration) {
 namespace ManyToMany {
     export interface Configuration extends RelationConfiguration {
 
-        default?: any
-
         signal?: boolean
 
         type?: any

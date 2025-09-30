@@ -37,14 +37,14 @@ export default function JSONDeserializer<T>(object: any, Class : Type<any> = nul
         const name = property.name;
         let element = object[name];
 
+        if (element === undefined && property.configuration?.default !== undefined) {
+            const def = property.configuration.default;
+            element = typeof def === 'function' ? def() : def;
+        }
+
         match(property)
             .withObject(Basic.PropertyDescriptor, property => {
                 const converter = findConverter(property.configuration?.type);
-
-                if (element === undefined && property.configuration?.default !== undefined) {
-                    const def = property.configuration.default;
-                    element = typeof def === 'function' ? def() : def;
-                }
 
                 if (converter) {
                     const converterValue = converter.fromJson(element);

@@ -12,9 +12,9 @@ function Schema(configuration?: Schema.Configuration) {
 namespace Schema {
     export interface Configuration {
 
-        title?: string
+        title: string
 
-        widget?: string
+        widget: string
 
         link?: string
 

@@ -13,8 +13,6 @@ function OneToOne(configuration: OneToOne.Configuration) {
 namespace OneToOne {
     export interface Configuration extends RelationConfiguration {
 
-        default?: any
-
         signal?: boolean
 
         type?: any
