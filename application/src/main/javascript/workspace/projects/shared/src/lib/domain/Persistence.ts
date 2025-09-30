@@ -20,7 +20,6 @@ import EnumDescriptor from "./descriptors/EnumDescriptor";
 import NodeDescriptor from "./descriptors/NodeDescriptor";
 import ObjectDescriptor from "./descriptors/ObjectDescriptor";
 import Sort from "./container/Sort";
-import TupleTable from "./container/TupleTable";
 import PropertyDescriptor from "./descriptors/PropertyDescriptor";
 import {Meta} from "./container/ActiveObject";
 import Media from "./types/Media";
@@ -29,7 +28,6 @@ import Thumbnail from "./types/Thumbnail";
 export function init() {
 
     registerEntity(Table)
-    registerEntity(TupleTable)
     registerEntity(Sort)
     registerEntity(Row)
     registerEntity(Link)

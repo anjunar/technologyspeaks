@@ -6,8 +6,8 @@ export function match<T, O>(object: T): Matcher<T, O> {
     let result : O
     let matched = false
     return {
-        withType<E>(type: string, callback: (value: E) => O): Matcher<T, O> {
-            if (typeof object === type) {
+        withFunction<E>(fn: Function, callback: (value: E) => O): Matcher<T, O> {
+            if (object === fn) {
                 if (! result) {
                     // @ts-ignore
                     result = callback(object as E);
@@ -27,6 +27,17 @@ export function match<T, O>(object: T): Matcher<T, O> {
             }
             return this;
         },
+        withType<E>(type: string, callback: (value: E) => O): Matcher<T, O> {
+            if (typeof object === type) {
+                if (! result) {
+                    // @ts-ignore
+                    result = callback(object as E);
+
+                    matched = true;
+                }
+            }
+            return this
+        },
         exhaustive(): O {
             if (! matched) {
                 throw new Error("Nothing matched for " + JSON.stringify(object))
@@ -40,6 +51,7 @@ export function match<T, O>(object: T): Matcher<T, O> {
 }
 
 interface Matcher<T, O> {
+    withFunction<E extends T>(fn : Function, callback: (value: E) => O): Matcher<T, O>;
     withObject<E extends T>(clazz: abstract new (...args: any[]) => E, callback: (value: E) => O): Matcher<T, O>;
     withType<E extends T>(type: string, callback: (value: E) => O): Matcher<T, O>;
     exhaustive(): O;

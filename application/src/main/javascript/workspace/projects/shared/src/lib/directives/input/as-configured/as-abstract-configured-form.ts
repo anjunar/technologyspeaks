@@ -9,7 +9,8 @@ export abstract class AsAbstractConfiguredForm extends AsAbstractConfigured {
 
     override control : AsControlForm<any>
 
-    descriptor: ObjectDescriptor;
     instance: PropertiesContainer;
+
+    properties : { [key: string]: any }
 
 }

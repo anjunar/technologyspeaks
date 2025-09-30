@@ -26,12 +26,14 @@ export class AsConfiguredArrayForm extends AsAbstractConfiguredForm implements O
 
         this.instance = model.$meta?.instance;
 
-        this.descriptor = (this.parent.descriptor as CollectionDescriptor).items;
+        this.properties = this.parent.properties
 
-        this.control.newInstance = findClass(this.descriptor.type)
+        this.control.newInstance = model.constructor
 
+/*
         Object.values(this.descriptor.validators || {})
             .forEach(validator => this.control.addValidator(validator))
+*/
 
     }
 

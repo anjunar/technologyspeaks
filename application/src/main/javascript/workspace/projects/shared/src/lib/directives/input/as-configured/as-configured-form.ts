@@ -1,9 +1,12 @@
-import {Directive, inject} from '@angular/core';
+import {Directive, inject, OnInit} from '@angular/core';
 import {AsControlForm} from "../../as-control";
 import {ObjectDescriptor} from "../../../domain/descriptors";
 import {AsAbstractConfiguredForm} from "./as-abstract-configured-form";
 import {findClass} from "../../../mapper";
 import {AsForm} from "../as-form/as-form";
+import Basic from "../../../mapper/annotations/Basic";
+import ManyToOne from "../../../mapper/annotations/ManyToOne";
+import OneToOne from "../../../mapper/annotations/OneToOne";
 
 @Directive({
     selector: 'form[asModel], fieldset[property]',
@@ -15,7 +18,7 @@ import {AsForm} from "../as-form/as-form";
         }
     ]
 })
-export class AsConfiguredForm extends AsAbstractConfiguredForm {
+export class AsConfiguredForm extends AsAbstractConfiguredForm implements OnInit {
 
     override control = inject(AsControlForm, {self: true, optional: true});
 
@@ -30,17 +33,28 @@ export class AsConfiguredForm extends AsAbstractConfiguredForm {
         }
 
         if (!this.control.form) {
-            this.descriptor = model.$meta.descriptors;
+            this.properties = model.constructor.properties
         } else {
-            this.descriptor = (this.parent.descriptor as ObjectDescriptor).properties[name] as ObjectDescriptor;
+            let property = this.parent.properties[name];
+            let manyToOne = property.annotations.get(ManyToOne);
+            if (manyToOne) {
+                this.properties = manyToOne.targetEntity.properties
+            }
+
+            let oneToOne = property.annotations.get(OneToOne);
+            if (oneToOne) {
+                this.properties = oneToOne.targetEntity.properties
+            }
         }
 
         if (this.control instanceof AsForm) {
-            this.control.newInstance = findClass(this.descriptor.type)
+            this.control.newInstance = model.constructor
         }
 
+/*
         Object.values(this.descriptor.validators || {})
             .forEach(validator => this.control.addValidator(validator))
+*/
 
     }
 

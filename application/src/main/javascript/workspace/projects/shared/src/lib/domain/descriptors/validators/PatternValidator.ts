@@ -9,6 +9,10 @@ export default class PatternValidator implements Validator<string> {
     @Basic()
     regexp : string
 
+    constructor(regexp: string) {
+        this.regexp = regexp;
+    }
+
     validate(control: AsControl<string>): boolean {
         let regex = new RegExp(this.regexp, "g")
         return regex.test(control.model())

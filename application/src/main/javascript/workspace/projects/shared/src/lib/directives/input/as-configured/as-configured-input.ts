@@ -1,15 +1,30 @@
 import {Directive, inject, OnInit} from '@angular/core';
 import {AsAbstractConfiguredForm} from "./as-abstract-configured-form";
 import {AsControlInput} from "../../as-control";
-import {NodeDescriptor, ObjectDescriptor} from "../../../domain/descriptors";
+import {
+    EmailValidator,
+    NotBlankValidator,
+    NotNullValidator,
+    PastValidator,
+    PatternValidator, SizeValidator
+} from "../../../domain/descriptors";
 import {PropertiesContainer} from "../../../domain/container/ActiveObject";
 import PropertyDescriptor from "../../../domain/descriptors/PropertyDescriptor";
 import {AsInput} from "../as-input/as-input";
 import {AsAbstractConfigured} from "./as-abstract-configured";
+import Schema from "../../../mapper/annotations/Schema";
+import {match} from "../../../pattern-match";
+import Email from "../../../mapper/annotations/validators/Email";
+import Validator from "../../../domain/descriptors/validators/Validator";
+import NotBlank from "../../../mapper/annotations/validators/NotBlank";
+import NotNull from "../../../mapper/annotations/validators/NotNull";
+import Past from "../../../mapper/annotations/validators/Past";
+import Pattern from "../../../mapper/annotations/validators/Pattern";
+import Size from "../../../mapper/annotations/validators/Size";
 
 @Directive({
     selector: 'input[property], as-image[property]',
-    standalone : false,
+    standalone: false,
 })
 export class AsConfiguredInput extends AsAbstractConfigured implements OnInit {
 
@@ -17,33 +32,46 @@ export class AsConfiguredInput extends AsAbstractConfigured implements OnInit {
 
     override parent = inject(AsAbstractConfiguredForm, {skipSelf: true});
 
-    descriptor: NodeDescriptor;
     instance: PropertyDescriptor;
 
     ngOnInit(): void {
         const name = this.control.name();
 
-        this.descriptor = (this.parent.descriptor as ObjectDescriptor).properties[name];
+        let property: { annotations: Map<Function, any> } = this.parent.properties[name]
 
         if (this.parent.instance) {
             this.instance = (this.parent.instance as PropertiesContainer)[name];
         }
 
-        this.control.placeholder.set(this.descriptor.title);
+        let schema = property.annotations.get(Schema);
+
+        this.control.placeholder.set(schema?.title || name);
 
         if (this.control instanceof AsInput) {
-            this.control.type.set(this.descriptor.widget);
+            this.control.type.set(schema?.widget || "text");
 
 
             if (this.control.type() === "checkbox") {
                 this.control.isEmpty.set(false)
             } else {
-                this.control.isEmpty.set(! this.control.model())
+                this.control.isEmpty.set(!this.control.model())
             }
         }
 
-        Object.values(this.descriptor.validators || {})
-            .forEach(validator => this.control.addValidator(validator))
+        property.annotations.forEach((annotation, key) => {
+            let validator = match<Function, Validator<any>>(key)
+                .withFunction(Email, email => new EmailValidator())
+                .withFunction(NotBlank, notBlank => new NotBlankValidator())
+                .withFunction(NotNull, notNull => new NotNullValidator())
+                .withFunction(Past, past => new PastValidator())
+                .withFunction(Pattern, pattern => new PatternValidator(annotation.regex))
+                .withFunction(Size, size => new SizeValidator(annotation.min, annotation.max))
+                .nonExhaustive();
+
+            if (validator) {
+                this.control.addValidator(validator)
+            }
+        })
 
     }
 

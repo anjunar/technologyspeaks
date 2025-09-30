@@ -1,6 +1,18 @@
+export {default as Email} from "./annotations/validators/Email"
+export {default as NotBlank} from "./annotations/validators/NotBlank"
+export {default as NotNull} from "./annotations/validators/NotNull"
+export {default as Past} from "./annotations/validators/Past"
+export {default as Pattern} from "./annotations/validators/Pattern"
+export {default as Size} from "./annotations/validators/Size"
+
 export {default as Basic} from "./annotations/Basic"
 export {default as Entity} from "./annotations/Entity"
+export {default as ManyToMany} from "./annotations/ManyToMany"
+export {default as ManyToOne} from "./annotations/ManyToOne"
 export {default as MappedSuperclass} from "./annotations/MappedSuperclass"
+export {default as OneToMany} from "./annotations/OneToMany"
+export {default as OneToOne} from "./annotations/OneToOne"
+export {default as Schema} from "./annotations/Schema"
 
 export type {default as Converter} from "./converters/Converter"
 export {default as DateConverter} from "./converters/DateConverter"

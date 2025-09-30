@@ -9,6 +9,9 @@ import {AsLazySelect} from "../../../components/input/as-lazy-select/as-lazy-sel
 import {HttpClient, HttpRequest} from "@angular/common/http";
 import {Mapper} from "../../../mapper";
 import {Table} from "../../../domain/container";
+import ManyToMany from "../../../mapper/annotations/ManyToMany";
+import OneToMany from "../../../mapper/annotations/OneToMany";
+import Schema from "../../../mapper/annotations/Schema";
 
 @Directive({
     selector: 'as-lazy-select[property]',
@@ -22,30 +25,34 @@ export class AsConfiguredLazySelect extends AsAbstractConfigured implements OnIn
 
     http = inject(HttpClient)
 
-    descriptor: NodeDescriptor;
     instance: PropertyDescriptor;
 
     ngOnInit(): void {
         const name = this.control.name();
 
-        this.descriptor = (this.parent.descriptor as ObjectDescriptor).properties[name];
+        let property = this.parent.properties[name];
+
+        let schema = property.annotations.get(Schema);
+
 
         if (this.parent.instance) {
             this.instance = (this.parent.instance as PropertiesContainer)[name];
         }
 
-        this.control.placeholder.set(this.descriptor.title);
+        this.control.placeholder.set(schema.title);
 
         if (this.control instanceof AsInput) {
-            this.control.el.type = this.descriptor.widget;
+            this.control.el.type = schema.widget;
         }
 
+/*
         Object.values(this.descriptor.validators || {})
             .forEach(validator => this.control.addValidator(validator))
+*/
 
         this.control.loader.set((query) => {
-            let link = this.descriptor.links["list"];
-            return this.http.get(`${link.url}?index=${query.index}&limit=${query.limit}&search=${query.search}`)
+            let link = schema.link
+            return this.http.get(`${link}?index=${query.index}&limit=${query.limit}&search=${query.search}`)
         })
 
     }

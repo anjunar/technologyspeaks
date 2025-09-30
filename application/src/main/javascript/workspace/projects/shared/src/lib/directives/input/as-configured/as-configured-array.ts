@@ -4,6 +4,10 @@ import {CollectionDescriptor} from "../../../domain/descriptors";
 import {AsFormArray} from "../../../components/input/as-form-array/as-form-array";
 import {findClass} from "../../../mapper";
 import {AsAbstractConfigured} from "./as-abstract-configured";
+import ManyToOne from "../../../mapper/annotations/ManyToOne";
+import OneToOne from "../../../mapper/annotations/OneToOne";
+import ManyToMany from "../../../mapper/annotations/ManyToMany";
+import OneToMany from "../../../mapper/annotations/OneToMany";
 
 @Directive({
     selector: 'form-array',
@@ -15,17 +19,30 @@ export class AsConfiguredArray extends AsAbstractConfigured implements OnInit {
 
     override parent = inject(AsAbstractConfiguredForm, {skipSelf: true, optional: true});
 
-    descriptor: CollectionDescriptor;
+    properties : { [key: string]: any }
 
     ngOnInit(): void {
         const name = this.control.name();
 
-        this.descriptor = this.parent.descriptor.properties[name] as CollectionDescriptor
+        let property = this.parent.properties[name];
+        let manyToMany = property.annotations.get(ManyToMany);
+        if (manyToMany) {
+            this.properties = manyToMany.targetEntity.properties
+            this.control.newInstance = manyToMany.targetEntity
+        }
 
-        this.control.newInstance = findClass(this.descriptor.items.type)
+        let oneToMany = property.annotations.get(OneToMany);
+        if (oneToMany) {
+            this.properties = oneToMany.targetEntity.properties
+            this.control.newInstance = oneToMany.targetEntity
+        }
 
+
+
+/*
         Object.values(this.descriptor.validators || {})
             .forEach(validator => this.control.addValidator(validator))
+*/
     }
 
 }

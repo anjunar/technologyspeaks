@@ -7,7 +7,7 @@ const classRegistry = new Map<string, Type<any>>()
 
 const converterRegistry = new Map<any, Converter<any, any>>()
 
-export const annotationMapping = new Map<Function, Type<AbstractPropertyDescriptor>>()
+export const annotationMapping = new Map<Function, Type<any>>()
 
 export interface StandardConfiguration {
     signal?: boolean
@@ -34,7 +34,7 @@ export function createProperty(
     propertyKey: string,
     type: any,
     annotation: Function,
-    configuration: StandardConfiguration
+    configuration: any
 ) {
     const constructor = target.constructor
 
