@@ -38,7 +38,7 @@ class EntityWriter extends MessageBodyWriter {
 
   val jsonMapper = JsonMapper()
 
-  override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
+  override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef[?], transitions: Seq[StateDef[?]]): Boolean = {
     val companion = TypeResolver.companionInstance(javaType.raw)
     if (companion == null) {
       false 
@@ -51,7 +51,7 @@ class EntityWriter extends MessageBodyWriter {
     }
   }
 
-  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef, transitions : Seq[StateDef], factory : Stage.Session): CompletionStage[String] = {
+  override def write(entity: Any, resolvedClass: ResolvedClass, annotations: Array[Annotation], ctx : RoutingContext, state : StateDef[?], transitions : Seq[StateDef[?]], factory : Stage.Session): CompletionStage[String] = {
 
     val user = ctx.user()
     val roles = user.principal().getJsonArray("roles").getList.asScala.toSet.asInstanceOf[Set[String]]
@@ -65,7 +65,7 @@ class EntityWriter extends MessageBodyWriter {
         schemaBuilder.thenCompose(schemaBuilder => {
 
           val tableLinks = transitions
-            .filter(state => (!state.isRef || state.ref == classOf[Table[?]]) && state.rolesAllowed.exists(role => roles.contains(role)))
+            .filter(state => (state.withLinks && !state.isRef || state.ref == classOf[Table[?]]) && state.rolesAllowed.exists(role => roles.contains(role)))
             .map(state => Link(state.path, state.httpMethod, state.rel, state.name))
           
           val classSchema = schemaBuilder.instances(entity)
@@ -73,8 +73,8 @@ class EntityWriter extends MessageBodyWriter {
           
           table.rows.forEach(item => {
             val entityLinks = transitions
-              .filter(state => (!state.isRef || state.ref == item.getClass) && state.rolesAllowed.exists(role => roles.contains(role)))
-              .map(state => Link(state.path.replace(":id", item.asInstanceOf[IdProvider].id.toString), state.httpMethod, state.rel, state.name))
+              .filter(state => (state.withLinks && !state.isRef || state.ref == item.getClass) && state.rolesAllowed.exists(role => roles.contains(role)))
+              .map(state => Link(state.asInstanceOf[StateDef[Any]].generatePath(state.path,  item), state.httpMethod, state.rel, state.name))
 
             val rowsProperty = classSchema.properties.find((name, property) => name == "rows").get
             val itemSchema = rowsProperty._2.schemas.instances(item)
@@ -91,8 +91,8 @@ class EntityWriter extends MessageBodyWriter {
 
           val classSchema = schemaBuilder.instances(entity)
           val entityLinks = transitions
-            .filter(state => (!state.isRef || state.ref == resolvedClass.raw) && state.rolesAllowed.exists(role => roles.contains(role)))
-            .map(state => Link(state.path, state.httpMethod, state.rel, state.name))
+            .filter(state => (state.withLinks && !state.isRef || state.ref == resolvedClass.raw) && state.rolesAllowed.exists(role => roles.contains(role)))
+            .map(state => Link(state.asInstanceOf[StateDef[Any]].generatePath(state.path,  entity), state.httpMethod, state.rel, state.name))
           
           classSchema.links.addAll(entityLinks)
 

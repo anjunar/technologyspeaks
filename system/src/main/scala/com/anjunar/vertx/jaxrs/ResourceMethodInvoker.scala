@@ -29,7 +29,7 @@ class ResourceMethodInvoker {
   @Inject
   var sessionFactory : Stage.SessionFactory = uninitialized
 
-  def invoke(ctx: RoutingContext, sessionHandler: SessionHandler, state: StateDef, transitions: Seq[StateDef], instance: AnyRef): CompletionStage[(String, String)] = {
+  def invoke(ctx: RoutingContext, sessionHandler: SessionHandler, state: StateDef[?], transitions: Seq[StateDef[?]], instance: AnyRef): CompletionStage[(String, String)] = {
     sessionFactory.openSession.thenCompose(session => {
       log.debug("Resource Method invoker begin, Session begin " + state)
 

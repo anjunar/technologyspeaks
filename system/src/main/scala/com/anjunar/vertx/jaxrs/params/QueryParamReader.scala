@@ -27,7 +27,7 @@ class QueryParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[QueryParam])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.Session): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef[?], factory : Stage.Session): CompletionStage[Any] = {
     val value = ctx.queryParam(annotations.find(annotation => annotation.annotationType() == classOf[QueryParam]).get.asInstanceOf[QueryParam].value())
 
     if (value.isEmpty) {

@@ -1,41 +1,37 @@
 package com.anjunar.vertx.fsm
 
+import com.anjunar.scala.mapper.IdProvider
+import com.anjunar.scala.schema.model.Link
 import com.anjunar.scala.universe.members.ResolvedMethod
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
-import com.anjunar.vertx.engine.SchemaView
-import com.anjunar.vertx.engine.SchemaView.Full
 import jakarta.annotation.security.RolesAllowed
 import jakarta.ws.rs.{Consumes, HttpMethod, Path, Produces}
 
 import java.lang.reflect.Type
 
-case class StateDef(rel : String,
-                    name : String,
+case class StateDef[E](rel: String,
+                    name: String,
                     view: String = "full",
                     ref: Class[?] = classOf[Void],
+                    withLinks: Boolean = true,
+                    generatePath: (path: String, entity: E) => String = (path, entity : E) => path,
                     resource: Class[?]) {
-  
-  def isRef : Boolean = ref != classOf[Void]
 
   val clazz: ResolvedClass = TypeResolver
     .resolve(resource)
-
   val method: ResolvedMethod = clazz
     .declaredMethods
     .find(method => method.annotations.exists(annotation => annotation.annotationType().isAnnotationPresent(classOf[HttpMethod])))
     .get
-  
   val httpMethod = method.annotations.find(annotation => annotation.annotationType().isAnnotationPresent(classOf[HttpMethod]))
     .get
     .annotationType()
     .getSimpleName
-  
-  val returnType : Type = method.returnType.typeArguments(0).underlying
-  
-  val path : String = {
+  val returnType: Type = method.returnType.typeArguments(0).underlying
+  val path: String = {
     val classPathAnnotation = clazz.findAnnotation(classOf[Path])
     val methodPathAnnotation = method.findAnnotation(classOf[Path])
-    
+
     val classPath = if (classPathAnnotation == null) {
       throw new IllegalStateException("No Path Annotation on " + resource.getName)
     } else {
@@ -45,7 +41,7 @@ case class StateDef(rel : String,
         "/" + classPathAnnotation.value()
       }
     }
-    
+
     val methodPath = if (methodPathAnnotation == null) {
       ""
     } else {
@@ -55,26 +51,25 @@ case class StateDef(rel : String,
         "/" + methodPathAnnotation.value()
       }
     }
-    
+
     val fullPath = classPath + methodPath
-    
+
     if (fullPath == "/") {
       ""
     } else {
       fullPath
     }
-  } 
-  
-  val consumes : Array[String] = {
+  }
+  val consumes: Array[String] = {
     val classConsumes = clazz.findAnnotation(classOf[Consumes])
     val methodConsumes = method.findAnnotation(classOf[Consumes])
-    
+
     if (classConsumes == null) {
       if (methodConsumes == null) {
         Array[String]()
       } else {
         methodConsumes.value()
-      }    
+      }
     } else {
       if (methodConsumes == null) {
         classConsumes.value()
@@ -83,8 +78,7 @@ case class StateDef(rel : String,
       }
     }
   }
-
-  val produces : Array[String] = {
+  val produces: Array[String] = {
     val classProduces = clazz.findAnnotation(classOf[Produces])
     val methodProduces = method.findAnnotation(classOf[Produces])
 
@@ -102,14 +96,15 @@ case class StateDef(rel : String,
       }
     }
   }
-  
-  val rolesAllowed : Array[String] = {
+  val rolesAllowed: Array[String] = {
     val allowed = method.findAnnotation(classOf[RolesAllowed])
     if (allowed == null) {
       Array("Administrator")
     } else {
-      allowed.value()  
+      allowed.value()
     }
   }
+
+  def isRef: Boolean = ref != classOf[Void]
 
 }

@@ -58,15 +58,12 @@ object UserResource {
   @Path("control/users/user")
   class Update {
     
-    @Inject
-    var sessionFactory : Stage.SessionFactory = uninitialized
-
     @PUT
     @Consumes(Array(MediaType.APPLICATION_JSON))
     @Produces(Array(MediaType.APPLICATION_JSON))
     @RolesAllowed(Array("User", "Administrator"))
-    def update(entity: User): CompletionStage[User] = {
-      sessionFactory.withTransaction(implicit session => {
+    def update(@Context session : Stage.Session, entity: User): CompletionStage[User] = {
+      session.withTransaction(implicit transaction => {
         session.merge(entity)
       })
     }

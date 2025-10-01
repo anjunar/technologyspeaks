@@ -19,11 +19,11 @@ class JsonObjectWriter extends MessageBodyWriter {
   
   val contentType : String = MediaType.APPLICATION_JSON
   
-  override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef]): Boolean = {
+  override def canWrite(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef[?], transitions: Seq[StateDef[?]]): Boolean = {
     javaType.raw == classOf[JsonObject]
   }
 
-  override def write(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef, transitions: Seq[StateDef], factory : Stage.Session): CompletionStage[String] = {
+  override def write(entity: Any, javaType: ResolvedClass, annotations: Array[Annotation], ctx: RoutingContext, state: StateDef[?], transitions: Seq[StateDef[?]], factory : Stage.Session): CompletionStage[String] = {
     CompletableFuture.completedFuture(entity.asInstanceOf[JsonObject].encode())
   }
 

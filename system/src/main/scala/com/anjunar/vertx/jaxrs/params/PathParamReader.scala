@@ -27,7 +27,7 @@ class PathParamReader extends ParamReader {
     annotations.exists(annotation => annotation.annotationType() == classOf[PathParam])
   }
 
-  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef, factory : Stage.Session): CompletionStage[Any] = {
+  override def read(ctx: RoutingContext, sessionHandler: SessionHandler, javaType: ResolvedClass, annotations: Array[Annotation], state: StateDef[?], factory : Stage.Session): CompletionStage[Any] = {
     val value = ctx.pathParam(annotations.find(annotation => annotation.annotationType() == classOf[PathParam]).get.asInstanceOf[PathParam].value())
 
     javaType.raw match {
