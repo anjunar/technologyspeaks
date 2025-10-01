@@ -2,10 +2,10 @@ import {Entity} from "../../mapper";
 import Basic from "../../mapper/annotations/Basic";
 import {Link} from "../container";
 
-@Entity("PropDescriptor")
+@Entity("PropertyDescriptor")
 export default class PropertyDescriptor {
     
-    $type = "PropDescriptor"
+    $type = "PropertyDescriptor"
     
     @Basic()
     visible : boolean

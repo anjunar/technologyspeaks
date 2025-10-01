@@ -39,8 +39,8 @@ export class AsConfiguredInput extends AsAbstractConfigured implements OnInit {
 
         let property: { annotations: Map<Function, any> } = this.parent.properties[name]
 
-        if (this.parent.instance) {
-            this.instance = (this.parent.instance as PropertiesContainer)[name];
+        if (this.parent.descriptors) {
+            this.instance = (this.parent.descriptors as PropertiesContainer)[name];
         }
 
         let schema = property.annotations.get(Schema);

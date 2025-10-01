@@ -26,6 +26,6 @@ export class RootPage {
 
     open = signal(true)
 
-    links = computed(() => this.application.app().$meta.links);
+    links = computed(() => this.application.app().$links);
 
 }

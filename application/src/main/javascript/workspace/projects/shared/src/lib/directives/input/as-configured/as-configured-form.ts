@@ -28,8 +28,8 @@ export class AsConfiguredForm extends AsAbstractConfiguredForm implements OnInit
         const name = this.control.name();
         const model = this.control.model();
 
-        if (model?.$meta?.instance) {
-            this.instance = model.$meta.instance;
+        if (model?.$descriptors) {
+            this.descriptors = model.$descriptors
         }
 
         if (!this.control.form) {

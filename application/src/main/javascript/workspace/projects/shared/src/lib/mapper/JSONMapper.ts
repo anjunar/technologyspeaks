@@ -11,21 +11,11 @@ import {findType} from "./Registry";
 export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: PropertyDescriptor) {
 
     if (object instanceof Function) {
-        object.descriptor = schema
-        object.instance = prop
+        object.descriptor = prop
         object = object()
     }
 
     if (object instanceof Object) {
-        object.$instance = <E>(ctor : Constructor<E>) : E => {
-            let type = findType(ctor);
-            let result = JSONDeserializer<E>({ $type : type });
-            let objectDescriptor = schema as ObjectDescriptor
-            let nodeDescriptor = Object.values(objectDescriptor.properties).find(node => node.type === type);
-            traverseObjectGraph(result, nodeDescriptor, prop)
-            return result
-        }
-
         Object.entries(object).filter(([key, value]) => value).forEach(([key, value] : [key : string, value : any]) => {
 
             if (value instanceof Function && key !== "$instance") {
@@ -66,7 +56,7 @@ export const Mapper = {
     domain(object : any) : any {
         let deserialized : any = JSONDeserializer(object);
         if (deserialized.$meta) {
-            traverseObjectGraph(deserialized, deserialized.$meta.descriptors, deserialized.$meta.instance)
+            traverseObjectGraph(deserialized, null, deserialized.$descriptors)
         }
         return deserialized
     },

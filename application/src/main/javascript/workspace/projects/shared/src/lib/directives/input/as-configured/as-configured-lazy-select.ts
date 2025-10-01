@@ -35,8 +35,8 @@ export class AsConfiguredLazySelect extends AsAbstractConfigured implements OnIn
         let schema = property.annotations.get(Schema);
 
 
-        if (this.parent.instance) {
-            this.instance = (this.parent.instance as PropertiesContainer)[name];
+        if (this.parent.descriptors) {
+            this.instance = (this.parent.descriptors as PropertiesContainer)[name];
         }
 
         this.control.placeholder.set(schema.title);

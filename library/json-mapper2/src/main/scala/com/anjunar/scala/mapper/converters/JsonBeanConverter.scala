@@ -61,8 +61,8 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
     properties.put(if jsonTypeInfo == null then "$type" else jsonTypeInfo.property(), JsonString(instance.getClass.getSimpleName))
     val jsonObject = JsonObject(properties)
 
-    val meta = new mutable.LinkedHashMap[String, JsonNode]()
-    properties.put("$meta", JsonObject(meta))
+    val descriptors = new mutable.LinkedHashMap[String, JsonNode]()
+    properties.put("$descriptors", JsonObject(descriptors))
 
     val resolvedType = TypeToken.of(aType.underlying).resolveType(instance.getClass).getType
 
@@ -99,17 +99,13 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
 
           val propDescriptor = JsonObject(
             mutable.LinkedHashMap(
-              "$type" -> JsonString("PropDescriptor"),
+              "$type" -> JsonString("PropertyDescriptor"),
               "visible" -> JsonBoolean(propertySchema.visible),
               "writeable" -> JsonBoolean(propertySchema.writeable)
             )
           )
 
-          val instanceDescriptor = meta
-            .getOrElseUpdate("instance", JsonObject(mutable.LinkedHashMap()))
-            .asInstanceOf[JsonObject]
-
-          instanceDescriptor.value.put(property.name, propDescriptor)
+          descriptors.put(property.name, propDescriptor)
 
           if (propertySchema.secured) {
             if (propertySchema.visible) {
@@ -123,7 +119,7 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
     }
 
     if (typeMapping != null) {
-      val links = meta.getOrElseUpdate("links", JsonObject(mutable.LinkedHashMap[String, JsonNode]())).asInstanceOf[JsonObject]
+      val links = properties.getOrElseUpdate("$links", JsonObject(mutable.LinkedHashMap[String, JsonNode]())).asInstanceOf[JsonObject]
 
       generateLinks(typeMapping.links.toSeq, instance, context, links.value, context.registry)
 
@@ -131,16 +127,15 @@ class JsonBeanConverter extends JsonAbstractConverter(TypeResolver.resolve(class
         val classPropertyOption = typeMapping.properties.get(name)
         if (classPropertyOption.isDefined) {
           val classProperty = classPropertyOption.get
-          val instance = meta("instance").asInstanceOf[JsonObject]
-          val jsonNode = instance.value(name).asInstanceOf[JsonObject]
+          val jsonNode = descriptors(name).asInstanceOf[JsonObject]
           generateLinks(classProperty.links, instance, context, jsonNode.value, context.registry)
         }
       })
 
-      if links.value.isEmpty then meta.remove("links")
+      if links.value.isEmpty then descriptors.remove("links")
     }
 
-    if meta.isEmpty then properties.remove("$meta") else meta.put("$type", JsonString("Meta"))
+    if descriptors.isEmpty then properties.remove("$descriptors")
 
     jsonObject
   }

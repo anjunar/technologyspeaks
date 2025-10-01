@@ -29,12 +29,13 @@ export type Constructor<T> = new (...args: any[]) => T;
 
 export default abstract class ActiveObject {
 
-    @OneToOne({targetEntity : Meta})
-    $meta : Meta
+    @Basic()
+    $descriptors : PropertiesContainer
+
+    @Basic()
+    $links : LinkContainer
 
     @Basic()
     $type: string
-
-    $instance : <E>(ctor : Constructor<E>) => E
 
 }

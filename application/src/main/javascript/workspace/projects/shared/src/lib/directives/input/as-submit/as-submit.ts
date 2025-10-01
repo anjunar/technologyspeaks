@@ -56,7 +56,7 @@ export class AsSubmit {
             event.preventDefault()
             let button = event.submitter as HTMLButtonElement;
             let activeObject = this.asForm.model() as ActiveObject;
-            let link = activeObject.$meta.links[button.name];
+            let link = activeObject.$links[button.name];
 
             this.http.request<ActiveObject>(new HttpRequest(link.method as any, "/service" + link.url, Mapper.toJson(activeObject)))
                 .subscribe({

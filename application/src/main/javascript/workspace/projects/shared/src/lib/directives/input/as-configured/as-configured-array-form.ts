@@ -24,7 +24,7 @@ export class AsConfiguredArrayForm extends AsAbstractConfiguredForm implements O
     ngOnInit(): void {
         const model = this.control.model();
 
-        this.instance = model.$meta?.instance;
+        this.descriptors = model.$descriptors
 
         this.properties = this.parent.properties
 

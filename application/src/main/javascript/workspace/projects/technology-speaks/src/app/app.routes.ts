@@ -5,7 +5,7 @@ import {RootPage} from "./pages/root/root-page/root-page";
 import {HttpClient} from "@angular/common/http";
 import {inject} from "@angular/core";
 import {firstValueFrom} from "rxjs";
-import {JSONDeserializer, traverseObjectGraph} from "shared";
+import {JSONDeserializer, Mapper, traverseObjectGraph} from "shared";
 import Application from "./domain/Application";
 import {UsersPage} from "./pages/control/users-page/users-page";
 import {UserPage} from "./pages/control/user-page/user-page";
@@ -66,12 +66,7 @@ export const routes: Routes = [
 
                         let id = route.paramMap.get("id")
 
-                        let deserializer : any = JSONDeserializer(
-                            await firstValueFrom(http.get(`/service/control/users/user/${id}`))
-                        )
-                        traverseObjectGraph(deserializer, deserializer.$meta.descriptors, deserializer.$meta.instance)
-
-                        return deserializer
+                        return Mapper.domain(await firstValueFrom(http.get(`/service/control/users/user/${id}`)))
                     }
                 }
             }

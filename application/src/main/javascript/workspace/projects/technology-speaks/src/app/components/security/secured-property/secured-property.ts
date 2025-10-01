@@ -38,7 +38,7 @@ export class SecuredProperty {
             }
         }
 
-        let link = (configurable.instance as PropertiesContainer)[this.configurable.control.name()].security as Link
+        let link = (configurable.descriptors as PropertiesContainer)[this.configurable.control.name()].security as Link
 
         this.http.get(link.url)
             .subscribe(response => {
