@@ -1,7 +1,9 @@
 <div class="container">
     <h1>Login</h1>
-    <form (ngSubmit)="onSubmit()">
-        <input type="email" email required name="email" [(ngModel)]="email">
+    <form [(asModel)]="model" (submit)="onSubmit($event)">
+        <as-input-container>
+            <input property="email">
+        </as-input-container>
         <div class="button">
             <button type="submit">Login</button>
         </div>

@@ -7,6 +7,7 @@ import Basic from "./annotations/Basic";
 import ManyToOne from "./annotations/ManyToOne";
 import OneToMany from "./annotations/OneToMany";
 import {Type} from "@angular/core";
+import ObjectLiteral from "./annotations/ObjectLiteral";
 
 function isPlainObject(obj: any): obj is Record<string, any> {
     if (obj === null || typeof obj !== 'object') return false;
@@ -52,16 +53,17 @@ export default function JSONDeserializer<T>(object: any, Class : Type<any> = nul
                     return;
                 }
 
+                instance[name] = property.configuration?.signal ? value(element) : element;
+            })
+            .withObject(ObjectLiteral.PropertyDescriptor, property => {
                 if (isPlainObject(element)) {
                     const mapped = Object.entries(element).reduce((prev, [key, value]) => {
-                        prev[key] = JSONDeserializer(value, property.configuration?.type);
+                        prev[key] = JSONDeserializer(value, property.configuration.type);
                         return prev;
                     }, {} as any);
                     instance[name] = property.configuration?.signal ? value(mapped) : mapped;
                     return;
                 }
-
-                instance[name] = property.configuration?.signal ? value(element) : element;
             })
             .withObject(ManyToMany.PropertyDescriptor, property => {
                 if (Array.isArray(element)) {

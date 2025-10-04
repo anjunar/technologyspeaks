@@ -7,6 +7,7 @@ import OneToOne from "./annotations/OneToOne";
 import Basic from "./annotations/Basic";
 import ManyToOne from "./annotations/ManyToOne";
 import OneToMany from "./annotations/OneToMany";
+import ObjectLiteral from "./annotations/ObjectLiteral";
 
 function isPlainObject(obj: any): obj is Record<string, any> {
     if (obj === null || typeof obj !== 'object') return false;
@@ -52,6 +53,9 @@ export default function JSONSerializer(entity: any): any {
                         return prev;
                     }
 
+                    prev[prop.name] = value;
+                })
+                .withObject(ObjectLiteral.PropertyDescriptor, prop => {
                     if (isPlainObject(value)) {
                         prev[prop.name] = Object.entries(value).reduce((acc, [k, v]) => {
                             acc[k] = JSONSerializer(v);
@@ -59,8 +63,6 @@ export default function JSONSerializer(entity: any): any {
                         }, {} as any);
                         return prev;
                     }
-
-                    prev[prop.name] = value;
                 })
                 .withObject(ManyToMany.PropertyDescriptor, prop => {
                     if (Array.isArray(value)) {

@@ -1,7 +1,8 @@
 import Converter from "./converters/Converter";
 import {Type} from "@angular/core";
+import {Mapper} from "./JSONMapper";
 
-const entityRegistry = new Set<Type<any>>();
+// const entityRegistry = new Set<Type<any>>();
 
 const classRegistry = new Map<string, Type<any>>()
 
@@ -59,11 +60,11 @@ export function createProperty(
 }
 
 export function registerEntity(clazz: Type<any>) {
-    entityRegistry.add(clazz)
+    // entityRegistry.add(clazz)
 }
 
 export function registerClass(name: string, clazz: Type<any>) {
-    classRegistry.set(name, clazz)
+    classRegistry.set(name, clazz);
 }
 
 export function registerConverter(clazz: any, converter: Converter<any, any>) {

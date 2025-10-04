@@ -7,6 +7,7 @@ import PropertyDescriptor from "../domain/descriptors/PropertyDescriptor";
 import JSONDeserializer from "./JSONDeserializer";
 import JSONSerializer from "./JSONSerializer";
 import {findType} from "./Registry";
+import {Type} from "@angular/core";
 
 export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: PropertyDescriptor) {
 
@@ -53,8 +54,8 @@ export function traverseObjectGraph(object: any, schema: NodeDescriptor, prop: P
 }
 
 export const Mapper = {
-    domain(object : any) : any {
-        let deserialized : any = JSONDeserializer(object);
+    domain(object : any, clazz? : Type<any>) : any {
+        let deserialized : any = JSONDeserializer(object, clazz);
         if (deserialized.$meta) {
             traverseObjectGraph(deserialized, null, deserialized.$descriptors)
         }

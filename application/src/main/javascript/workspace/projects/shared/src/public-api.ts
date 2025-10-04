@@ -45,7 +45,6 @@ export * from './lib/http-client/server-cookie-interceptor'
 export * from './lib/domain/types'
 export * from './lib/domain/descriptors'
 export * from './lib/domain/container'
-export * from './lib/domain/Persistence'
 
 export * from './lib/mapper'
 

@@ -4,9 +4,10 @@ import ObjectDescriptor from "../descriptors/ObjectDescriptor";
 import NodeDescriptor from "../descriptors/NodeDescriptor";
 import PropertyDescriptor from "../descriptors/PropertyDescriptor";
 import Link from "./Link";
-import {Entity} from "../../mapper";
+import {Entity, Mapper} from "../../mapper";
 import {Signal} from "@angular/core";
 import OneToOne from "../../mapper/annotations/OneToOne";
+import ObjectLiteral from "../../mapper/annotations/ObjectLiteral";
 
 @Entity("Meta")
 export class Meta {
@@ -29,7 +30,7 @@ export type Constructor<T> = new (...args: any[]) => T;
 
 export default abstract class ActiveObject {
 
-    @Basic()
+    @ObjectLiteral({type : PropertyDescriptor})
     $descriptors : PropertiesContainer
 
     @Basic()
@@ -37,5 +38,9 @@ export default abstract class ActiveObject {
 
     @Basic()
     $type: string
+
+    static newInstance<T extends ActiveObject>(this: new () => T): T {
+        return Mapper.domain({ $type : new this().$type});
+    }
 
 }

@@ -1,21 +1,24 @@
-import {Component, inject, input, model, ViewEncapsulation} from '@angular/core';
-import {AsInputContainer} from "shared";
-import {FormsModule} from "@angular/forms";
+import {Component, inject, model, signal, ViewEncapsulation} from '@angular/core';
 import * as webauthnJson from "@github/webauthn-json";
 import {Router} from "@angular/router";
 import {AppService} from "../../../app.service";
 import {HttpClient} from "@angular/common/http";
+import Login from "../../../domain/security/Login";
+import {
+    AsForm, AsInput,
+    AsInputContainer, Mapper, PropertyFormsModule
+} from "shared";
 
 @Component({
     selector: 'login-page',
-    imports: [AsInputContainer, FormsModule],
+    imports: [PropertyFormsModule, AsInputContainer, AsForm, AsInput],
     templateUrl: './login-page.html',
     styleUrl: './login-page.css',
     encapsulation: ViewEncapsulation.None
 })
 export class LoginPage {
 
-    email = model<string>()
+    model = signal(Login.newInstance())
 
     router = inject(Router);
 
@@ -23,14 +26,15 @@ export class LoginPage {
 
     http = inject(HttpClient)
 
-    async onSubmit() {
+    async onSubmit(event : Event) {
+        event.preventDefault()
 
         const credentialGetOptions = await fetch('/service/security/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({username: this.email()}),
+            body: JSON.stringify({username: this.model().email()}),
         }).then(resp => resp.json());
 
         const publicKeyCredential = await webauthnJson.get(credentialGetOptions);
@@ -41,7 +45,7 @@ export class LoginPage {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                username: this.email(),
+                username: this.model().email(),
                 publicKeyCredential
             }),
         });
@@ -50,7 +54,7 @@ export class LoginPage {
             const params = new URLSearchParams(window.location.search)
             let redirect = params.get("redirect");
             this.service.run(this.http).then(() => {
-                this.router.navigateByUrl(redirect ? decodeURIComponent(redirect) : "/", {onSameUrlNavigation : "reload"})
+                this.router.navigateByUrl(redirect ? decodeURIComponent(redirect) : "/", {onSameUrlNavigation: "reload"})
             })
         } else {
             alert("Something went wrong")
