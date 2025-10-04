@@ -1,16 +1,12 @@
 import {Directive, inject, OnInit} from '@angular/core';
 import {AsControlForm} from "../../as-control";
-import {ObjectDescriptor} from "../../../domain/descriptors";
 import {AsAbstractConfiguredForm} from "./as-abstract-configured-form";
-import {findClass} from "../../../mapper";
 import {AsForm} from "../as-form/as-form";
-import Basic from "../../../mapper/annotations/Basic";
-import ManyToOne from "../../../mapper/annotations/ManyToOne";
-import OneToOne from "../../../mapper/annotations/OneToOne";
+import Reference from "../../../mapper/annotations/Reference";
 
 @Directive({
     selector: 'form[asModel], fieldset[property]',
-    standalone : false,
+    standalone: false,
     providers: [
         {
             provide: AsAbstractConfiguredForm,
@@ -36,25 +32,25 @@ export class AsConfiguredForm extends AsAbstractConfiguredForm implements OnInit
             this.properties = model.constructor.properties
         } else {
             let property = this.parent.properties[name];
-            let manyToOne = property.annotations.get(ManyToOne);
-            if (manyToOne) {
-                this.properties = manyToOne.targetEntity.properties
-            }
-
-            let oneToOne = property.annotations.get(OneToOne);
-            if (oneToOne) {
-                this.properties = oneToOne.targetEntity.properties
+            let reference = property.annotations.get(Reference);
+            if (reference) {
+                this.properties = reference.targetEntity.properties
             }
         }
 
         if (this.control instanceof AsForm) {
-            this.control.newInstance = model.constructor
+            if (model) {
+                this.control.newInstance = model.constructor
+            } else {
+                let newVar = this.parent.properties[name].annotations.get(Reference);
+                this.control.newInstance = newVar.targetEntity
+            }
         }
 
-/*
-        Object.values(this.descriptor.validators || {})
-            .forEach(validator => this.control.addValidator(validator))
-*/
+        /*
+                Object.values(this.descriptor.validators || {})
+                    .forEach(validator => this.control.addValidator(validator))
+        */
 
     }
 

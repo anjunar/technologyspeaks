@@ -1,4 +1,4 @@
-import {AbstractSearch, Basic, Entity} from "shared";
+import {AbstractSearch, Primitive, Entity} from "shared";
 import Role from "./Role";
 
 @Entity("CredentialSearch")
@@ -6,10 +6,10 @@ export default class CredentialSearch extends AbstractSearch {
 
     override $type = "CredentialSearch"
 
-    @Basic()
+    @Primitive()
     displayName : string
 
-    @Basic()
+    @Primitive()
     roles : Role[]
 
 }

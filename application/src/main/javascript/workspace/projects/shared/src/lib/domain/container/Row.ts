@@ -1,5 +1,5 @@
 import Entity from "../../mapper/annotations/Entity";
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
 import type LinkContainer from "./LinkContainer";
 import Links from "./Links";
 import ActiveObject from "./ActiveObject";
@@ -9,10 +9,10 @@ export default class Row<D> extends ActiveObject implements Links {
 
     override $type = "Row"
 
-    @Basic()
+    @Primitive()
     data: D
 
-    @Basic()
+    @Primitive()
     links: LinkContainer
 
 }

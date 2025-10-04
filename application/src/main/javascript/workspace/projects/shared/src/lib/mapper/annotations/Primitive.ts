@@ -1,16 +1,15 @@
 import 'reflect-metadata'
 import {createProperty, AbstractPropertyDescriptor, StandardConfiguration, annotationMapping} from "../Registry";
-import ManyToMany from "./ManyToMany";
 
-function Basic(configuration?: Basic.Configuration) {
+function Primitive(configuration?: Primitive.Configuration) {
     return function (target: any, propertyKey: string) {
         const type = Reflect.getMetadata("design:type", target, propertyKey);
 
-        createProperty(target, propertyKey, type, Basic, configuration);
+        createProperty(target, propertyKey, type, Primitive, configuration);
     }
 }
 
-namespace Basic {
+namespace Primitive {
     export interface Configuration extends StandardConfiguration {
 
         type?: any
@@ -21,9 +20,9 @@ namespace Basic {
 
     export class PropertyDescriptor extends AbstractPropertyDescriptor {
 
-        override configuration : Basic.Configuration
+        override configuration : Primitive.Configuration
 
-        constructor(name: string, configuration: Basic.Configuration) {
+        constructor(name: string, configuration: Primitive.Configuration) {
             super(name);
             this.configuration = configuration;
         }
@@ -31,6 +30,6 @@ namespace Basic {
 
 }
 
-export default Basic
+export default Primitive
 
-annotationMapping.set(Basic, Basic.PropertyDescriptor)
+annotationMapping.set(Primitive, Primitive.PropertyDescriptor)

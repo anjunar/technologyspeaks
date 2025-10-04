@@ -1,4 +1,4 @@
-import {AbstractEntity, Basic, Entity} from "shared";
+import {AbstractEntity, Primitive, Entity} from "shared";
 import User from "../control/User";
 import HashTag from "../shared/HashTag";
 
@@ -7,22 +7,22 @@ export default class Document extends AbstractEntity {
 
     override $type = "Document"
 
-    @Basic()
+    @Primitive()
     score : number
 
-    @Basic()
+    @Primitive()
     title : string
 
-    @Basic()
+    @Primitive()
     description : string
 
-    @Basic()
+    @Primitive()
     user : User
 
-    @Basic()
+    @Primitive()
     revision : number
 
-    @Basic()
+    @Primitive()
     hashTags : HashTag[]
 
 }

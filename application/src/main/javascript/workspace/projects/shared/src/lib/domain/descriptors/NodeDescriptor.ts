@@ -1,41 +1,39 @@
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
 import type LinkContainer from "../container/LinkContainer";
-import MappedSuperclass from "../../mapper/annotations/MappedSuperclass";
 import ValidatorContainer from "./validators/ValidatorContainer";
 
-@MappedSuperclass("NodeDescriptor")
 export default class NodeDescriptor {
 
     $type = "NodeDescriptor"
 
-    @Basic()
-    type : string
+    @Primitive()
+    type: string
 
-    @Basic()
-    title : string
+    @Primitive()
+    title: string
 
-    @Basic()
-    description? : string
+    @Primitive()
+    description?: string
 
-    @Basic()
-    widget : string
+    @Primitive()
+    widget: string
 
-    @Basic()
-    name? : boolean
+    @Primitive()
+    name?: boolean
 
-    @Basic()
-    id? : boolean
+    @Primitive()
+    id?: boolean
 
-    @Basic()
-    hidden? : boolean
+    @Primitive()
+    hidden?: boolean
 
-    @Basic()
-    step? : string
+    @Primitive()
+    step?: string
 
-    @Basic()
-    links? : LinkContainer
+    @Primitive()
+    links?: LinkContainer
 
-    @Basic()
-    validators? : ValidatorContainer
+    @Primitive()
+    validators?: ValidatorContainer
 
 }

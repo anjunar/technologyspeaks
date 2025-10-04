@@ -1,14 +1,14 @@
-import {AbstractEntity, Basic, Entity} from "shared";
+import {AbstractEntity, Primitive, Entity} from "shared";
 
 @Entity("Chunk")
 export default class Chunk extends AbstractEntity {
 
     override $type = "Chunk"
 
-    @Basic()
+    @Primitive()
     title : string
 
-    @Basic()
+    @Primitive()
     content : string
 
 }

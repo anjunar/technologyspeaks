@@ -1,5 +1,5 @@
 import {Entity} from "../../mapper";
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
 import {Link} from "../container";
 
 @Entity("PropertyDescriptor")
@@ -7,13 +7,13 @@ export default class PropertyDescriptor {
     
     $type = "PropertyDescriptor"
     
-    @Basic()
+    @Primitive()
     visible : boolean
 
-    @Basic()
+    @Primitive()
     writeable : boolean
 
-    @Basic()
+    @Primitive()
     security : Link
 
 

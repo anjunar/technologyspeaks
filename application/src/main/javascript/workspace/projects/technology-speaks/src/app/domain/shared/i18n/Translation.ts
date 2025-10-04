@@ -1,14 +1,14 @@
-import {ActiveObject, Basic, Entity} from "shared";
+import {ActiveObject, Primitive, Entity} from "shared";
 
 @Entity("Translation")
 export default class Translation extends ActiveObject {
 
     override $type = "Translation"
 
-    @Basic()
+    @Primitive()
     text : string
 
-    @Basic()
+    @Primitive()
     locale : string
 
 }

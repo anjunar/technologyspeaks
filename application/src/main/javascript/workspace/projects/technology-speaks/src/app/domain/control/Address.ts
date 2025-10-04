@@ -1,4 +1,4 @@
-import {AbstractEntity, Basic, Entity, NotBlank, Pattern, Schema, Size} from "shared";
+import {AbstractEntity, Primitive, Entity, NotBlank, Pattern, UIField, Size} from "shared";
 import {MetaSignal} from "shared";
 
 @Entity("Address")
@@ -6,26 +6,26 @@ export default class Address extends AbstractEntity {
 
     override $type = "Address"
 
-    @Schema({title : "Street", widget : "text"})
-    @Basic({signal: true})
+    @UIField({title : "Street", widget : "text"})
+    @Primitive({signal: true})
     @NotBlank()
     @Size({min: 3, max: 20})
     street: MetaSignal<string>
 
-    @Schema({title : "Street Number", widget : "text"})
-    @Basic({signal: true})
+    @UIField({title : "Street Number", widget : "text"})
+    @Primitive({signal: true})
     @NotBlank()
     @Size({min: 3, max: 20})
     number: MetaSignal<string>
 
-    @Schema({title : "Zip Code", widget : "text"})
-    @Basic({signal: true})
+    @UIField({title : "Zip Code", widget : "text"})
+    @Primitive({signal: true})
     @NotBlank()
     @Pattern({regex: "^[0-9]{5}$"})
     zipCode: MetaSignal<string>
 
-    @Schema({title : "Country", widget : "text"})
-    @Basic({signal: true})
+    @UIField({title : "Country", widget : "text"})
+    @Primitive({signal: true})
     @NotBlank()
     @Size({min: 3, max: 20})
     country: MetaSignal<string>

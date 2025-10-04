@@ -11,6 +11,7 @@ import {
 import {SecuredForm} from "./secured-form/secured-form";
 import {HttpClient} from "@angular/common/http";
 import {PropertiesContainer} from "../../../../../../shared/src/lib/domain/container/ActiveObject";
+import ManagedProperty from "../../../domain/shared/ManagedProperty";
 
 @Component({
     selector: 'secured-property',
@@ -47,7 +48,7 @@ export class SecuredProperty {
                     title: "Visibility",
                     component: SecuredForm,
                     inputs: {
-                        form: Mapper.domain(response)
+                        form: ManagedProperty.fromJSON(response)
                     }
                 })
             })

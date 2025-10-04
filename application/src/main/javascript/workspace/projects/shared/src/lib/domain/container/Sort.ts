@@ -1,16 +1,16 @@
 import {Entity} from "../../mapper";
 import ActiveObject from "./ActiveObject";
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
 
 @Entity("Sort")
 export default class Sort extends ActiveObject {
 
     override $type = "Sort"
 
-    @Basic()
+    @Primitive()
     property : string
 
-    @Basic()
+    @Primitive()
     value : string
 
 }

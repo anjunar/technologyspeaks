@@ -1,16 +1,16 @@
 import Validator from "./Validator";
 import Entity from "../../../mapper/annotations/Entity";
-import Basic from "../../../mapper/annotations/Basic";
+import Primitive from "../../../mapper/annotations/Primitive";
 import {AsControl, AsControlInput} from "../../../directives/as-control";
 import {max, min} from "rxjs";
 
 @Entity("SizeValidator")
 export default class SizeValidator implements Validator<string> {
 
-    @Basic()
+    @Primitive()
     min : number
 
-    @Basic()
+    @Primitive()
     max : number
 
     constructor(min: number, max: number) {

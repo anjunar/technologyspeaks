@@ -12,7 +12,7 @@ import {PropertiesContainer} from "../../../domain/container/ActiveObject";
 import PropertyDescriptor from "../../../domain/descriptors/PropertyDescriptor";
 import {AsInput} from "../as-input/as-input";
 import {AsAbstractConfigured} from "./as-abstract-configured";
-import Schema from "../../../mapper/annotations/Schema";
+import UIField from "../../../mapper/annotations/UIField";
 import {match} from "../../../pattern-match";
 import Email from "../../../mapper/annotations/validators/Email";
 import Validator from "../../../domain/descriptors/validators/Validator";
@@ -43,7 +43,7 @@ export class AsConfiguredInput extends AsAbstractConfigured implements OnInit {
             this.instance = (this.parent.descriptors as PropertiesContainer)[name];
         }
 
-        let schema = property.annotations.get(Schema);
+        let schema = property.annotations.get(UIField);
 
         this.control.placeholder.set(schema?.title || name);
 

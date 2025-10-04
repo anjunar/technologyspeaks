@@ -1,16 +1,16 @@
 import 'reflect-metadata'
 import {createProperty, AbstractPropertyDescriptor, RelationConfiguration, annotationMapping} from "../Registry";
 
-function OneToMany(configuration: OneToMany.Configuration) {
+function Collection(configuration: Collection.Configuration) {
     return function (target: any, propertyKey: string) {
         const type = Reflect.getMetadata("design:type", target, propertyKey);
 
-        createProperty(target, propertyKey, type, OneToMany, configuration);
+        createProperty(target, propertyKey, type, Collection, configuration);
 
     }
 }
 
-namespace OneToMany {
+namespace Collection {
     export interface Configuration extends RelationConfiguration {
 
         signal?: boolean
@@ -21,9 +21,9 @@ namespace OneToMany {
 
     export class PropertyDescriptor extends AbstractPropertyDescriptor {
 
-        configuration: OneToMany.Configuration
+        configuration: Collection.Configuration
 
-        constructor(name: string, configuration: OneToMany.Configuration) {
+        constructor(name: string, configuration: Collection.Configuration) {
             super(name);
             this.configuration = configuration;
         }
@@ -31,6 +31,6 @@ namespace OneToMany {
 
 }
 
-export default OneToMany
+export default Collection
 
-annotationMapping.set(OneToMany, OneToMany.PropertyDescriptor)
+annotationMapping.set(Collection, Collection.PropertyDescriptor)

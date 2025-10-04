@@ -1,24 +1,24 @@
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
 import LinkContainer from "./LinkContainer";
 import ObjectDescriptor from "../descriptors/ObjectDescriptor";
 import NodeDescriptor from "../descriptors/NodeDescriptor";
 import PropertyDescriptor from "../descriptors/PropertyDescriptor";
 import Link from "./Link";
-import {Entity, Mapper} from "../../mapper";
+import {Entity, findType, Mapper} from "../../mapper";
 import {Signal} from "@angular/core";
-import OneToOne from "../../mapper/annotations/OneToOne";
-import ObjectLiteral from "../../mapper/annotations/ObjectLiteral";
+import Reference from "../../mapper/annotations/Reference";
+import Embedded from "../../mapper/annotations/Embedded";
 
 @Entity("Meta")
 export class Meta {
 
-    @OneToOne({targetEntity : ObjectDescriptor})
+    @Reference({targetEntity : ObjectDescriptor})
     descriptors : ObjectDescriptor
 
-    @Basic()
+    @Primitive()
     instance : PropertiesContainer
 
-    @Basic()
+    @Primitive()
     links : LinkContainer
 }
 
@@ -30,17 +30,26 @@ export type Constructor<T> = new (...args: any[]) => T;
 
 export default abstract class ActiveObject {
 
-    @ObjectLiteral({type : PropertyDescriptor})
+    @Embedded({type : PropertyDescriptor})
     $descriptors : PropertiesContainer
 
-    @Basic()
+    @Embedded({type : Link})
     $links : LinkContainer
 
-    @Basic()
+    @Primitive()
     $type: string
 
     static newInstance<T extends ActiveObject>(this: new () => T): T {
-        return Mapper.domain({ $type : new this().$type});
+        return Mapper.domain({ $type : findType(this)});
     }
+
+    static fromJSON<T extends ActiveObject>(this: new () => T, json : any): T {
+        return Mapper.domain(json, this);
+    }
+
+    static toJSON<T extends ActiveObject>(this: new () => T, json : any): any {
+        return Mapper.toJson(json);
+    }
+
 
 }

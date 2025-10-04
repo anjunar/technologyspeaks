@@ -100,7 +100,8 @@ export class AsForm extends AsControlSingleForm<any> implements AsControlValueAc
             if (!presentValue) {
                 let newInstance = this.newInstance
                 if (newInstance) {
-                    let instance = (this.form as any).model().$instance(newInstance);
+                    // @ts-ignore
+                    let instance = newInstance.newInstance()
                     this.model.set(instance)
                 }
             }

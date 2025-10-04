@@ -1,15 +1,15 @@
 import 'reflect-metadata'
 import {annotationMapping, createProperty} from "../Registry";
 
-function Schema(configuration?: Schema.Configuration) {
+function UIField(configuration?: UIField.Configuration) {
     return function (target: any, propertyKey: string) {
         const type = Reflect.getMetadata("design:type", target, propertyKey);
 
-        createProperty(target, propertyKey, type, Schema, configuration);
+        createProperty(target, propertyKey, type, UIField, configuration);
     }
 }
 
-namespace Schema {
+namespace UIField {
     export interface Configuration {
 
         title: string
@@ -22,12 +22,12 @@ namespace Schema {
 
     export class PropertyDescriptor {
 
-        constructor(public name: string, public configuration: Schema.Configuration) {}
+        constructor(public name: string, public configuration: UIField.Configuration) {}
 
     }
 
 }
 
-export default Schema
+export default UIField
 
-annotationMapping.set(Schema, Schema.PropertyDescriptor)
+annotationMapping.set(UIField, UIField.PropertyDescriptor)

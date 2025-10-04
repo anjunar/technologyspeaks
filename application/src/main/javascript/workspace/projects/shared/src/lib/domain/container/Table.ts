@@ -1,22 +1,22 @@
 import Entity from "../../mapper/annotations/Entity";
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
 import type LinkContainer from "./LinkContainer";
 import ActiveObject from "./ActiveObject";
 import Links from "./Links";
-import OneToMany from "../../mapper/annotations/OneToMany";
+import Collection from "../../mapper/annotations/Collection";
 
 @Entity("Table")
 export default class Table<R> extends ActiveObject implements Links {
 
     override $type = "Table"
 
-    @OneToMany({ targetEntity : null})
+    @Collection({ targetEntity : null})
     rows : R[]
 
-    @Basic()
+    @Primitive()
     size : number
 
-    @Basic()
+    @Primitive()
     links : LinkContainer
 
 }

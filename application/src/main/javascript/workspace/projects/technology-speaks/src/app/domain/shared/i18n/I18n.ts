@@ -1,13 +1,13 @@
-import {AbstractEntity, Basic, Entity} from "shared";
+import {AbstractEntity, Primitive, Entity} from "shared";
 import Translation from "./Translation";
 
 @Entity("I18n")
 export default class I18n extends AbstractEntity {
     override $type = "I18n"
 
-    @Basic()
+    @Primitive()
     text : string
 
-    @Basic()
+    @Primitive()
     translations : Translation[]
 }

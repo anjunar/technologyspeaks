@@ -1,4 +1,4 @@
-import {Basic, Entity, AbstractEntity, Schema, Email, NotBlank} from "shared";
+import {Primitive, Entity, AbstractEntity, UIField, Email, NotBlank} from "shared";
 import {MetaSignal} from "shared";
 
 @Entity("EMail")
@@ -8,8 +8,8 @@ export default class EMail extends AbstractEntity {
 
     @NotBlank()
     @Email()
-    @Schema({title : "Email", widget : "email"})
-    @Basic({signal : true})
+    @UIField({title : "Email", widget : "email"})
+    @Primitive({signal : true})
     value : MetaSignal<string>
 
 }

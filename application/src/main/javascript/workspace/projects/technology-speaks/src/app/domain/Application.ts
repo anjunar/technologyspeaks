@@ -1,12 +1,12 @@
 import User from "./control/User";
-import {ActiveObject, Basic, Entity, OneToOne} from "shared";
+import {ActiveObject, Primitive, Entity, Reference} from "shared";
 
 @Entity("Application")
 export default class Application extends ActiveObject {
 
     override $type = "Application"
 
-    @OneToOne({targetEntity : User})
+    @Reference({targetEntity : User})
     user: User
 
 }

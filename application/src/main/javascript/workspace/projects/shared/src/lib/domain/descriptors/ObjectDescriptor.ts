@@ -1,7 +1,7 @@
 import NodeDescriptor from "./NodeDescriptor";
-import Basic from "../../mapper/annotations/Basic";
 import Entity from "../../mapper/annotations/Entity";
-import ManyToOne from "../../mapper/annotations/ManyToOne";
+import Collection from "../../mapper/annotations/Collection";
+import Embedded from "../../mapper/annotations/Embedded";
 
 interface PropertiesContainer {
     [key: string]: NodeDescriptor
@@ -12,10 +12,10 @@ export default class ObjectDescriptor extends NodeDescriptor {
 
     override $type = "ObjectDescriptor"
 
-    @Basic()
+    @Embedded({type: NodeDescriptor})
     properties: PropertiesContainer
 
-    @ManyToOne({targetEntity : ObjectDescriptor})
+    @Collection({targetEntity: ObjectDescriptor})
     oneOf: ObjectDescriptor[] = []
 
     allProperties(type: string): PropertiesContainer {

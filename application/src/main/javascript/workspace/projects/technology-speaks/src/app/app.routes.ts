@@ -52,10 +52,8 @@ export const routes: Routes = [
                         let index = route.paramMap.get("index") || 0;
                         let limit = route.paramMap.get("limit") || 5;
 
-                        return Mapper.domain(
-                            await firstValueFrom(http.get(`/service/control/users?index=${index}&limit=${limit}`)),
-                            Table<User>
-                        )
+                        return Table.fromJSON(await firstValueFrom(http.get(`/service/control/users?index=${index}&limit=${limit}`)))
+
                     }
                 }
             },
@@ -68,7 +66,7 @@ export const routes: Routes = [
 
                         let id = route.paramMap.get("id")
 
-                        return Mapper.domain(await firstValueFrom(http.get(`/service/control/users/user/${id}`)), User)
+                        return User.fromJSON(await firstValueFrom(http.get(`/service/control/users/user/${id}`)))
                     }
                 }
             }

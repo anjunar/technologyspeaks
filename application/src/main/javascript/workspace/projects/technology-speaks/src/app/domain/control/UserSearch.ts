@@ -1,4 +1,4 @@
-import {AbstractSearch, Basic, Entity} from "shared";
+import {AbstractSearch, Primitive, Entity} from "shared";
 import {LocalDate} from "@js-joda/core";
 
 @Entity("UserSearch")
@@ -6,13 +6,13 @@ export default class UserSearch extends AbstractSearch {
 
     override $type = "UserSearch"
 
-    @Basic()
+    @Primitive()
     email : string
 
-    @Basic()
+    @Primitive()
     name : string
 
-    @Basic()
+    @Primitive()
     birthDate : LocalDate
 
 }

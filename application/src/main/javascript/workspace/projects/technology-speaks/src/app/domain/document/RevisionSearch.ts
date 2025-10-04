@@ -1,4 +1,4 @@
-import {Basic, Entity} from "shared";
+import {Primitive, Entity} from "shared";
 import {AbstractSearch} from "shared";
 import Document from "./Document";
 
@@ -7,7 +7,7 @@ export default class RevisionSearch extends AbstractSearch {
 
     override $type = "RevisionSearch"
 
-    @Basic()
+    @Primitive()
     document : Document
 
 }

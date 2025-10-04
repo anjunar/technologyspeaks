@@ -1,5 +1,5 @@
 import Entity from "../../mapper/annotations/Entity";
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
 import ActiveObject from "./ActiveObject";
 
 @Entity("Link")
@@ -7,22 +7,22 @@ export default class Link {
 
     $type = "Link"
 
-    @Basic()
+    @Primitive()
     url : string
 
-    @Basic()
+    @Primitive()
     method : string
 
-    @Basic()
+    @Primitive()
     rel : string
 
-    @Basic()
+    @Primitive()
     title : string
 
-    @Basic()
+    @Primitive()
     linkType : string
 
-    @Basic()
+    @Primitive()
     body : ActiveObject
 
 }

@@ -1,21 +1,20 @@
-import {MappedSuperclass} from "../../mapper";
 import ActiveObject from "./ActiveObject";
 import Sort from "./Sort";
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
+import Collection from "../../mapper/annotations/Collection";
 
-@MappedSuperclass("abstractSearch")
 export default abstract class AbstractSearch extends ActiveObject {
 
     override $type = "abstractSearch"
 
-    @Basic()
-    sort : Sort[]
+    @Collection({targetEntity : Sort})
+    sort: Sort[]
 
-    @Basic()
-    index : number
+    @Primitive()
+    index: number
 
-    @Basic()
-    limit : number
+    @Primitive()
+    limit: number
 
 
 }

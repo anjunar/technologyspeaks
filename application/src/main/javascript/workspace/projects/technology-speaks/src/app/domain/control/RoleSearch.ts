@@ -1,14 +1,14 @@
-import {AbstractSearch, Basic, Entity} from "shared";
+import {AbstractSearch, Primitive, Entity} from "shared";
 
 @Entity("RoleSearch")
 export default class RoleSearch extends AbstractSearch {
 
     override $type = "RoleSearch"
 
-    @Basic()
+    @Primitive()
     name : string
 
-    @Basic()
+    @Primitive()
     description : string
 
 }

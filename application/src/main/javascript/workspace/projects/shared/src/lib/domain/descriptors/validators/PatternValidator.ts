@@ -1,12 +1,12 @@
 import Validator from "./Validator";
 import Entity from "../../../mapper/annotations/Entity";
-import Basic from "../../../mapper/annotations/Basic";
+import Primitive from "../../../mapper/annotations/Primitive";
 import { AsControl } from "../../../directives/as-control";
 
 @Entity("PatternValidator")
 export default class PatternValidator implements Validator<string> {
 
-    @Basic()
+    @Primitive()
     regexp : string
 
     constructor(regexp: string) {

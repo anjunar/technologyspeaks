@@ -1,18 +1,16 @@
-import MappedSuperclass from "../../mapper/annotations/MappedSuperclass";
 import ActiveObject from "./ActiveObject";
-import Basic from "../../mapper/annotations/Basic";
+import Primitive from "../../mapper/annotations/Primitive";
 import {LocalDateTime} from "@js-joda/core";
 
-@MappedSuperclass("AbstractEntity")
 export default class AbstractEntity extends ActiveObject {
 
-    @Basic()
+    @Primitive()
     id: string
 
-    @Basic()
+    @Primitive()
     created: LocalDateTime
 
-    @Basic()
+    @Primitive()
     modified: LocalDateTime
 
 }

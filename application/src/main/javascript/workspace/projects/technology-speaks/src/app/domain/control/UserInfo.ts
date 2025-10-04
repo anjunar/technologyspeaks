@@ -1,27 +1,27 @@
 import {LocalDate} from "@js-joda/core";
-import {AbstractEntity, Basic, Entity, MetaSignal, NotBlank, Past, Schema, Size} from "shared";
+import {AbstractEntity, Primitive, Entity, MetaSignal, NotBlank, Past, UIField, Size} from "shared";
 import {Media} from "shared";
-import OneToOne from "../../../../../shared/src/lib/mapper/annotations/OneToOne";
+import Reference from "../../../../../shared/src/lib/mapper/annotations/Reference";
 
 @Entity("UserInfo")
 export default class UserInfo extends AbstractEntity {
 
     override $type = "UserInfo"
 
-    @Schema({title : "First Name", widget : "text"})
-    @Basic({signal: true, type : String})
+    @UIField({title : "First Name", widget : "text"})
+    @Primitive({signal: true, type : String})
     @NotBlank()
     @Size({min: 3, max: 20})
     firstName: MetaSignal<string>
 
-    @Schema({title : "Last Name", widget : "text"})
-    @Basic({signal: true, type: String})
+    @UIField({title : "Last Name", widget : "text"})
+    @Primitive({signal: true, type: String})
     @NotBlank()
     @Size({min: 3, max: 20})
     lastName: MetaSignal<string>
 
-    @Schema({title : "Birthdate", widget : "date"})
-    @Basic({
+    @UIField({title : "Birthdate", widget : "date"})
+    @Primitive({
         default: LocalDate.now,
         signal: true,
         type: LocalDate
@@ -29,8 +29,8 @@ export default class UserInfo extends AbstractEntity {
     @Past()
     birthDate: MetaSignal<LocalDate>
 
-    @Schema({title : "Image", widget : "image"})
-    @OneToOne({signal: true, targetEntity : Media})
+    @UIField({title : "Image", widget : "image"})
+    @Reference({signal: true, targetEntity : Media})
     image: MetaSignal<Media>
 
 }

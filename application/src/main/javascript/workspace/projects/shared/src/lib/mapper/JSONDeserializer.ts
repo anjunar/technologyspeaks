@@ -1,13 +1,11 @@
 import {findClass, findConverter, findProperties} from "./Registry";
 import {value} from "../meta-signal/value-signal";
 import {match} from "../pattern-match";
-import ManyToMany from "./annotations/ManyToMany";
-import OneToOne from "./annotations/OneToOne";
-import Basic from "./annotations/Basic";
-import ManyToOne from "./annotations/ManyToOne";
-import OneToMany from "./annotations/OneToMany";
+import Reference from "./annotations/Reference";
+import Primitive from "./annotations/Primitive";
+import Collection from "./annotations/Collection";
 import {Type} from "@angular/core";
-import ObjectLiteral from "./annotations/ObjectLiteral";
+import Embedded from "./annotations/Embedded";
 
 function isPlainObject(obj: any): obj is Record<string, any> {
     if (obj === null || typeof obj !== 'object') return false;
@@ -15,14 +13,19 @@ function isPlainObject(obj: any): obj is Record<string, any> {
     return proto === Object.prototype || proto === null;
 }
 
-export default function JSONDeserializer<T>(object: any, Class : Type<any> = null): T {
+export default function JSONDeserializer<T>(object: any, Class: Type<any> = null): T {
+
+    if (typeof object === "undefined") {
+        throw new Error("Object is undefined")
+    }
+
     if (!(object instanceof Object)) {
         return object;
     }
 
     const type = object.$type;
 
-    if (! Class) {
+    if (!Class) {
         Class = findClass(type);
     }
 
@@ -44,7 +47,7 @@ export default function JSONDeserializer<T>(object: any, Class : Type<any> = nul
         }
 
         match(property)
-            .withObject(Basic.PropertyDescriptor, property => {
+            .withObject(Primitive.PropertyDescriptor, property => {
                 const converter = findConverter(property.configuration?.type);
 
                 if (converter) {
@@ -55,7 +58,7 @@ export default function JSONDeserializer<T>(object: any, Class : Type<any> = nul
 
                 instance[name] = property.configuration?.signal ? value(element) : element;
             })
-            .withObject(ObjectLiteral.PropertyDescriptor, property => {
+            .withObject(Embedded.PropertyDescriptor, property => {
                 if (isPlainObject(element)) {
                     const mapped = Object.entries(element).reduce((prev, [key, value]) => {
                         prev[key] = JSONDeserializer(value, property.configuration.type);
@@ -65,29 +68,15 @@ export default function JSONDeserializer<T>(object: any, Class : Type<any> = nul
                     return;
                 }
             })
-            .withObject(ManyToMany.PropertyDescriptor, property => {
+            .withObject(Collection.PropertyDescriptor, property => {
                 if (Array.isArray(element)) {
                     const mapped = element.map(item => JSONDeserializer(item, property.configuration.targetEntity));
                     instance[name] = property.configuration?.signal ? value(mapped) : mapped;
                 }
             })
-            .withObject(ManyToOne.PropertyDescriptor, property => {
-                if (element && element.$type) {
-                    const valueObject = JSONDeserializer(element, property.configuration.targetEntity);
-                    instance[name] = property.configuration?.signal ? value(valueObject) : valueObject;
-                }
-            })
-            .withObject(OneToMany.PropertyDescriptor, property => {
-                if (Array.isArray(element)) {
-                    const mapped = element.map(item => JSONDeserializer(item, property.configuration.targetEntity));
-                    instance[name] = property.configuration?.signal ? value(mapped) : mapped;
-                }
-            })
-            .withObject(OneToOne.PropertyDescriptor, property => {
-                if (element && element.$type) {
-                    const valueObject = JSONDeserializer(element, property.configuration.targetEntity);
-                    instance[name] = property.configuration?.signal ? value(valueObject) : valueObject;
-                }
+            .withObject(Reference.PropertyDescriptor, property => {
+                const valueObject = element ? JSONDeserializer(element, property.configuration.targetEntity) : undefined;
+                instance[name] = property.configuration?.signal ? value(valueObject) : valueObject;
             })
 
     }

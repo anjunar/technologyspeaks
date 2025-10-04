@@ -1,4 +1,4 @@
-import {Basic, Entity, AbstractEntity} from "shared";
+import {Primitive, Entity, AbstractEntity} from "shared";
 import User from "./User";
 
 @Entity("Group")
@@ -6,13 +6,13 @@ export default class Group extends AbstractEntity {
 
     override $type = "Group"
 
-    @Basic()
+    @Primitive()
     name : string
 
-    @Basic()
+    @Primitive()
     description : string
 
-    @Basic()
+    @Primitive()
     users : User[]
 
 

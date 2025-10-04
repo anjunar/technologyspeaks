@@ -1,14 +1,14 @@
-import {Basic, Entity, AbstractEntity} from "shared";
+import {Primitive, Entity, AbstractEntity} from "shared";
 
 @Entity("Identity")
 export default class Identity extends AbstractEntity {
 
     override $type = "Identity"
 
-    @Basic()
+    @Primitive()
     enabled : boolean
 
-    @Basic()
+    @Primitive()
     deleted : boolean
 
 }

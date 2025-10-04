@@ -1,17 +1,12 @@
 import {Directive, inject, OnInit} from '@angular/core';
 import {AsAbstractConfiguredForm} from "./as-abstract-configured-form";
-import {NodeDescriptor, ObjectDescriptor} from "../../../domain/descriptors";
 import PropertyDescriptor from "../../../domain/descriptors/PropertyDescriptor";
 import {PropertiesContainer} from "../../../domain/container/ActiveObject";
 import {AsInput} from "../as-input/as-input";
 import {AsAbstractConfigured} from "./as-abstract-configured";
 import {AsLazySelect} from "../../../components/input/as-lazy-select/as-lazy-select";
-import {HttpClient, HttpRequest} from "@angular/common/http";
-import {Mapper} from "../../../mapper";
-import {Table} from "../../../domain/container";
-import ManyToMany from "../../../mapper/annotations/ManyToMany";
-import OneToMany from "../../../mapper/annotations/OneToMany";
-import Schema from "../../../mapper/annotations/Schema";
+import {HttpClient} from "@angular/common/http";
+import UIField from "../../../mapper/annotations/UIField";
 
 @Directive({
     selector: 'as-lazy-select[property]',
@@ -32,7 +27,7 @@ export class AsConfiguredLazySelect extends AsAbstractConfigured implements OnIn
 
         let property = this.parent.properties[name];
 
-        let schema = property.annotations.get(Schema);
+        let schema = property.annotations.get(UIField);
 
 
         if (this.parent.descriptors) {
@@ -45,10 +40,10 @@ export class AsConfiguredLazySelect extends AsAbstractConfigured implements OnIn
             this.control.el.type = schema.widget;
         }
 
-/*
-        Object.values(this.descriptor.validators || {})
-            .forEach(validator => this.control.addValidator(validator))
-*/
+        /*
+                Object.values(this.descriptor.validators || {})
+                    .forEach(validator => this.control.addValidator(validator))
+        */
 
         this.control.loader.set((query) => {
             let link = schema.link

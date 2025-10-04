@@ -1,14 +1,14 @@
-import {ActiveObject, Basic, Entity} from "shared";
+import {ActiveObject, Primitive, Entity} from "shared";
 
 @Entity("GeoPoint")
 export default class GeoPoint extends ActiveObject {
 
     override $type = "GeoPoint"
 
-    @Basic()
+    @Primitive()
     x : number
 
-    @Basic()
+    @Primitive()
     y : number
 
 }
