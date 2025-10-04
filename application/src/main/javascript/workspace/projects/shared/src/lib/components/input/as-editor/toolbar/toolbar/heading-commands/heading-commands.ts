@@ -3,7 +3,9 @@ import {EditorView} from "prosemirror-view";
 import {setBlockType} from "prosemirror-commands";
 import {FormsModule} from "@angular/forms";
 import {EditorCommandComponent} from "../EditorCommandComponent";
-import {NodeSpec} from "prosemirror-model";
+import {NodeSpec, Schema} from "prosemirror-model";
+import {Plugin} from "prosemirror-state";
+import {from} from "rxjs";
 
 @Component({
     selector: 'editor-heading-commands',
@@ -62,5 +64,11 @@ export class HeadingCommands extends EditorCommandComponent  {
     get nodeSpec(): Record<string, NodeSpec> {
         return {}
     }
+
+    plugins(schema: Schema): Plugin[] {
+        return [];
+    }
+
+
 
 }

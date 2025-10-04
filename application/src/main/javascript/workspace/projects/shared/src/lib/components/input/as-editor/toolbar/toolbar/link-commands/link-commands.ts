@@ -2,10 +2,10 @@ import {Component, inject, input, signal, ViewEncapsulation} from '@angular/core
 import {EditorView} from "prosemirror-view";
 import {WindowManagerService} from "../../../../../modal/as-window/service/window-manager-service";
 import {LinkWindow} from "./link-window/link-window";
-import {TextSelection} from "prosemirror-state";
+import {Plugin, TextSelection} from "prosemirror-state";
 import {AsIcon} from "../../../../../layout/as-icon/as-icon";
 import {EditorCommandComponent} from "../EditorCommandComponent";
-import {NodeSpec} from "prosemirror-model";
+import {NodeSpec, Schema} from "prosemirror-model";
 
 @Component({
     selector: 'editor-link-commands',
@@ -70,6 +70,8 @@ export class LinkCommands extends EditorCommandComponent  {
         return {}
     }
 
-
+    plugins(schema: Schema): Plugin[] {
+        return [];
+    }
 
 }

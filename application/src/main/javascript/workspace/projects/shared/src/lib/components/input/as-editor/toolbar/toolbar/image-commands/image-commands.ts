@@ -1,10 +1,10 @@
 import {Component, inject, signal, ViewEncapsulation} from '@angular/core';
 import {AsIcon} from "../../../../../layout/as-icon/as-icon";
-import {DOMOutputSpec, NodeSpec} from "prosemirror-model";
+import {DOMOutputSpec, NodeSpec, Schema} from "prosemirror-model";
 import {EditorView} from "prosemirror-view";
 import {WindowManagerService} from "../../../../../modal/as-window/service/window-manager-service";
 import {ImageWindow} from "./image-window/image-window";
-import {NodeSelection} from "prosemirror-state";
+import {NodeSelection, Plugin} from "prosemirror-state";
 import {EditorCommandComponent} from "../EditorCommandComponent";
 
 @Component({
@@ -51,28 +51,61 @@ export class ImageCommands extends EditorCommandComponent {
         this.insertImage(src, width, height)
     }
 
-    insertImage(src: string, width?: number, height?: number) {
+    insertImage(src: string, width?: number, height?: number, pos?: number | null) {
         const view = this.editor()?.view;
         if (!view || !src) return;
 
-        const {state, dispatch} = view;
+        const { state, dispatch } = view;
         const imageType = state.schema.nodes["image"];
-        if (!imageType) {
-            console.warn("image node type not found in schema.");
-            return;
-        }
+        if (!imageType) return;
 
         let style = "";
-        if (width) style += `width:${width}px;`;
-        if (height) style += `height:${height}px;`;
+        if (width != null) style += `width:${width}px;`;
+        if (height != null) style += `height:${height}px;`;
+        const styleAttr = style || null;
 
-        const tr = state.tr.replaceSelectionWith(
-            imageType.create({src, style}),
-            false
-        );
+        let baseAttrs = {};
+        if (typeof pos === "number") {
+            const node = state.doc.nodeAt(pos);
+            if (node) baseAttrs = { ...node.attrs };
+        }
+
+        const attrs = {
+            ...baseAttrs,
+            src,
+            style: styleAttr
+        };
+
+        let tr = state.tr;
+
+        if (typeof pos === "number") {
+            tr = tr.setNodeMarkup(pos, imageType, attrs);
+        } else if (state.selection instanceof NodeSelection && state.selection.node.type === imageType) {
+            tr = tr.setNodeMarkup(state.selection.from, imageType, attrs);
+        } else {
+            tr = tr.replaceSelectionWith(imageType.create(attrs), false);
+        }
 
         dispatch(tr.scrollIntoView());
         view.focus();
+    }
+
+    plugins(schema: Schema): Plugin[] {
+        let self = this
+        return [new Plugin({
+            props: {
+                handleDOMEvents: {
+                    dblclick(view, event) {
+                        const target = event.target as HTMLElement;
+                        if (target && target.nodeName === "IMG") {
+                            self.open()
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+            }
+        })];
     }
 
     get nodeSpec(): NodeSpec {

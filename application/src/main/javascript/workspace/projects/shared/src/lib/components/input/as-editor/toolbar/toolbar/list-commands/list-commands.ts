@@ -1,9 +1,13 @@
 import {Component, input, signal, ViewEncapsulation} from '@angular/core';
 import {EditorView} from "prosemirror-view";
 import {AsIcon} from "../../../../../layout/as-icon/as-icon";
-import {NodeSpec, NodeType} from "prosemirror-model";
-import {wrapInList} from "prosemirror-schema-list";
+import {NodeSpec, NodeType, Schema} from "prosemirror-model";
+import {liftListItem, splitListItem, wrapInList} from "prosemirror-schema-list";
 import {EditorCommandComponent} from "../EditorCommandComponent";
+import {Command, EditorState, Plugin} from "prosemirror-state";
+import {keymap} from "prosemirror-keymap";
+import {chainCommands, newlineInCode, splitBlock} from "prosemirror-commands";
+import {history} from "prosemirror-history";
 
 @Component({
     selector: 'editor-list-commands',
@@ -50,6 +54,26 @@ export class ListCommands extends EditorCommandComponent  {
 
     get nodeSpec(): Record<string, NodeSpec> {
         return {}
+    }
+
+    plugins(schema: Schema): Plugin[] {
+        function customEnterCommand(listItemType: NodeType): Command {
+            return (state, dispatch, view) => {
+                const {$from, empty} = state.selection;
+
+                if (empty && $from.parent.content.size === 0) {
+                    return liftListItem(listItemType)(state, dispatch);
+                }
+
+                return splitListItem(listItemType)(state, dispatch, view);
+            };
+        }
+
+        return [
+            keymap({
+                "Enter" : customEnterCommand(schema.nodes["list_item"])
+            })
+        ];
     }
 
 }

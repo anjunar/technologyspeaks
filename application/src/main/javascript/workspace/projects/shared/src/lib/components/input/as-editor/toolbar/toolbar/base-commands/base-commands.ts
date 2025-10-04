@@ -4,7 +4,8 @@ import {redo, undo} from "prosemirror-history";
 import {toggleMark} from "prosemirror-commands";
 import {AsIcon} from "../../../../../layout/as-icon/as-icon";
 import {EditorCommandComponent} from "../EditorCommandComponent";
-import {NodeSpec} from "prosemirror-model";
+import {NodeSpec, Schema} from "prosemirror-model";
+import {Plugin} from "prosemirror-state";
 
 
 @Component({
@@ -72,6 +73,10 @@ export class BaseCommands extends EditorCommandComponent {
 
     get nodeSpec(): Record<string, NodeSpec> {
         return {}
+    }
+
+    plugins(schema: Schema): Plugin[] {
+        return [];
     }
 
 }

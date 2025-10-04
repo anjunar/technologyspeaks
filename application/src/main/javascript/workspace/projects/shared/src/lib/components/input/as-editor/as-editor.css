@@ -8,6 +8,7 @@ as-editor {
 
     .toolbar {
         display: flex;
+        align-items: center;
     }
 
     div.container {
@@ -25,6 +26,34 @@ as-editor {
             font-variant-ligatures: none;
             font-feature-settings: "liga" 0; /* the above doesn't seem to work in Edge */
         }
+
+        .ProseMirror table {
+            width: fit-content;
+            border-spacing: 0;
+            table-layout: auto;
+        }
+
+        .ProseMirror table > tbody > tr > td {
+            height: 48px;
+            vertical-align: middle;
+            min-width: 20px;
+            white-space: nowrap;
+            padding-right: 5px;
+        }
+
+        .ProseMirror table > tbody > tr > td {
+            border-top: 1px solid var(--color-background-secondary);
+        }
+
+        .ProseMirror table.hover tbody tr:hover {
+            background-color: var(--color-selected);
+            color: var(--color-background-primary);
+        }
+
+        .ProseMirror table td:first-of-type, table th:first-of-type {
+            padding-left: 12px;
+        }
+
 
         .ProseMirror pre {
             white-space: pre-wrap;
