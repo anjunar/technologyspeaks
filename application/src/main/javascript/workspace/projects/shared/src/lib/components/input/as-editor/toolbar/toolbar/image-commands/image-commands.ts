@@ -1,10 +1,11 @@
-import {Component, ElementRef, inject, input, viewChild, ViewEncapsulation} from '@angular/core';
+import {Component, inject, signal, ViewEncapsulation} from '@angular/core';
 import {AsIcon} from "../../../../../layout/as-icon/as-icon";
 import {DOMOutputSpec, NodeSpec} from "prosemirror-model";
 import {EditorView} from "prosemirror-view";
 import {WindowManagerService} from "../../../../../modal/as-window/service/window-manager-service";
 import {ImageWindow} from "./image-window/image-window";
 import {NodeSelection} from "prosemirror-state";
+import {EditorCommandComponent} from "../EditorCommandComponent";
 
 @Component({
     selector: 'editor-image-commands',
@@ -15,9 +16,9 @@ import {NodeSelection} from "prosemirror-state";
     styleUrl: './image-commands.css',
     encapsulation: ViewEncapsulation.None
 })
-export class ImageCommands {
+export class ImageCommands extends EditorCommandComponent {
 
-    editor = input<{ view: EditorView }>()
+    editor = signal<{ view: EditorView }>({view: null})
 
     service = inject(WindowManagerService)
 
@@ -26,21 +27,21 @@ export class ImageCommands {
         let attrs: any = {};
 
         if (view) {
-            const { state } = view;
+            const {state} = view;
             const imageType = state.schema.nodes["image"];
 
             if (state.selection instanceof NodeSelection && state.selection.node.type === imageType) {
-                attrs = { ...state.selection.node.attrs };
+                attrs = {...state.selection.node.attrs};
             }
         }
 
         this.service.open({
-            id : "openImage",
-            title : "Add Image",
-            component : ImageWindow,
-            inputs : {
-                parent : this,
-                attrs : attrs
+            id: "openImage",
+            title: "Add Image",
+            component: ImageWindow,
+            inputs: {
+                parent: this,
+                attrs: attrs
             }
         })
     }
@@ -74,40 +75,42 @@ export class ImageCommands {
         view.focus();
     }
 
-    static get nodeSpec(): NodeSpec {
+    get nodeSpec(): NodeSpec {
         return {
-            inline: true,
-            attrs: {
-                src: {default: null},
-                alt: {default: null},
-                title: {default: null},
-                style: {default: null}
-            },
-            group: "inline",
-            draggable: true,
-            parseDOM: [{
-                tag: "img[src]",
-                getAttrs: (dom: any) => ({
-                    src: dom.getAttribute("src"),
-                    title: dom.getAttribute("title"),
-                    alt: dom.getAttribute("alt"),
-                    style: dom.getAttribute("style")
-                })
-            }],
-            toDOM: (node) => {
-                const attrs: { src: string; alt?: string; title?: string; style?: string; } = {
-                    src: node.attrs["src"],
-                    alt: node.attrs["alt"],
-                    title: node.attrs["title"],
-                    style: node.attrs["style"]
-                };
+            image: {
+                inline: true,
+                attrs: {
+                    src: {default: null},
+                    alt: {default: null},
+                    title: {default: null},
+                    style: {default: null}
+                },
+                group: "inline",
+                draggable: true,
+                parseDOM: [{
+                    tag: "img[src]",
+                    getAttrs: (dom: any) => ({
+                        src: dom.getAttribute("src"),
+                        title: dom.getAttribute("title"),
+                        alt: dom.getAttribute("alt"),
+                        style: dom.getAttribute("style")
+                    })
+                }],
+                toDOM: (node : any) => {
+                    const attrs: { src: string; alt?: string; title?: string; style?: string; } = {
+                        src: node.attrs["src"],
+                        alt: node.attrs["alt"],
+                        title: node.attrs["title"],
+                        style: node.attrs["style"]
+                    };
 
-                // @ts-ignore
-                Object.keys(attrs).forEach(key => attrs[key] == null && delete attrs[key]);
+                    // @ts-ignore
+                    Object.keys(attrs).forEach(key => attrs[key] == null && delete attrs[key]);
 
-                return ["img", attrs] as DOMOutputSpec;
+                    return ["img", attrs] as DOMOutputSpec;
+                }
             }
-        };
+        }
     }
 
 }

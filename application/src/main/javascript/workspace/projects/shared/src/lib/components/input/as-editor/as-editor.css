@@ -6,6 +6,10 @@ as-editor {
     flex-direction: column;
     height: 100%;
 
+    .toolbar {
+        display: flex;
+    }
+
     div.container {
         flex : 1;
 

@@ -1,7 +1,9 @@
-import {Component, computed, input, ViewEncapsulation} from '@angular/core';
+import {Component, computed, input, signal, ViewEncapsulation} from '@angular/core';
 import {EditorView} from "prosemirror-view";
 import {setBlockType} from "prosemirror-commands";
 import {FormsModule} from "@angular/forms";
+import {EditorCommandComponent} from "../EditorCommandComponent";
+import {NodeSpec} from "prosemirror-model";
 
 @Component({
     selector: 'editor-heading-commands',
@@ -12,9 +14,9 @@ import {FormsModule} from "@angular/forms";
     styleUrl: './heading-commands.css',
     encapsulation: ViewEncapsulation.None
 })
-export class HeadingCommands {
+export class HeadingCommands extends EditorCommandComponent  {
 
-    editor = input<{ view: EditorView }>()
+    editor = signal<{view : EditorView}>({view : null})
 
     activeHeading = computed(() => {
         const v = this.editor().view;
@@ -55,6 +57,10 @@ export class HeadingCommands {
 
         setBlockType(type, {level})(state, dispatch);
         this.editor().view.focus();
+    }
+
+    get nodeSpec(): Record<string, NodeSpec> {
+        return {}
     }
 
 }

@@ -1,9 +1,11 @@
-import {Component, inject, input, ViewEncapsulation} from '@angular/core';
+import {Component, inject, input, signal, ViewEncapsulation} from '@angular/core';
 import {EditorView} from "prosemirror-view";
 import {WindowManagerService} from "../../../../../modal/as-window/service/window-manager-service";
 import {LinkWindow} from "./link-window/link-window";
 import {TextSelection} from "prosemirror-state";
 import {AsIcon} from "../../../../../layout/as-icon/as-icon";
+import {EditorCommandComponent} from "../EditorCommandComponent";
+import {NodeSpec} from "prosemirror-model";
 
 @Component({
     selector: 'editor-link-commands',
@@ -14,11 +16,11 @@ import {AsIcon} from "../../../../../layout/as-icon/as-icon";
     styleUrl: './link-commands.css',
     encapsulation: ViewEncapsulation.None
 })
-export class LinkCommands {
+export class LinkCommands extends EditorCommandComponent  {
 
     service = inject(WindowManagerService)
 
-    editor = input<{ view: EditorView }>()
+    editor = signal<{view : EditorView}>({view : null})
 
 
     openLink() {
@@ -63,6 +65,11 @@ export class LinkCommands {
         dispatch(tr.scrollIntoView());
         view.focus();
     }
+
+    get nodeSpec(): Record<string, NodeSpec> {
+        return {}
+    }
+
 
 
 }

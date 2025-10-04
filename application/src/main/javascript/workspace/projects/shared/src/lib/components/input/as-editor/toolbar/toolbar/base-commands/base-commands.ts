@@ -1,8 +1,10 @@
-import {Component, computed, input, ViewEncapsulation} from '@angular/core';
+import {Component, computed, signal, ViewEncapsulation} from '@angular/core';
 import {EditorView} from "prosemirror-view";
 import {redo, undo} from "prosemirror-history";
 import {toggleMark} from "prosemirror-commands";
 import {AsIcon} from "../../../../../layout/as-icon/as-icon";
+import {EditorCommandComponent} from "../EditorCommandComponent";
+import {NodeSpec} from "prosemirror-model";
 
 
 @Component({
@@ -14,12 +16,12 @@ import {AsIcon} from "../../../../../layout/as-icon/as-icon";
     styleUrl: './base-commands.css',
     encapsulation: ViewEncapsulation.None
 })
-export class BaseCommands {
+export class BaseCommands extends EditorCommandComponent {
 
-    editor = input<{view : EditorView}>()
+    editor = signal<{ view: EditorView }>({view: null})
 
     activeMarks = computed(() => {
-        const { state } = this.editor().view;
+        const {state} = this.editor().view;
         const marks = state.schema.marks;
         const result: Record<string, boolean> = {};
         for (const markName in marks) {
@@ -36,8 +38,8 @@ export class BaseCommands {
     }
 
     isMarkActive(markTypeName: string) {
-        const { state } = this.editor().view;
-        const { from, empty } = state.selection;
+        const {state} = this.editor().view;
+        const {from, empty} = state.selection;
         const type = state.schema.marks[markTypeName];
         if (!type) return false;
 
@@ -66,6 +68,10 @@ export class BaseCommands {
         let view = this.editor().view;
         redo(view.state, view.dispatch);
         view.focus();
+    }
+
+    get nodeSpec(): Record<string, NodeSpec> {
+        return {}
     }
 
 }

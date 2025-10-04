@@ -1,8 +1,9 @@
-import {Component, input, ViewEncapsulation} from '@angular/core';
+import {Component, input, signal, ViewEncapsulation} from '@angular/core';
 import {EditorView} from "prosemirror-view";
 import {AsIcon} from "../../../../../layout/as-icon/as-icon";
-import {NodeType} from "prosemirror-model";
+import {NodeSpec, NodeType} from "prosemirror-model";
 import {wrapInList} from "prosemirror-schema-list";
+import {EditorCommandComponent} from "../EditorCommandComponent";
 
 @Component({
     selector: 'editor-list-commands',
@@ -13,9 +14,9 @@ import {wrapInList} from "prosemirror-schema-list";
     styleUrl: './list-commands.css',
     encapsulation: ViewEncapsulation.None,
 })
-export class ListCommands {
+export class ListCommands extends EditorCommandComponent  {
 
-    editor = input<{ view: EditorView }>()
+    editor = signal<{view : EditorView}>({view : null})
 
     wrapBulletList() {
         const view = this.editor()?.view;
@@ -45,6 +46,10 @@ export class ListCommands {
 
         wrapInList(nodeType)(state, dispatch);
         view.focus();
+    }
+
+    get nodeSpec(): Record<string, NodeSpec> {
+        return {}
     }
 
 }
