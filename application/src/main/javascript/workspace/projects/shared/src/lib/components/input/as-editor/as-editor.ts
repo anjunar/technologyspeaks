@@ -1,4 +1,13 @@
-import {Component, effect, ElementRef, Type, viewChild, ViewContainerRef, ViewEncapsulation} from '@angular/core';
+import {
+    Component, computed,
+    effect,
+    ElementRef,
+    inject,
+    Type, untracked,
+    viewChild,
+    ViewContainerRef,
+    ViewEncapsulation
+} from '@angular/core';
 import {EditorState, Plugin} from "prosemirror-state";
 import {schema as basicSchema} from "prosemirror-schema-basic";
 import {EditorView} from "prosemirror-view";
@@ -14,6 +23,8 @@ import {LinkCommands} from "./toolbar/toolbar/link-commands/link-commands";
 import {ListCommands} from "./toolbar/toolbar/list-commands/list-commands";
 import {EditorCommandComponent} from "./toolbar/toolbar/EditorCommandComponent";
 import {TableCommands} from "./toolbar/toolbar/table-commands/table-commands";
+import {AsControlInput} from "../../../directives/as-control";
+import {NG_VALUE_ACCESSOR} from "@angular/forms";
 
 const commands: Type<EditorCommandComponent>[] = [BaseCommands, HeadingCommands, ImageCommands, LinkCommands, ListCommands, TableCommands]
 
@@ -22,27 +33,48 @@ const commands: Type<EditorCommandComponent>[] = [BaseCommands, HeadingCommands,
     imports: [],
     templateUrl: './as-editor.html',
     styleUrl: './as-editor.css',
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: AsEditor,
+            multi: true
+        }, {
+            provide: AsControlInput,
+            useExisting: AsEditor,
+        }
+    ]
 })
-export class AsEditor {
+export class AsEditor extends AsControlInput<string> {
 
     editorContainer = viewChild<ElementRef<HTMLDivElement>>("editorContainer")
 
     toolbar = viewChild("toolbar", {read: ViewContainerRef})
 
-    constructor() {
-        effect(() => {
+    el = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>).nativeElement
 
-            const instances = commands.map(command => {
+    constructor() {
+        super();
+
+        const instances = computed(() => {
+            return commands.map(command => {
                 let componentRef = this.toolbar().createComponent(command);
                 return componentRef.instance
             })
+        })
+
+        effect(() => {
+
+            const self = this;
+
+            const model = untracked(() => this.model());
 
             const stateListenerPlugin = new Plugin({
                 view() {
                     return {
                         update(view) {
-                            instances.forEach(instance => instance.editor.set({view}))
+                            instances().forEach(instance => instance.editor.set({view}))
+                            self.onChange.forEach(fn => fn(self.name(), JSON.stringify(view.state.doc.toJSON()), self.default(), self.el));
                         },
                         destroy() {
                         }
@@ -50,7 +82,7 @@ export class AsEditor {
                 }
             });
 
-            let specs = instances.reduce((prev: any, instance) => {
+            let specs = instances().reduce((prev: any, instance) => {
                 return Object.assign(prev, instance.nodeSpec)
             }, {})
 
@@ -65,10 +97,11 @@ export class AsEditor {
                 marks: basicSchema.spec.marks
             });
 
-            let plugins = instances.flatMap(instance => instance.plugins(schema))
+            let plugins = instances().flatMap(instance => instance.plugins(schema))
 
             const state = EditorState.create({
                 schema,
+                doc : model ? schema.nodeFromJSON(JSON.parse(model)) : undefined,
                 plugins: [
                     ...plugins,
                     stateListenerPlugin,
@@ -89,9 +122,19 @@ export class AsEditor {
 
             let editorView = new EditorView(this.editorContainer().nativeElement, {state});
 
-            instances.forEach(instance => instance.editor.set({view: editorView}))
+            instances().forEach(instance => instance.editor.set({view: editorView}))
 
+            return () => {
+                console.log("destroy")
+                editorView.destroy();
+            }
         });
+    }
+
+    controlAdded(): void {}
+
+    setDisabledState(isDisabled: boolean): void {
+        this.el.setAttribute("disabled", "true")
     }
 
 }

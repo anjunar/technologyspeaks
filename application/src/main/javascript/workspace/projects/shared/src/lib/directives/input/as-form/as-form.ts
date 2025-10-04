@@ -127,7 +127,9 @@ export class AsForm extends AsControlSingleForm<any> implements AsControlValueAc
                 } else {
                     control.model.set(undefined)
                     control.setDisabledState(isDisabled)
-                    control.unsubscribe()
+                    if (control.unsubscribe) {
+                        control.unsubscribe()
+                    }
 
                     if (control instanceof AsControlInput) {
                         control.writeDefaultValue(undefined)
