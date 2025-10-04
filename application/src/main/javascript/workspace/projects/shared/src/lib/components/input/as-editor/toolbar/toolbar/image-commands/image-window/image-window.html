@@ -1,0 +1,14 @@
+@if (src()) {
+    <img #image [src]="src()" style="height: 200px"/>
+} @else {
+    <div [style.width]="width() + 'px'" [style.height]="height() + 'px'"></div>
+}
+
+<input type="file" #file (change)="fileChangeEvent($event)">
+
+<div>
+    <input type="number" [ngModel]="width()" (ngModelChange)="onWidthChange($event)">
+    <input type="number" [ngModel]="height()" (ngModelChange)="onHeightChange($event)">
+</div>
+
+<button type="button" (click)="parent().close(src(), width(), height())">Ok</button>

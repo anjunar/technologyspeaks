@@ -1,0 +1,8 @@
+<select [ngModel]="activeHeading() || 'p'" (ngModelChange)="$event === 'p' ? setParagraph() : setHeading($event)">
+    <option value="p">Paragraph</option>
+    @for (level of [1,2,3,4,5,6]; track level;) {
+        <option [value]="level">
+            H{{level}}
+        </option>
+    }
+</select>

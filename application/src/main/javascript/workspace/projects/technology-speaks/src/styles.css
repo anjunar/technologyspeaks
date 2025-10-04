@@ -33,6 +33,10 @@ html[data-theme="light"] {
     input {
         color-scheme: light;
     }
+
+    select {
+        color-scheme: light;
+    }
 }
 
 html[data-theme="dark"] {
@@ -67,13 +71,17 @@ html[data-theme="dark"] {
     input {
         color-scheme: dark;
     }
+
+    select {
+        color-scheme: dark;
+    }
 }
 
 @font-face {
     font-family: 'Material Icons';
     font-style: normal;
     font-weight: 400;
-    src: url(./material-subset.woff2) format('woff2');
+    src: url(./material.ttf) format('truetype');
 }
 
 .material-icons {
