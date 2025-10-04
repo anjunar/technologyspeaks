@@ -9,8 +9,7 @@ import {HttpClient} from "@angular/common/http";
 import UIField from "../../../mapper/annotations/UIField";
 
 @Directive({
-    selector: 'as-lazy-select[property]',
-    standalone: false
+    selector: 'as-lazy-select[property]'
 })
 export class AsConfiguredLazySelect extends AsAbstractConfigured implements OnInit {
 

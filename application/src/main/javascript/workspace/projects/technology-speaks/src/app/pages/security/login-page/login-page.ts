@@ -1,17 +1,14 @@
-import {Component, inject, model, signal, ViewEncapsulation} from '@angular/core';
+import {Component, inject, signal, ViewEncapsulation} from '@angular/core';
 import * as webauthnJson from "@github/webauthn-json";
 import {Router} from "@angular/router";
 import {AppService} from "../../../app.service";
 import {HttpClient} from "@angular/common/http";
 import Login from "../../../domain/security/Login";
-import {
-    AsForm, AsInput,
-    AsInputContainer, Mapper, PropertyFormsModule
-} from "shared";
+import {AsInputContainer, configuredPropertyForms} from "shared";
 
 @Component({
     selector: 'login-page',
-    imports: [PropertyFormsModule, AsInputContainer, AsForm, AsInput],
+    imports: [AsInputContainer, ...configuredPropertyForms],
     templateUrl: './login-page.html',
     styleUrl: './login-page.css',
     encapsulation: ViewEncapsulation.None
@@ -26,7 +23,7 @@ export class LoginPage {
 
     http = inject(HttpClient)
 
-    async onSubmit(event : Event) {
+    async onSubmit(event: Event) {
         event.preventDefault()
 
         const credentialGetOptions = await fetch('/service/security/login', {

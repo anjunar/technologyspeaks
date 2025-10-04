@@ -6,7 +6,6 @@ import Reference from "../../../mapper/annotations/Reference";
 
 @Directive({
     selector: 'form[asModel], fieldset[property]',
-    standalone: false,
     providers: [
         {
             provide: AsAbstractConfiguredForm,

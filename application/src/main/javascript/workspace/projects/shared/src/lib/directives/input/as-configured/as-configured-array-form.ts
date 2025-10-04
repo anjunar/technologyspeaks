@@ -7,7 +7,6 @@ import {AsAbstractConfiguredForm} from "./as-abstract-configured-form";
 
 @Directive({
     selector: 'array-form',
-    standalone : false,
     providers: [
         {
             provide: AsAbstractConfiguredForm,

@@ -5,8 +5,7 @@ import {AsAbstractConfigured} from "./as-abstract-configured";
 import Collection from "../../../mapper/annotations/Collection";
 
 @Directive({
-    selector: 'form-array',
-    standalone: false
+    selector: 'form-array'
 })
 export class AsConfiguredArray extends AsAbstractConfigured implements OnInit {
 

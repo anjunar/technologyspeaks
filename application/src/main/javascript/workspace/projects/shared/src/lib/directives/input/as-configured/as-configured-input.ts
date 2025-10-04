@@ -23,8 +23,7 @@ import Pattern from "../../../mapper/annotations/validators/Pattern";
 import Size from "../../../mapper/annotations/validators/Size";
 
 @Directive({
-    selector: 'input[property], as-image[property]',
-    standalone: false,
+    selector: 'input[property], as-image[property]'
 })
 export class AsConfiguredInput extends AsAbstractConfigured implements OnInit {
 

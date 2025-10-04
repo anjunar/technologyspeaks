@@ -29,8 +29,13 @@ export * from './lib/components/layout/as-view-port/as-view-port'
 export * from './lib/components/modal/as-window/as-window'
 export * from './lib/components/modal/as-window/service/window-manager-service'
 
+export * from './lib/directives/input/as-configured/as-abstract-configured'
 export * from './lib/directives/input/as-configured/as-abstract-configured-form'
-export * from './lib/directives/input/as-configured/as-abstract-configured-form'
+export * from './lib/directives/input/as-configured/as-configured-array'
+export * from './lib/directives/input/as-configured/as-configured-array-form'
+export * from './lib/directives/input/as-configured/as-configured-form'
+export * from './lib/directives/input/as-configured/as-configured-input'
+export * from './lib/directives/input/as-configured/as-configured-lazy-select'
 
 export * from './lib/directives/input/as-form/as-form'
 
@@ -53,4 +58,4 @@ export * from './lib/meta-signal/value-signal'
 
 export * from './lib/pattern-match'
 
-export * from './lib/property-forms/property-forms-module'
+export * from './lib/module'

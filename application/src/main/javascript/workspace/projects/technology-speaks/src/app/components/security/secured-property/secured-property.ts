@@ -1,13 +1,5 @@
 import {Component, inject, ViewEncapsulation} from '@angular/core';
-import {
-    AsAbstractConfiguredForm,
-    AsForm,
-    AsIcon, AsInputContainer, AsSubmit,
-    Link,
-    Mapper,
-    PropertyFormsModule,
-    WindowManagerService
-} from "shared";
+import {AsAbstractConfiguredForm, AsIcon, Link, WindowManagerService} from "shared";
 import {SecuredForm} from "./secured-form/secured-form";
 import {HttpClient} from "@angular/common/http";
 import {PropertiesContainer} from "../../../../../../shared/src/lib/domain/container/ActiveObject";
@@ -15,7 +7,7 @@ import ManagedProperty from "../../../domain/shared/ManagedProperty";
 
 @Component({
     selector: 'secured-property',
-    imports: [PropertyFormsModule, AsIcon],
+    imports: [AsIcon],
     templateUrl: './secured-property.html',
     styleUrl: './secured-property.css',
     encapsulation: ViewEncapsulation.None
