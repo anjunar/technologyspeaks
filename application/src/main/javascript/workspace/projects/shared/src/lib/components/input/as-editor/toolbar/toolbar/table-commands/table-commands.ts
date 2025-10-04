@@ -1,4 +1,4 @@
-import {Component, signal, ViewEncapsulation} from '@angular/core';
+import {Component, inject, signal, ViewEncapsulation} from '@angular/core';
 import {EditorView} from "prosemirror-view";
 import {findTable, goToNextCell, tableEditing, tableNodes} from "prosemirror-tables";
 import {Fragment, NodeSpec, Schema} from "prosemirror-model";
@@ -7,6 +7,8 @@ import {Command, Plugin, TextSelection} from "prosemirror-state";
 import {EditorCommandComponent} from "../EditorCommandComponent";
 import {keymap} from "prosemirror-keymap";
 import {chainCommands} from "prosemirror-commands";
+import {WindowManagerService} from "../../../../../modal/as-window/service/window-manager-service";
+import {TableWindow} from "./table-window/table-window";
 
 @Component({
     selector: 'editor-table-commands',
@@ -21,10 +23,23 @@ export class TableCommands extends EditorCommandComponent {
 
     editor = signal<{ view: EditorView }>({view: null});
 
+    service = inject(WindowManagerService)
+
+    open() {
+        this.service.open({
+            id: "openTable",
+            title: "Add Table",
+            component: TableWindow,
+            inputs: {
+                parent: this
+            }
+        })
+    }
+
     plugins(schema: Schema): Plugin[] {
         return [
             keymap({
-                "Mod-Enter": (state, dispatch, view) => {  // Neue Bindung: Text oben einfügen
+                "Mod-Enter": (state, dispatch, view) => {
                     if (view) {
                         this.insertAboveTable(view);
                         return true;
